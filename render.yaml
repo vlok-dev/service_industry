@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: industro-plumbers
+    runtime: ruby
+    plan: free
+    buildCommand: bundle install && bundle exec rails assets:precompile && bundle exec rails db:migrate
+    startCommand: bundle exec rails server -b 0.0.0.0 -p $PORT
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: SECRET_KEY_BASE
+        generateValue: true
+      - key: RAILS_SERVE_STATIC_FILES
+        value: true
+      - key: RAILS_LOG_LEVEL
+        value: info
