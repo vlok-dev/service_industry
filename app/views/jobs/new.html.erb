@@ -1,0 +1,50 @@
+<p><%= link_to "Back to Jobs", jobs_path, class: "btn" %></p>
+
+<h1>New Job</h1>
+
+<%= form_with model: @job, local: true do |f| %>
+  <% if @job.errors.any? %>
+    <div class="alert">
+      <h2><%= pluralize(@job.errors.count, "error") %> prohibited this job from being saved:</h2>
+      <ul>
+        <% @job.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :customer_name, "Customer Name" %><br>
+    <%= f.text_field :customer_name, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :address %><br>
+    <%= f.text_area :address, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :description %><br>
+    <%= f.text_area :description, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :status %><br>
+    <%= f.select :status, Job.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: true }, { required: true } %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :priority %><br>
+    <%= f.select :priority, Job.priorities.keys.map { |p| [p.humanize, p] }, { include_blank: true }, { required: true } %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :notes %><br>
+    <%= f.text_area :notes %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.submit "Create Job", class: "btn" %>
+  </div>
+<% end %>

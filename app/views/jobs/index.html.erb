@@ -1,0 +1,49 @@
+<h1>Jobs</h1>
+
+<% if current_user.super_admin? %>
+  <p><%= link_to "Create New Job", new_job_path, class: "btn" %></p>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Customer</th>
+      <th>Address</th>
+      <th>Status</th>
+      <th>Priority</th>
+      <th>Scheduled Date</th>
+      <th>Assigned To</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @jobs.each do |job| %>
+      <tr>
+        <td><%= job.customer_name %></td>
+        <td><%= job.address %></td>
+        <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+        <td><%= job.priority.humanize %></td>
+        <td><%= job.scheduled_date&.strftime("%Y-%m-%d") || "Not scheduled" %></td>
+        <td><%= job.assigned_to&.name || "Unassigned" %></td>
+        <td>
+          <%= link_to "View", job %>
+          <% if policy(job).edit? %>
+            <%= link_to "Edit", edit_job_path(job) %>
+          <% end %>
+          <% if current_user.scheduler? && job.pending? %>
+            <%= form_with url: schedule_job_path(job), method: :patch, local: true, style: "display: inline;" do |f| %>
+              <%= f.hidden_field :status, value: "scheduled" %>
+              <%= f.date_field :scheduled_date, value: Date.tomorrow, required: true %>
+              <%= f.time_field :scheduled_time, value: "08:00", required: true %>
+              <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, job.assigned_to_id), include_blank: "Select Plumber" %>
+              <%= f.submit "Schedule", class: "btn btn-success", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            <% end %>
+          <% end %>
+          <% if policy(job).destroy? %>
+            <%= button_to "Delete", job, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

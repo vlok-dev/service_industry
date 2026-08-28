@@ -1,0 +1,21 @@
+<p><%= link_to "Back to Jobs", jobs_path, class: "btn" %></p>
+
+<h1>Job Details</h1>
+
+<p><strong>Customer:</strong> <%= @job.customer_name %></p>
+<p><strong>Address:</strong> <%= @job.address %></p>
+<p><strong>Description:</strong> <%= @job.description %></p>
+<p><strong>Status:</strong> <span class="badge badge-<%= @job.status %>"><%= @job.status.humanize %></span></p>
+<p><strong>Priority:</strong> <%= @job.priority.humanize %></p>
+<p><strong>Scheduled Date:</strong> <%= @job.scheduled_date&.strftime("%Y-%m-%d") || "Not scheduled" %></p>
+<p><strong>Scheduled Time:</strong> <%= @job.scheduled_time&.strftime("%H:%M") || "Not scheduled" %></p>
+<p><strong>Assigned To:</strong> <%= @job.assigned_to&.name || "Unassigned" %></p>
+<p><strong>Notes:</strong> <%= @job.notes || "None" %></p>
+<p><strong>Logged By:</strong> <%= @job.user.name %></p>
+
+<% if policy(@job).edit? %>
+  <%= link_to "Edit", edit_job_path(@job), class: "btn" %>
+<% end %>
+<% if policy(@job).show? %>
+  <%= button_to "Send WhatsApp", whatsapp_job_path(@job), method: :post, class: "btn", data: { confirm: "Send job details via WhatsApp?" } %>
+<% end %>

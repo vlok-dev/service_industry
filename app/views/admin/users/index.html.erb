@@ -1,0 +1,31 @@
+<p><%= link_to "Back to Admin Dashboard", admin_root_path %></p>
+
+<h1>Users</h1>
+
+<p><%= link_to "Add New User", new_admin_user_path, class: "btn" %></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Phone</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @users.each do |user| %>
+      <tr>
+        <td><%= user.name %></td>
+        <td><%= user.email %></td>
+        <td><%= user.role&.humanize || "N/A" %></td>
+        <td><%= user.phone_number || "N/A" %></td>
+        <td>
+          <%= link_to "Edit", edit_admin_user_path(user) %>
+          <%= button_to "Delete", admin_user_path(user), method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

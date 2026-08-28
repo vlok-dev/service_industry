@@ -1,0 +1,57 @@
+<p><%= link_to "Back to Admin Dashboard", admin_root_path %></p>
+
+<h1>Company Settings</h1>
+
+<%= form_with model: [:admin, @setting] do |f| %>
+  <% if @setting.errors.any? %>
+    <div class="alert">
+      <h2><%= pluralize(@setting.errors.count, "error") %> prohibited this setting from being saved:</h2>
+      <ul>
+        <% @setting.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :company_name %><br>
+    <%= f.text_field :company_name, value: @setting.company_name || "Industro Plumbers" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :whatsapp_api_key, "WhatsApp API Key" %><br>
+    <%= f.text_field :whatsapp_api_key, value: @setting.whatsapp_api_key %>
+    <p style="color: #666; font-size: 0.875rem;">For Meta WhatsApp Cloud API</p>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :whatsapp_phone_id, "WhatsApp Phone ID" %><br>
+    <%= f.text_field :whatsapp_phone_id, value: @setting.whatsapp_phone_id %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :default_job_priority %><br>
+    <%= f.select :default_job_priority, options_for_select([["Low", "low"], ["Medium", "medium"], ["High", "high"]], @setting.default_job_priority || "medium") %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :working_hours_start %><br>
+    <%= f.time_field :working_hours_start, value: @setting.working_hours_start || "08:00" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :working_hours_end %><br>
+    <%= f.time_field :working_hours_end, value: @setting.working_hours_end || "17:00" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :notification_email %><br>
+    <%= f.email_field :notification_email, value: @setting.notification_email %>
+    <p style="color: #666; font-size: 0.875rem;">For daily reports and alerts</p>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.submit "Save Settings", class: "btn" %>
+  </div>
+<% end %>

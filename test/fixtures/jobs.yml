@@ -1,0 +1,29 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  customer_name: MyString
+  address: MyText
+  description: MyText
+  scheduled_date: 2026-08-28
+  scheduled_time: 2026-08-28 20:53:45
+  status: 1
+  priority: 1
+  assigned_to: one
+  notes: MyText
+  completed_at: 2026-08-28 20:53:45
+  cancelled_at: 2026-08-28 20:53:45
+  user: one
+
+two:
+  customer_name: MyString
+  address: MyText
+  description: MyText
+  scheduled_date: 2026-08-28
+  scheduled_time: 2026-08-28 20:53:45
+  status: 1
+  priority: 1
+  assigned_to: two
+  notes: MyText
+  completed_at: 2026-08-28 20:53:45
+  cancelled_at: 2026-08-28 20:53:45
+  user: two

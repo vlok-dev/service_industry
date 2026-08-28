@@ -1,0 +1,202 @@
+<h1>Dashboard</h1>
+
+<% if current_user.super_admin? %>
+  <h2>My Jobs (Michelle)</h2>
+  <p><%= link_to "Create New Job", new_job_path, class: "btn" %></p>
+  <% if @my_jobs.present? %>
+    <table>
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Status</th>
+          <th>Scheduled Date</th>
+          <th>Assigned To</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @my_jobs.each do |job| %>
+          <tr>
+            <td><%= job.customer_name %></td>
+            <td><%= job.address %></td>
+            <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+            <td><%= job.scheduled_date&.strftime("%Y-%m-%d") || "Not scheduled" %></td>
+            <td><%= job.assigned_to&.name || "Unassigned" %></td>
+            <td>
+              <%= link_to "View", job %>
+              <%= link_to "Edit", edit_job_path(job) %>
+              <%= button_to "Delete", job, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p>No jobs yet.</p>
+  <% end %>
+<% end %>
+
+<% if current_user.scheduler? %>
+  <h2>Pending Jobs (Michael)</h2>
+  <% if @pending_jobs.present? %>
+    <table>
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Description</th>
+          <th>Priority</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @pending_jobs.each do |job| %>
+          <tr>
+            <td><%= job.customer_name %></td>
+            <td><%= job.address %></td>
+            <td><%= job.description.truncate(50) %></td>
+            <td><%= job.priority.humanize %></td>
+            <td>
+              <%= form_with url: schedule_job_path(job), method: :patch, local: true do |f| %>
+                <%= f.hidden_field :status, value: "scheduled" %>
+                <%= f.date_field :scheduled_date, value: Date.tomorrow, required: true %>
+                <%= f.time_field :scheduled_time, value: "08:00", required: true %>
+                <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, job.assigned_to_id), include_blank: "Select Plumber" %>
+                <%= f.submit "Schedule", class: "btn btn-success" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p>No pending jobs.</p>
+  <% end %>
+
+  <h2>Tomorrow's Schedule (<%= Date.tomorrow.strftime("%Y-%m-%d") %>)</h2>
+  <% if @scheduled_tomorrow.present? %>
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Plumber</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @scheduled_tomorrow.each do |job| %>
+          <tr>
+            <td><%= job.scheduled_time&.strftime("%H:%M") %></td>
+            <td><%= job.customer_name %></td>
+            <td><%= job.address %></td>
+            <td><%= job.assigned_to&.name || "Unassigned" %></td>
+            <td>
+              <%= button_to "Send WhatsApp to Plumber", whatsapp_job_path(job), method: :post, class: "btn", data: { confirm: "Send job details to plumber via WhatsApp?" } %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <%= button_to "Send All Tomorrow's Jobs via WhatsApp", bulk_whatsapp_jobs_path(scheduled_date: Date.tomorrow), method: :post, class: "btn btn-success" %>
+  <% else %>
+    <p>No jobs scheduled for tomorrow.</p>
+  <% end %>
+<% end %>
+
+<% if current_user.reporter? %>
+  <h2>Daily Report - <%= Date.today.strftime("%B %d, %Y") %> (Lee Anne)</h2>
+  <h3>Today's Jobs</h3>
+  <% if @today_jobs.present? %>
+    <table>
+      <thead>
+        <tr>
+          <th>Time Logged</th>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Description</th>
+          <th>Logged By</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @today_jobs.each do |job| %>
+          <tr>
+            <td><%= job.created_at.strftime("%H:%M") %></td>
+            <td><%= job.customer_name %></td>
+            <td><%= job.address %></td>
+            <td><%= job.description.truncate(50) %></td>
+            <td><%= job.user.name %></td>
+            <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <p>Total jobs today: <%= @today_jobs.count %></p>
+  <% else %>
+    <p>No jobs logged today.</p>
+  <% end %>
+
+  <h3>All Jobs</h3>
+  <% if @all_jobs.present? %>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Status</th>
+          <th>Logged By</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @all_jobs.each do |job| %>
+          <tr>
+            <td><%= job.created_at.strftime("%Y-%m-%d") %></td>
+            <td><%= job.customer_name %></td>
+            <td><%= job.address %></td>
+            <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+            <td><%= job.user.name %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p>No jobs in system.</p>
+  <% end %>
+<% end %>
+
+<% if current_user.plumber? %>
+  <h2>My Jobs</h2>
+  <% if @my_jobs.present? %>
+    <table>
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Scheduled</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @my_jobs.each do |job| %>
+          <tr>
+            <td><%= job.customer_name %></td>
+            <td><%= job.address %></td>
+            <td><%= job.scheduled_date&.strftime("%Y-%m-%d") %> at <%= job.scheduled_time&.strftime("%H:%M") %></td>
+            <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+            <td>
+              <%= link_to "Update Status", edit_job_path(job) %>
+              <%= button_to "Send WhatsApp", whatsapp_job_path(job), method: :post, class: "btn", data: { confirm: "Send address to customer via WhatsApp?" } %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p>No jobs assigned to you.</p>
+  <% end %>
+<% end %>

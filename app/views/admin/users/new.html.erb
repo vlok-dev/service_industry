@@ -1,0 +1,50 @@
+<p><%= link_to "Back to Admin Dashboard", admin_root_path %></p>
+
+<h1>New User</h1>
+
+<%= form_with model: [:admin, @user], local: true do |f| %>
+  <% if @user.errors.any? %>
+    <div class="alert">
+      <h2><%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:</h2>
+      <ul>
+        <% @user.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :name %><br>
+    <%= f.text_field :name, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :email %><br>
+    <%= f.email_field :email, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :role %><br>
+    <%= f.select :role, User.roles.keys.map { |r| [r.humanize, r] }, { include_blank: true }, { required: true } %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :phone_number, "WhatsApp Number" %><br>
+    <%= f.text_field :phone_number, placeholder: "+27821234567" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :password %><br>
+    <%= f.password_field :password, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :password_confirmation %><br>
+    <%= f.password_field :password_confirmation, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.submit "Create User", class: "btn" %>
+  </div>
+<% end %>
