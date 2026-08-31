@@ -40,6 +40,12 @@
   </div>
 
   <div style="margin-bottom: 1rem;">
+    <%= f.label :assigned_to_id, "Assign Plumber" %><br>
+    <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name), { include_blank: "Select Plumber (optional)" } %>
+    <p style="color: #666; font-size: 0.875rem;">Optional: Pre-assign a plumber. Michael can change this when scheduling.</p>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
     <%= f.label :notes %><br>
     <%= f.text_area :notes %>
   </div>

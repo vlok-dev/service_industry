@@ -94,13 +94,13 @@
             <td><%= job.address %></td>
             <td><%= job.assigned_to&.name || "Unassigned" %></td>
             <td>
-              <%= button_to "Send WhatsApp to Plumber", whatsapp_job_path(job), method: :post, class: "btn", data: { confirm: "Send job details to plumber via WhatsApp?" } %>
+              <%= link_to "Send WhatsApp to Plumber", whatsapp_job_path(job), class: "btn", data: { confirm: "Open WhatsApp to send job details to plumber?" } %>
             </td>
           </tr>
         <% end %>
       </tbody>
     </table>
-    <%= button_to "Send All Tomorrow's Jobs via WhatsApp", bulk_whatsapp_jobs_path(scheduled_date: Date.tomorrow), method: :post, class: "btn btn-success" %>
+    <%= link_to "Send All Tomorrow's Jobs via WhatsApp", bulk_whatsapp_jobs_path(scheduled_date: Date.tomorrow), class: "btn btn-success" %>
   <% else %>
     <p>No jobs scheduled for tomorrow.</p>
   <% end %>
@@ -190,7 +190,7 @@
             <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
             <td>
               <%= link_to "Update Status", edit_job_path(job) %>
-              <%= button_to "Send WhatsApp", whatsapp_job_path(job), method: :post, class: "btn", data: { confirm: "Send address to customer via WhatsApp?" } %>
+              <%= link_to "Send WhatsApp", whatsapp_job_path(job), class: "btn", data: { confirm: "Open WhatsApp to send address to customer?" } %>
             </td>
           </tr>
         <% end %>

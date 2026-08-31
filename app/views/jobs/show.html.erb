@@ -17,5 +17,5 @@
   <%= link_to "Edit", edit_job_path(@job), class: "btn" %>
 <% end %>
 <% if policy(@job).show? %>
-  <%= button_to "Send WhatsApp", whatsapp_job_path(@job), method: :post, class: "btn", data: { confirm: "Send job details via WhatsApp?" } %>
+  <%= link_to "Send WhatsApp", whatsapp_job_path(@job), class: "btn", data: { confirm: "Open WhatsApp to send job details?" } %>
 <% end %>

@@ -47,11 +47,11 @@
       <% if user_signed_in? %>
         <span style="color: #93c5fd; margin-left: 1rem;"><%= current_user.name %> (<%= current_user.role&.humanize || "User" %>)</span>
         <%= link_to "Jobs", jobs_path %>
-        <%= link_to "Dashboard", root_path %>
+        <%= link_to "Dashboard", dashboard_path %>
         <% if current_user.admin? || current_user.super_admin? %>
           <%= link_to "Admin", admin_root_path %>
         <% end %>
-        <%= button_to "Logout", destroy_user_session_path, method: :delete, style: "background: none; border: none; color: white; cursor: pointer; text-decoration: underline; display: inline; padding: 0;" %>
+        <%= button_to "Logout", logout_path, method: :delete, style: "background: none; border: none; color: white; cursor: pointer; text-decoration: underline; display: inline; padding: 0;" %>
       <% else %>
         <%= link_to "Login", new_user_session_path %>
       <% end %>

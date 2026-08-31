@@ -1,0 +1,36 @@
+<h1>Send WhatsApp Messages</h1>
+
+<p>Click each link below to open WhatsApp with the job details pre-filled for the assigned plumber.</p>
+
+<% if @jobs.present? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Customer</th>
+        <th>Address</th>
+        <th>Plumber</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @jobs.each do |job| %>
+        <tr>
+          <td><%= job.scheduled_time&.strftime("%H:%M") %></td>
+          <td><%= job.customer_name %></td>
+          <td><%= job.address %></td>
+          <td><%= job.assigned_to.name %></td>
+          <td>
+            <% message = "New Job Assigned:\nCustomer: #{job.customer_name}\nAddress: #{job.address}\nDescription: #{job.description}\nScheduled: #{job.scheduled_date&.strftime('%Y-%m-%d')} at #{job.scheduled_time&.strftime('%H:%M') || 'TBD'}\nPriority: #{job.priority.humanize}\nStatus: #{job.status.humanize}" %>
+            <% phone = job.assigned_to.phone_number.gsub(/[^0-9]/, '') %>
+            <a href="https://wa.me/<%= phone %>?text=<%= CGI.escape(message) %>" target="_blank" rel="noopener" class="btn">Send WhatsApp</a>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No scheduled jobs with assigned plumbers for <%= @date.strftime('%Y-%m-%d') %>.</p>
+<% end %>
+
+<p><%= link_to "Back to Dashboard", root_path %></p>

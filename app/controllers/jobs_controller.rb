@@ -1,6 +1,5 @@
 class JobsController < ApplicationController
   before_action :set_job, only: %i[ show edit update destroy schedule whatsapp ]
-  before_action :authenticate_user!
 
   def index
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
@@ -58,8 +57,8 @@ class JobsController < ApplicationController
 
     phone = @job.assigned_to&.phone_number
     if phone.present?
-      WhatsAppService.send_job_details(phone, @job)
-      redirect_to @job, notice: "WhatsApp message sent successfully."
+      message = "New Job Assigned:\nCustomer: #{@job.customer_name}\nAddress: #{@job.address}\nDescription: #{@job.description}\nScheduled: #{@job.scheduled_date&.strftime('%Y-%m-%d')} at #{@job.scheduled_time&.strftime('%H:%M') || 'TBD'}\nPriority: #{@job.priority.humanize}\nStatus: #{@job.status.humanize}"
+      redirect_to "https://wa.me/#{phone.gsub(/[^0-9]/, '')}?text=#{CGI.escape(message)}", allow_other_host: true
     else
       redirect_to @job, alert: "No phone number available for the assigned plumber."
     end
@@ -70,17 +69,8 @@ class JobsController < ApplicationController
 
     date = Date.parse(params[:scheduled_date]) rescue Date.tomorrow
     jobs = policy_scope(Job).scheduled.where(scheduled_date: date)
-
-    sent_count = 0
-    jobs.each do |job|
-      phone = job.assigned_to&.phone_number
-      if phone.present?
-        WhatsAppService.send_job_details(phone, job)
-        sent_count += 1
-      end
-    end
-
-    redirect_to root_path, notice: "WhatsApp messages sent to #{sent_count} plumbers for #{date.strftime('%Y-%m-%d')}."
+    @jobs = jobs.select { |job| job.assigned_to&.phone_number.present? }
+    @date = date
   end
 
   private
