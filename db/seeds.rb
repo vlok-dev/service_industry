@@ -51,6 +51,62 @@ plumber2 = User.find_or_create_by!(email: "jane@industroplumbers.co.za") do |u|
   u.phone_number = "+27823334444"
 end
 
+plumber3 = User.find_or_create_by!(email: "thabo@industroplumbers.co.za") do |u|
+  u.name = "Thabo Mokoena"
+  u.password = "password123"
+  u.password_confirmation = "password123"
+  u.role = :plumber
+  u.phone_number = "+27825551111"
+end
+
+plumber4 = User.find_or_create_by!(email: "sipho@industroplumbers.co.za") do |u|
+  u.name = "Sipho Dlamini"
+  u.password = "password123"
+  u.password_confirmation = "password123"
+  u.role = :plumber
+  u.phone_number = "+27826662222"
+end
+
+plumber5 = User.find_or_create_by!(email: "lerato@industroplumbers.co.za") do |u|
+  u.name = "Lerato Khumalo"
+  u.password = "password123"
+  u.password_confirmation = "password123"
+  u.role = :plumber
+  u.phone_number = "+27827773333"
+end
+
+plumber6 = User.find_or_create_by!(email: "peter@industroplumbers.co.za") do |u|
+  u.name = "Peter Naidoo"
+  u.password = "password123"
+  u.password_confirmation = "password123"
+  u.role = :plumber
+  u.phone_number = "+27828884444"
+end
+
+plumber7 = User.find_or_create_by!(email: "james@industroplumbers.co.za") do |u|
+  u.name = "James van der Merwe"
+  u.password = "password123"
+  u.password_confirmation = "password123"
+  u.role = :plumber
+  u.phone_number = "+27829995555"
+end
+
+plumber8 = User.find_or_create_by!(email: "thandi@industroplumbers.co.za") do |u|
+  u.name = "Thandiwe Ndlovu"
+  u.password = "password123"
+  u.password_confirmation = "password123"
+  u.role = :plumber
+  u.phone_number = "+27821113333"
+end
+
+plumber9 = User.find_or_create_by!(email: "david@industroplumbers.co.za") do |u|
+  u.name = "David Pillay"
+  u.password = "password123"
+  u.password_confirmation = "password123"
+  u.role = :plumber
+  u.phone_number = "+27822224444"
+end
+
 # Sample Jobs
 Job.find_or_create_by!(customer_name: "John Smith", address: "123 Main Street, Johannesburg", description: "Leaking kitchen tap", status: :pending, priority: :medium, user: michelle)
 Job.find_or_create_by!(customer_name: "Sarah Johnson", address: "456 Oak Avenue, Sandton", description: "Burst pipe in bathroom", status: :scheduled, priority: :high, user: michelle, scheduled_date: Date.tomorrow, scheduled_time: "09:00", assigned_to: plumber1)
