@@ -1,4 +1,4 @@
-run = "bash bin/replit-start.sh"
+run = "bundle exec rails server -b 0.0.0.0 -p 3000"
 
 [gitPackager]
 language = "ruby"
@@ -13,5 +13,9 @@ RAILS_LOG_TO_STDOUT = "true"
 RAILS_MAX_THREADS = "5"
 PORT = "3000"
 
+[buildCommand]
+build = "bundle config set --local without 'development test' && bundle install --jobs 1 && bundle exec rails assets:precompile && bundle exec rails db:migrate && bundle exec rails db:seed"
+
 [deployment]
-run = ["sh", "-c", "bash bin/replit-start.sh"]
+run = ["sh", "-c", "bundle exec rails server -b 0.0.0.0 -p 3000"]
+build = "bundle config set --local without 'development test' && bundle install --jobs 1 && bundle exec rails assets:precompile && bundle exec rails db:migrate && bundle exec rails db:seed"
