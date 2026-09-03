@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_03_172427) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_03_203000) do
   create_table "jobs", force: :cascade do |t|
     t.text "address"
     t.integer "assigned_to_id"
@@ -98,6 +98,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_172427) do
   add_foreign_key "jobs", "users"
   add_foreign_key "jobs", "users", column: "assigned_to_id"
   add_foreign_key "purchase_order_items", "purchase_orders"
-  add_foreign_key "purchase_orders", "users", column: "created_by_id"
   add_foreign_key "purchase_orders", "jobs"
+  add_foreign_key "purchase_orders", "users", column: "created_by_id"
 end

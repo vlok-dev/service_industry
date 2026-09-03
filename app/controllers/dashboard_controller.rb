@@ -6,33 +6,14 @@ class DashboardController < ApplicationController
     when "super_admin"
       @my_jobs = @jobs.where(user: current_user)
       @pending_jobs = @jobs.pending
-      @scheduled_jobs = @jobs.scheduled
       @in_progress_jobs = @jobs.in_progress
       @completed_jobs = @jobs.completed
+      build_schedule_view
+      @scheduled_jobs = jobs_for_schedule_view
     when "scheduler"
       @pending_jobs = @jobs.pending
-
-      view = params[:view].presence_in(%w[day week month]) || "day"
-      date = Date.parse(params[:date]) rescue Date.tomorrow
-
-      case view
-      when "day"
-        @scheduled_jobs = @jobs.where(scheduled_date: date)
-        @date_range_label = date.strftime("%A, %B %d, %Y")
-      when "week"
-        week_start = date.beginning_of_week(:monday)
-        week_end = date.end_of_week(:monday)
-        @scheduled_jobs = @jobs.where(scheduled_date: week_start..week_end)
-        @date_range_label = "#{week_start.strftime("%b %d")} — #{week_end.strftime("%b %d, %Y")}"
-      when "month"
-        month_start = date.beginning_of_month
-        month_end = date.end_of_month
-        @scheduled_jobs = @jobs.where(scheduled_date: month_start..month_end)
-        @date_range_label = date.strftime("%B %Y")
-      end
-
-      @scheduler_view = view
-      @scheduler_date = date
+      build_schedule_view
+      @scheduled_jobs = jobs_for_schedule_view
       @scheduled_tomorrow = @jobs.where(scheduled_date: Date.tomorrow)
     when "reporter"
       @all_jobs = @jobs.order(created_at: :desc)
@@ -62,6 +43,38 @@ class DashboardController < ApplicationController
     when "week" then @scheduler_date + 1.week
     when "month" then @scheduler_date + 1.month
     else @scheduler_date
+    end
+  end
+
+  private
+
+  def build_schedule_view
+    @scheduler_view = params[:view].presence_in(%w[day week month]) || "day"
+    @scheduler_date = Date.parse(params[:date]) rescue Date.tomorrow
+    @date_range_label = schedule_range_label(@scheduler_view, @scheduler_date)
+  end
+
+  def jobs_for_schedule_view
+    case @scheduler_view
+    when "day"
+      @jobs.where(scheduled_date: @scheduler_date)
+    when "week"
+      week_start = @scheduler_date.beginning_of_week(:monday)
+      week_end = @scheduler_date.end_of_week(:monday)
+      @jobs.where(scheduled_date: week_start..week_end)
+    when "month"
+      @jobs.where(scheduled_date: @scheduler_date.beginning_of_month..@scheduler_date.end_of_month)
+    end
+  end
+
+  def schedule_range_label(view, date)
+    case view
+    when "day" then date.strftime("%A, %B %d, %Y")
+    when "week"
+      week_start = date.beginning_of_week(:monday)
+      week_end = date.end_of_week(:monday)
+      "#{week_start.strftime("%b %d")} \u2014 #{week_end.strftime("%b %d, %Y")}"
+    when "month" then date.strftime("%B %Y")
     end
   end
 end

@@ -51,9 +51,6 @@
               <%= f.submit "Schedule", class: "btn btn-success", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
             <% end %>
           <% end %>
-          <% if current_user.super_admin? && policy(job).destroy? %>
-            <%= button_to "Delete", job, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
-          <% end %>
         </td>
       </tr>
     <% end %>

@@ -17,5 +17,39 @@
   <%= link_to "Edit", edit_job_path(@job), class: "btn" %>
 <% end %>
 <% if policy(@job).show? %>
-  <%= link_to "Send WhatsApp", whatsapp_job_path(@job), class: "btn", data: { confirm: "Open WhatsApp to send job details?" } %>
+  <%= link_to "Send WhatsApp", whatsapp_job_path(@job), class: "btn", data: { confirm: "Open WhatsApp to send job details to plumber?" } %>
 <% end %>
+
+<h3>Purchase Orders</h3>
+<% if @job.purchase_orders.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>PO #</th>
+        <th>Supplier</th>
+        <th>Order Date</th>
+        <th>Expected Delivery</th>
+        <th>Status</th>
+        <th>Total</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @job.purchase_orders.includes(:items).each do |po| %>
+        <tr>
+          <td><%= po.po_number || "N/A" %></td>
+          <td><%= po.supplier_name %></td>
+          <td><%= po.order_date&.strftime("%Y-%m-%d") %></td>
+          <td><%= po.expected_delivery&.strftime("%Y-%m-%d") %></td>
+          <td><span class="badge badge-<%= po.status %>"><%= po.status.humanize %></span></td>
+          <td>R <%= number_with_precision(po.subtotal, precision: 2) %></td>
+          <td><%= link_to "View", job_purchase_order_path(@job, po), class: "btn" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No purchase orders for this job.</p>
+<% end %>
+
+<%= link_to "Add Purchase Order", new_job_purchase_order_path(@job), class: "btn btn-success" %>

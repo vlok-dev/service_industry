@@ -31,11 +31,7 @@
             <td><%= job.customer_name %></td>
             <td><%= job.address %></td>
             <td>
-              <% if job.completed_with_invoice? %>
-                <span class="badge badge-completed">INV: <%= job.invoice_number %></span>
-              <% else %>
-                <span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span>
-              <% end %>
+              <span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span>
             </td>
             <td><%= job.scheduled_date&.strftime("%Y-%m-%d") || "Not scheduled" %></td>
             <td><%= job.assigned_to&.name || "Unassigned" %></td>
@@ -51,6 +47,8 @@
   <% else %>
     <p>No jobs yet.</p>
   <% end %>
+
+  <%= render "schedule_view" %>
 <% end %>
 
 <% if current_user.scheduler? %>
@@ -93,60 +91,15 @@
     <p>No pending jobs.</p>
   <% end %>
 
-  <div class="scheduler-controls">
-    <div class="view-tabs">
-      <%= link_to "Day", dashboard_path(view: "day", date: @scheduler_date), class: "view-tab #{@scheduler_view == 'day' ? 'active' : ''}" %>
-      <%= link_to "Week", dashboard_path(view: "week", date: @scheduler_date), class: "view-tab #{@scheduler_view == 'week' ? 'active' : ''}" %>
-      <%= link_to "Month", dashboard_path(view: "month", date: @scheduler_date), class: "view-tab #{@scheduler_view == 'month' ? 'active' : ''}" %>
-    </div>
-    <div class="date-navigation">
-      <%= link_to "&#9664; Prev".html_safe, dashboard_path(view: @scheduler_view, date: prev_date), class: "btn btn-secondary" %>
-      <%= form_with url: dashboard_path, method: :get, local: true, style: "display: inline;" do |f| %>
-        <%= f.hidden_field :view, value: @scheduler_view %>
-        <%= f.date_field :date, value: @scheduler_date, onchange: "this.form.submit();", class: "date-picker" %>
-      <% end %>
-      <%= link_to "Next &#9654;".html_safe, dashboard_path(view: @scheduler_view, date: next_date), class: "btn btn-secondary" %>
-    </div>
-    <div class="date-display">
-      <h2><%= @date_range_label %></h2>
-    </div>
-  </div>
-
-  <% if @scheduled_jobs.present? %>
-    <table>
-      <thead>
-        <tr>
-          <th>Time</th>
-          <th>Customer</th>
-          <th>Address</th>
-          <th>Plumber</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @scheduled_jobs.order(:scheduled_date, :scheduled_time).each do |job| %>
-          <tr>
-            <td><%= job.scheduled_time&.strftime("%H:%M") %></td>
-            <td><%= job.customer_name %></td>
-            <td><%= job.address %></td>
-            <td><%= job.assigned_to&.name || "Unassigned" %></td>
-            <td>
-              <%= link_to "Send WhatsApp to Plumber", whatsapp_job_path(job), class: "btn", data: { confirm: "Open WhatsApp to send job details to plumber?" } %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-    <% if @scheduler_view == "day" %>
-      <%= link_to "Send All #{@scheduler_date.strftime('%A')}'s Jobs via WhatsApp", bulk_whatsapp_jobs_path(scheduled_date: @scheduler_date), class: "btn btn-success" %>
-    <% end %>
-  <% else %>
-    <p>No jobs scheduled for this period.</p>
+  <%= render "schedule_view" %>
+  <% if @scheduler_view == "day" && @scheduled_jobs.present? %>
+    <%= link_to "Send All #{@scheduler_date.strftime('%A')}'s Jobs via WhatsApp", bulk_whatsapp_jobs_path(scheduled_date: @scheduler_date), class: "btn btn-success" %>
   <% end %>
 <% end %>
 
 <% if current_user.reporter? %>
   <h2>Daily Report - <%= Date.today.strftime("%B %d, %Y") %> (Lee Anne)</h2>
+
   <h3>Today's Jobs</h3>
   <% if @today_jobs.present? %>
     <table>
