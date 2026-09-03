@@ -51,6 +51,19 @@
   </div>
 
   <div style="margin-bottom: 1rem;">
+    <%= f.label :job_number, "Job Number" %><br>
+    <%= f.text_field :job_number %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :invoice_number, "Invoice Number" %><br>
+    <%= f.text_field :invoice_number, placeholder: "Auto-generated when status is set to Completed" %>
+    <% if @job.completed? && @job.invoice_number.blank? %>
+      <p style="color: #dc2626; font-size: 0.875rem;">Status is Completed but no invoice number set. Add one now.</p>
+    <% end %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
     <%= f.submit "Update Job", class: "btn" %>
   </div>
 <% end %>

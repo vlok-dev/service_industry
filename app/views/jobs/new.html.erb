@@ -51,6 +51,17 @@
   </div>
 
   <div style="margin-bottom: 1rem;">
+    <%= f.label :job_number, "Job Number" %><br>
+    <%= f.text_field :job_number, placeholder: "Auto-generated (e.g. JOB-00001) - leave blank for default" %>
+    <p style="color: #666; font-size: 0.875rem;">Optional: Set a custom job number, or leave blank to auto-generate.</p>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :invoice_number, "Invoice Number (when completed)" %><br>
+    <%= f.text_field :invoice_number, placeholder: "Leave blank to auto-generate on completion" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
     <%= f.submit "Create Job", class: "btn" %>
   </div>
 <% end %>

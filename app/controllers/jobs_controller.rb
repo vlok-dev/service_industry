@@ -4,6 +4,8 @@ class JobsController < ApplicationController
   def index
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
     @jobs = filter_jobs if params[:filter].present?
+    @jobs = @jobs.search(params[:q]) if params[:q].present?
+    @search_query = params[:q]
   end
 
   def show
@@ -80,7 +82,7 @@ class JobsController < ApplicationController
   end
 
   def job_params
-    params.require(:job).permit(:customer_name, :address, :description, :status, :priority, :assigned_to_id, :notes, :scheduled_date, :scheduled_time)
+    params.require(:job).permit(:customer_name, :address, :description, :status, :priority, :assigned_to_id, :notes, :scheduled_date, :scheduled_time, :job_number, :invoice_number)
   end
 
   def schedule_params

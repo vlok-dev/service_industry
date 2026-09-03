@@ -14,7 +14,7 @@
       <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
         <div class="field">
           <%= f.label :email, "Email" %>
-          <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "you@company.com" %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "you@company.com", value: @remembered_email %>
         </div>
         <div class="field">
           <%= f.label :password, "Password" %>
@@ -26,8 +26,18 @@
             <%= f.label :remember_me, "Remember me" %>
           </div>
         <% end %>
+        <div class="field remember-me" style="background: #dbeafe; padding: 0.75rem; border-radius: 6px; margin-top: 0.5rem;">
+          <%= check_box_tag :stay_logged_in, "1", false, style: "width: 18px; height: 18px; margin-right: 0.5rem;" %>
+          <%= label_tag :stay_logged_in, "Stay Logged In (remember my email for 30 days)", style: "font-weight: 600; color: #1e40af;" %>
+          <p style="font-size: 0.8rem; color: #1e3a8a; margin: 0.25rem 0 0 1.5rem;">Next time you visit the login page, your email will be pre-filled.</p>
+        </div>
         <div class="actions">
           <%= f.submit "Sign in", class: "btn-login" %>
+        </div>
+      <% end %>
+      <% if @remembered_email.present? %>
+        <div style="text-align: center; margin-top: 1rem;">
+          <%= link_to "Clear remembered email", stop_stay_logged_in_path, style: "color: #6b7280; font-size: 0.875rem;" %>
         </div>
       <% end %>
       <%= render "devise/shared/links" %>

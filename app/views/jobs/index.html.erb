@@ -4,27 +4,39 @@
   <p><%= link_to "Create New Job", new_job_path, class: "btn" %></p>
 <% end %>
 
+<%= form_with url: jobs_path, method: :get, local: true, style: "margin-bottom: 1rem;" do |f| %>
+  <%= f.text_field :q, value: @search_query, placeholder: "Search by Job Number, Address, or Invoice Number...", style: "padding: 0.5rem; width: 400px; max-width: 100%;" %>
+  <%= f.submit "Search", class: "btn" %>
+  <% if @search_query.present? %>
+    <%= link_to "Clear", jobs_path, class: "btn" %>
+  <% end %>
+<% end %>
+
 <table>
   <thead>
     <tr>
+      <th>Job #</th>
       <th>Customer</th>
       <th>Address</th>
       <th>Status</th>
       <th>Priority</th>
       <th>Scheduled Date</th>
       <th>Assigned To</th>
+      <th>Invoice #</th>
       <th>Actions</th>
     </tr>
   </thead>
   <tbody>
     <% @jobs.each do |job| %>
       <tr>
+        <td><%= job.job_number || "N/A" %></td>
         <td><%= job.customer_name %></td>
         <td><%= job.address %></td>
         <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
         <td><%= job.priority.humanize %></td>
         <td><%= job.scheduled_date&.strftime("%Y-%m-%d") || "Not scheduled" %></td>
         <td><%= job.assigned_to&.name || "Unassigned" %></td>
+        <td><%= job.invoice_number || "—" %></td>
         <td>
           <%= link_to "View", job %>
           <% if policy(job).edit? %>
@@ -39,7 +51,7 @@
               <%= f.submit "Schedule", class: "btn btn-success", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
             <% end %>
           <% end %>
-          <% if policy(job).destroy? %>
+          <% if current_user.super_admin? && policy(job).destroy? %>
             <%= button_to "Delete", job, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
           <% end %>
         </td>
@@ -47,3 +59,7 @@
     <% end %>
   </tbody>
 </table>
+
+<% if @jobs.empty? && @search_query.present? %>
+  <p>No jobs found matching "<%= @search_query %>".</p>
+<% end %>

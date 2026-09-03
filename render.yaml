@@ -14,3 +14,28 @@ services:
         value: true
       - key: RAILS_LOG_LEVEL
         value: info
+      - key: DATABASE_URL
+        fromDatabase:
+          name: industro-plumbers-db
+          property: connectionString
+      - key: DB_HOST
+        fromDatabase:
+          name: industro-plumbers-db
+          property: host
+      - key: DB_USERNAME
+        fromDatabase:
+          name: industro-plumbers-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: industro-plumbers-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: industro-plumbers-db
+          property: database
+
+databases:
+  - name: industro-plumbers-db
+    plan: free
+    databaseName: industro_plumbers_production
