@@ -23,7 +23,12 @@ Rails.application.routes.draw do
       collection do
         get :bulk_whatsapp
       end
+      resources :purchase_orders, only: [:new, :create, :show, :edit, :update, :destroy]
     end
+
+    get "/calendar" => "calendars#index", as: :calendar
+    get "/calendar/previous" => "calendars#previous_date", as: :calendar_previous
+    get "/calendar/next" => "calendars#next_date", as: :calendar_next
 
     namespace :admin do
       root to: "dashboard#index"

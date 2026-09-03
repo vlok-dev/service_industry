@@ -1,0 +1,55 @@
+<p><%= link_to "← Back to Job", job_path(@job), class: "btn" %></p>
+
+<h1>Purchase Order <%= @purchase_order.po_number %></h1>
+
+<div style="background: #f9fafb; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+  <p><strong>Job:</strong> <%= link_to @job.job_number, job_path(@job) %> — <%= @job.customer_name %></p>
+  <p><strong>Supplier:</strong> <%= @purchase_order.supplier_name %></p>
+  <% if @purchase_order.supplier_contact.present? %>
+    <p><strong>Contact:</strong> <%= @purchase_order.supplier_contact %></p>
+  <% end %>
+  <p><strong>Order Date:</strong> <%= @purchase_order.order_date&.strftime("%Y-%m-%d") || "N/A" %></p>
+  <% if @purchase_order.expected_delivery.present? %>
+    <p><strong>Expected Delivery:</strong> <%= @purchase_order.expected_delivery.strftime("%Y-%m-%d") %></p>
+  <% end %>
+  <p><strong>Status:</strong> <span class="badge badge-<%= @purchase_order.status %>"><%= @purchase_order.status.humanize %></span></p>
+  <p><strong>Created By:</strong> <%= @purchase_order.created_by&.name || "N/A" %></p>
+</div>
+
+<h3>Line Items</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Description</th>
+      <th>Quantity</th>
+      <th>Unit Price (R)</th>
+      <th>Total (R)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @purchase_order.items.each do |item| %>
+      <tr>
+        <td><%= item.description %></td>
+        <td><%= item.quantity %></td>
+        <td>R <%= number_with_precision(item.unit_price, precision: 2) %></td>
+        <td>R <%= number_with_precision(item.total, precision: 2) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3" style="text-align: right; font-weight: bold;">Total:</td>
+      <td style="font-weight: bold;">R <%= number_with_precision(@purchase_order.subtotal, precision: 2) %></td>
+    </tr>
+  </tfoot>
+</table>
+
+<% if @purchase_order.notes.present? %>
+  <h3>Notes</h3>
+  <p><%= @purchase_order.notes %></p>
+<% end %>
+
+<p style="margin-top: 1rem;">
+  <%= link_to "Edit", edit_job_purchase_order_path(@job, @purchase_order), class: "btn" %>
+  <%= button_to "Delete", job_purchase_order_path(@job, @purchase_order), method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger", style: "display: inline;" %>
+</p>

@@ -50,7 +50,7 @@ class JobsController < ApplicationController
     if @job.update(schedule_params)
       redirect_to jobs_path, notice: "Job was successfully scheduled."
     else
-      redirect_to jobs_path, alert: "Unable to schedule job."
+      redirect_back(fallback_location: jobs_path, allow_other_host: false, alert: @job.errors.full_messages.join(", "))
     end
   end
 

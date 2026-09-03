@@ -8,4 +8,16 @@ class User < ApplicationRecord
 
   has_many :assigned_jobs, class_name: "Job", foreign_key: :assigned_to_id, dependent: :nullify
   has_many :jobs, dependent: :nullify
+
+  before_validation :generate_email_if_blank
+
+  private
+
+  def generate_email_if_blank
+    if email.blank?
+      base = name.to_s.downcase.parameterize.gsub(/[^a-z0-9]/, "")
+      base = "user#{id || Time.now.to_i}" if base.blank?
+      self.email = "#{base}@industroplumbers.local"
+    end
+  end
 end

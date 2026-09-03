@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_03_161919) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_03_172427) do
   create_table "jobs", force: :cascade do |t|
     t.text "address"
     t.integer "assigned_to_id"
@@ -38,6 +38,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_161919) do
     t.datetime "created_at", null: false
     t.string "title"
     t.datetime "updated_at", null: false
+  end
+
+  create_table "purchase_order_items", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "description"
+    t.integer "purchase_order_id", null: false
+    t.integer "quantity"
+    t.decimal "total"
+    t.decimal "unit_price"
+    t.datetime "updated_at", null: false
+    t.index ["purchase_order_id"], name: "index_purchase_order_items_on_purchase_order_id"
+  end
+
+  create_table "purchase_orders", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "created_by_id", null: false
+    t.date "expected_delivery"
+    t.integer "job_id", null: false
+    t.text "notes"
+    t.date "order_date"
+    t.string "po_number"
+    t.integer "status"
+    t.string "supplier_contact"
+    t.string "supplier_name"
+    t.decimal "total_amount"
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_purchase_orders_on_created_by_id"
+    t.index ["job_id"], name: "index_purchase_orders_on_job_id"
   end
 
   create_table "settings", force: :cascade do |t|
@@ -69,4 +97,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_161919) do
 
   add_foreign_key "jobs", "users"
   add_foreign_key "jobs", "users", column: "assigned_to_id"
+  add_foreign_key "purchase_order_items", "purchase_orders"
+  add_foreign_key "purchase_orders", "users", column: "created_by_id"
+  add_foreign_key "purchase_orders", "jobs"
 end

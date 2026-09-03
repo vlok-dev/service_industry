@@ -54,7 +54,10 @@
 <% end %>
 
 <% if current_user.scheduler? %>
-  <h2>Pending Jobs (Michael)</h2>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h2 style="margin: 0;">Pending Jobs (Michael)</h2>
+    <%= link_to "📅 Calendar View", calendar_path, class: "btn" %>
+  </div>
   <% if @pending_jobs.present? %>
     <table>
       <thead>
@@ -149,23 +152,29 @@
     <table>
       <thead>
         <tr>
+          <th>Job #</th>
           <th>Time Logged</th>
           <th>Customer</th>
           <th>Address</th>
           <th>Description</th>
           <th>Logged By</th>
           <th>Status</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
         <% @today_jobs.each do |job| %>
           <tr>
+            <td>
+              <%= link_to (job.job_number || "N/A"), new_job_purchase_order_path(job), style: "color: #2563eb; text-decoration: underline;", title: "Click to add Purchase Order" %>
+            </td>
             <td><%= job.created_at.strftime("%H:%M") %></td>
             <td><%= job.customer_name %></td>
             <td><%= job.address %></td>
             <td><%= job.description.truncate(50) %></td>
             <td><%= job.user.name %></td>
             <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+            <td><%= link_to "Add PO", new_job_purchase_order_path(job), class: "btn", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %></td>
           </tr>
         <% end %>
       </tbody>
@@ -175,7 +184,7 @@
     <p>No jobs logged today.</p>
   <% end %>
 
-  <h3>All Jobs</h3>
+  <h3>All Jobs (click Job # to add Purchase Order)</h3>
   <% if @all_jobs.present? %>
     <table>
       <thead>

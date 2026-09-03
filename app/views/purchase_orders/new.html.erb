@@ -1,0 +1,95 @@
+<p><%= link_to "← Back to Job", job_path(@job), class: "btn" %></p>
+
+<h1>New Purchase Order</h1>
+<p><strong>Job:</strong> <%= link_to @job.job_number, job_path(@job) %> — <%= @job.customer_name %></p>
+
+<%= form_with model: [@job, @purchase_order], local: true do |f| %>
+  <% if @purchase_order.errors.any? %>
+    <div class="alert">
+      <h2><%= pluralize(@purchase_order.errors.count, "error") %> prohibited this from being saved:</h2>
+      <ul>
+        <% @purchase_order.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :supplier_name, "Supplier Name" %><br>
+    <%= f.text_field :supplier_name, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :supplier_contact, "Supplier Contact (Phone/Email)" %><br>
+    <%= f.text_field :supplier_contact, placeholder: "+27123456789 or supplier@example.com" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :order_date %><br>
+    <%= f.date_field :order_date, value: Date.today, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :expected_delivery %><br>
+    <%= f.date_field :expected_delivery %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :status %><br>
+    <%= f.select :status, PurchaseOrder.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: true } %>
+  </div>
+
+  <h3>Line Items</h3>
+  <table style="width: 100%; margin-bottom: 1rem;">
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Quantity</th>
+        <th>Unit Price (R)</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody id="items">
+      <%= f.fields_for :items do |item_form| %>
+        <tr class="item-row">
+          <td><%= item_form.text_field :description, placeholder: "Item description", style: "width: 100%;" %></td>
+          <td><%= item_form.number_field :quantity, min: 1, step: 1, class: "qty" %></td>
+          <td><%= item_form.number_field :unit_price, min: 0, step: 0.01, class: "price" %></td>
+          <td class="line-total">R 0.00</td>
+        </tr>
+      <% end %>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3" style="text-align: right; font-weight: bold;">Total:</td>
+        <td id="grand-total" style="font-weight: bold;">R 0.00</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :notes %><br>
+    <%= f.text_area :notes %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.submit "Create Purchase Order", class: "btn" %>
+  </div>
+<% end %>
+
+<script>
+function recalc() {
+  let total = 0;
+  document.querySelectorAll('.item-row').forEach(row => {
+    const qty = parseFloat(row.querySelector('.qty').value) || 0;
+    const price = parseFloat(row.querySelector('.price').value) || 0;
+    const lineTotal = qty * price;
+    row.querySelector('.line-total').textContent = 'R ' + lineTotal.toFixed(2);
+    total += lineTotal;
+  });
+  document.getElementById('grand-total').textContent = 'R ' + total.toFixed(2);
+}
+document.querySelectorAll('.qty, .price').forEach(input => input.addEventListener('input', recalc));
+recalc();
+</script>
