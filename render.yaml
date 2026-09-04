@@ -3,7 +3,7 @@ services:
     name: industro-plumbers
     runtime: ruby
     plan: free
-    buildCommand: bundle install && bundle exec rails assets:precompile && bundle exec rails db:migrate && bundle exec rails db:seed
+    buildCommand: bundle install && bundle exec rails assets:precompile && bundle exec rails db:migrate
     startCommand: bundle exec rails server -b 0.0.0.0 -p $PORT
     envVars:
       - key: RAILS_ENV
@@ -18,22 +18,6 @@ services:
         fromDatabase:
           name: industro-plumbers-db
           property: connectionString
-      - key: DB_HOST
-        fromDatabase:
-          name: industro-plumbers-db
-          property: host
-      - key: DB_USERNAME
-        fromDatabase:
-          name: industro-plumbers-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: industro-plumbers-db
-          property: password
-      - key: DB_NAME
-        fromDatabase:
-          name: industro-plumbers-db
-          property: database
 
 databases:
   - name: industro-plumbers-db
