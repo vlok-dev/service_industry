@@ -306,7 +306,7 @@
           <tbody>
             <% @today_jobs.each do |job| %>
               <tr>
-                <td><%= link_to (job.job_number || "N/A"), new_job_purchase_order_path(job), style: "color: var(--primary); text-decoration: none; font-weight: 500;" %></td>
+                <td><%= link_to (job.job_number || "N/A"), job_path(job), style: "color: var(--primary); text-decoration: none; font-weight: 500;", title: "View job and purchase orders" %></td>
                 <td><%= job.created_at.strftime("%H:%M") %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(35) %></td>
@@ -334,21 +334,25 @@
         <table>
           <thead>
             <tr>
+              <th>Job #</th>
               <th>Date</th>
               <th>Customer</th>
               <th>Address</th>
               <th>Status</th>
               <th>Logged By</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             <% @all_jobs.each do |job| %>
               <tr>
+                <td><%= link_to (job.job_number || "N/A"), job_path(job), style: "color: var(--primary); text-decoration: none; font-weight: 500;", title: "View job and purchase orders" %></td>
                 <td><%= job.created_at.strftime("%Y-%m-%d") %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
                 <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
                 <td><%= job.user.name %></td>
+                <td><%= link_to "Add PO", new_job_purchase_order_path(job), class: "btn btn-sm" %></td>
               </tr>
             <% end %>
           </tbody>

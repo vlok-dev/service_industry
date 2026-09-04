@@ -16,6 +16,14 @@ class PurchaseOrder < ApplicationRecord
     items.sum { |item| (item.quantity || 0) * (item.unit_price || 0) }
   end
 
+  def vat_amount
+    subtotal * (vat_rate / 100.0)
+  end
+
+  def total_including_vat
+    subtotal + vat_amount
+  end
+
   def item_count
     items.sum(:quantity)
   end

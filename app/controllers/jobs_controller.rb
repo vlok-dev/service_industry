@@ -59,7 +59,7 @@ class JobsController < ApplicationController
 
     phone = @job.assigned_to&.phone_number
     if phone.present?
-      message = "New Job Assigned:\nCustomer: #{@job.customer_name}\nAddress: #{@job.address}\nDescription: #{@job.description}\nScheduled: #{@job.scheduled_date&.strftime('%Y-%m-%d')} at #{@job.scheduled_time&.strftime('%H:%M') || 'TBD'}\nPriority: #{@job.priority.humanize}\nStatus: #{@job.status.humanize}"
+      message = "New Job Assigned:\nCustomer: #{@job.customer_name}\nAddress: #{@job.address}\nDescription: #{@job.description}\nScheduled: #{@job.scheduled_date&.strftime('%d %B %Y')} at #{@job.scheduled_time&.strftime('%I:%M %p') || 'TBD'}\nPriority: #{@job.priority.humanize}\nStatus: #{@job.status.humanize}"
       redirect_to "https://wa.me/#{phone.gsub(/[^0-9]/, '')}?text=#{CGI.escape(message)}", allow_other_host: true
     else
       redirect_to @job, alert: "No phone number available for the assigned plumber."

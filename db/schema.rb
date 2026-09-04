@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_03_203000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_04_114000) do
   create_table "jobs", force: :cascade do |t|
     t.text "address"
     t.integer "assigned_to_id"
@@ -64,6 +64,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_203000) do
     t.string "supplier_name"
     t.decimal "total_amount"
     t.datetime "updated_at", null: false
+    t.decimal "vat_rate", precision: 5, scale: 2, default: "15.0", null: false
     t.index ["created_by_id"], name: "index_purchase_orders_on_created_by_id"
     t.index ["job_id"], name: "index_purchase_orders_on_job_id"
   end
