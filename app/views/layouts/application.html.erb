@@ -13,7 +13,6 @@
 
     <link rel="icon" href="/IndustroPlumbers.png" type="image/png">
     <link rel="apple-touch-icon" href="/icon.png">
-    <link rel="manifest" href="/manifest.json">
 
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <style>
@@ -541,27 +540,10 @@
         margin-bottom: 1rem;
         opacity: 0.4;
       }
-
-      /* Offline Banner */
-      .offline-banner {
-        background: #fef3c7;
-        color: #92400e;
-        padding: 0.625rem 1rem;
-        text-align: center;
-        font-size: 0.875rem;
-        font-weight: 500;
-        display: none;
-        border-bottom: 1px solid #fde68a;
-      }
-
-      .offline-banner.visible {
-        display: block;
-      }
     </style>
   </head>
 
   <body>
-    <div id="offline-banner" class="offline-banner">You are currently offline. Changes will be saved locally.</div>
     <% if content_for?(:full_page) %>
       <%= yield :full_page %>
     <% else %>
@@ -604,66 +586,5 @@
         <%= yield %>
       </div>
     <% end %>
-
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/pwa-sw.js').catch(function(err) {
-          console.log('ServiceWorker registration failed: ', err);
-        });
-      }
-
-      var offlineBanner = document.getElementById('offline-banner');
-      function updateOnlineStatus() {
-        if (navigator.onLine) {
-          offlineBanner.classList.remove('visible');
-          syncQueuedForms();
-        } else {
-          offlineBanner.classList.add('visible');
-        }
-      }
-      window.addEventListener('online', updateOnlineStatus);
-      window.addEventListener('offline', updateOnlineStatus);
-      updateOnlineStatus();
-
-      function queueForm(formData, url, method) {
-        var queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
-        queue.push({ data: formData, url: url, method: method, timestamp: Date.now() });
-        localStorage.setItem('offlineQueue', JSON.stringify(queue));
-      }
-
-      function syncQueuedForms() {
-        var queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
-        if (queue.length === 0) return;
-        var remaining = [];
-        queue.forEach(function(item) {
-          fetch(item.url, {
-            method: item.method,
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
-            body: JSON.stringify(item.data)
-          }).then(function(response) {
-            if (!response.ok) throw new Error('Failed');
-          }).catch(function() {
-            remaining.push(item);
-          });
-        });
-        localStorage.setItem('offlineQueue', JSON.stringify(remaining));
-        if (remaining.length === 0 && queue.length > 0) {
-          alert('Offline changes have been synced.');
-          location.reload();
-        }
-      }
-
-      document.querySelectorAll('form').forEach(function(form) {
-        form.addEventListener('submit', function(e) {
-          if (!navigator.onLine) {
-            e.preventDefault();
-            var formData = {};
-            new FormData(form).forEach(function(value, key) { formData[key] = value; });
-            queueForm(formData, form.action, form.method.toUpperCase());
-            alert('You are offline. This submission has been saved and will be sent when you reconnect.');
-          }
-        });
-      });
-    </script>
   </body>
 </html>
