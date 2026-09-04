@@ -49,7 +49,7 @@
         justify-content: center;
         min-height: 100vh;
         padding: 2rem;
-        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+        background: #B2D33E;
       }
 
       .login-card {
@@ -566,7 +566,7 @@
             <% if current_user.admin? || current_user.super_admin? %>
               <%= link_to "Admin", admin_root_path %>
             <% end %>
-            <%= button_to "Logout", logout_path, method: :delete, style: "background: none; border: none; color: var(--text-muted); cursor: pointer; text-decoration: underline; display: inline; padding: 0; font-size: 0.875rem;" %>
+            <%= link_to "Logout", logout_path, data: { turbo_method: :delete }, style: "color: var(--text-muted); cursor: pointer; text-decoration: underline; display: inline; padding: 0; font-size: 0.875rem;" %>
           </div>
         <% else %>
           <div class="nav-links">
