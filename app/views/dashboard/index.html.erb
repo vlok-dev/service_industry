@@ -39,6 +39,7 @@
             <td>
               <%= link_to "View", job %>
               <%= link_to "Edit", edit_job_path(job) %>
+              <%= button_to "Delete", job, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
             </td>
           </tr>
         <% end %>
@@ -49,6 +50,133 @@
   <% end %>
 
   <%= render "schedule_view" %>
+<% end %>
+
+<% if current_user.accountant? %>
+  <h2>All Jobs (Accountant)</h2>
+  <p>Assign invoice numbers to each job.</p>
+  <%= form_with url: root_path, method: :get, local: true, style: "margin-bottom: 1rem;" do |f| %>
+    <%= f.text_field :q, value: params[:q], placeholder: "Search by Job Number, Address, or Invoice Number...", style: "padding: 0.5rem; width: 400px; max-width: 100%;" %>
+    <%= f.submit "Search", class: "btn" %>
+    <% if params[:q].present? %>
+      <%= link_to "Clear", root_path, class: "btn" %>
+    <% end %>
+  <% end %>
+  <% if @pending_jobs.present? %>
+    <h3>Pending Jobs</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Job #</th>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Priority</th>
+          <th>Created By</th>
+          <th>Invoice #</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @pending_jobs.each do |job| %>
+          <tr>
+            <td><%= job.job_number || "N/A" %></td>
+            <td><%= job.customer_name %></td>
+            <td><%= job.address %></td>
+            <td><%= job.priority.humanize %></td>
+            <td><%= job.user.name %></td>
+            <td><%= job.invoice_number || "—" %></td>
+            <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+
+  <% if @scheduled_jobs.present? %>
+    <h3>Scheduled Jobs</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Job #</th>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Scheduled</th>
+          <th>Assigned To</th>
+          <th>Invoice #</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @scheduled_jobs.each do |job| %>
+          <tr>
+            <td><%= job.job_number || "N/A" %></td>
+            <td><%= job.customer_name %></td>
+            <td><%= job.address %></td>
+            <td><%= job.scheduled_date&.strftime("%Y-%m-%d") %> at <%= job.scheduled_time&.strftime("%H:%M") %></td>
+            <td><%= job.assigned_to&.name || "Unassigned" %></td>
+            <td><%= job.invoice_number || "—" %></td>
+            <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+
+  <% if @in_progress_jobs.present? %>
+    <h3>In Progress Jobs</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Job #</th>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Assigned To</th>
+          <th>Invoice #</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @in_progress_jobs.each do |job| %>
+          <tr>
+            <td><%= job.job_number || "N/A" %></td>
+            <td><%= job.customer_name %></td>
+            <td><%= job.address %></td>
+            <td><%= job.assigned_to&.name || "Unassigned" %></td>
+            <td><%= job.invoice_number || "—" %></td>
+            <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+
+  <% if @completed_jobs.present? %>
+    <h3>Completed Jobs</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Job #</th>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Completed At</th>
+          <th>Invoice #</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @completed_jobs.each do |job| %>
+          <tr>
+            <td><%= job.job_number || "N/A" %></td>
+            <td><%= job.customer_name %></td>
+            <td><%= job.address %></td>
+            <td><%= job.completed_at&.strftime("%Y-%m-%d %H:%M") || "N/A" %></td>
+            <td><%= job.invoice_number || "—" %></td>
+            <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
 <% end %>
 
 <% if current_user.scheduler? %>

@@ -4,7 +4,7 @@ class JobPolicy < ApplicationPolicy
   end
 
   def show?
-    record_owner_or_admin? || assigned_plumber? || reporter? || user.scheduler?
+    record_owner_or_admin? || assigned_plumber? || reporter? || user.scheduler? || user.accountant?
   end
 
   def create?
@@ -16,7 +16,7 @@ class JobPolicy < ApplicationPolicy
   end
 
   def update?
-    record_owner_or_admin? || assigned_plumber?
+    record_owner_or_admin? || assigned_plumber? || user.accountant?
   end
 
   def edit?
@@ -38,7 +38,7 @@ class JobPolicy < ApplicationPolicy
   private
 
   def record_owner_or_admin?
-    user.super_admin? || user.admin? || record.user_id == user.id
+    user&.super_admin? || user&.admin? || record.user_id == user.id
   end
 
   def assigned_plumber?
@@ -52,7 +52,7 @@ class JobPolicy < ApplicationPolicy
   class Scope < Scope
     def resolve
       case user.role
-      when "super_admin", "admin"
+      when "super_admin", "admin", "accountant"
         scope.all
       when "scheduler"
         scope.all

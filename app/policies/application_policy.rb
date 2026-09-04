@@ -58,4 +58,8 @@ class ApplicationPolicy
   def admin_or_super_admin?
     user&.admin? || user&.super_admin?
   end
+
+  def accountant?
+    user&.accountant?
+  end
 end

@@ -20,16 +20,9 @@
           <%= f.label :password, "Password" %>
           <%= f.password_field :password, autocomplete: "current-password", placeholder: "••••••••" %>
         </div>
-        <% if devise_mapping.rememberable? %>
-          <div class="field remember-me">
-            <%= f.check_box :remember_me %>
-            <%= f.label :remember_me, "Remember me" %>
-          </div>
-        <% end %>
         <div class="field remember-me" style="background: #dbeafe; padding: 0.75rem; border-radius: 6px; margin-top: 0.5rem;">
           <%= check_box_tag :stay_logged_in, "1", false, style: "width: 18px; height: 18px; margin-right: 0.5rem;" %>
-          <%= label_tag :stay_logged_in, "Stay Logged In (remember my email for 30 days)", style: "font-weight: 600; color: #1e40af;" %>
-          <p style="font-size: 0.8rem; color: #1e3a8a; margin: 0.25rem 0 0 1.5rem;">Next time you visit the login page, your email will be pre-filled.</p>
+          <%= label_tag :stay_logged_in, "Stay Logged In", style: "font-weight: 600; color: #1e40af;" %>
         </div>
         <div class="actions">
           <%= f.submit "Sign in", class: "btn-login" %>

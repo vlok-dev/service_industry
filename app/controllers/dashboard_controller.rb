@@ -6,10 +6,37 @@ class DashboardController < ApplicationController
     when "super_admin"
       @my_jobs = @jobs.where(user: current_user)
       @pending_jobs = @jobs.pending
+      @scheduled_jobs = @jobs.scheduled
       @in_progress_jobs = @jobs.in_progress
       @completed_jobs = @jobs.completed
-      build_schedule_view
-      @scheduled_jobs = jobs_for_schedule_view
+
+      view = params[:view].presence_in(%w[day week month]) || "day"
+      date = Date.parse(params[:date]) rescue Date.tomorrow
+
+      case view
+      when "day"
+        @scheduled_jobs = @jobs.where(scheduled_date: date)
+        @date_range_label = date.strftime("%A, %B %d, %Y")
+      when "week"
+        week_start = date.beginning_of_week(:monday)
+        week_end = date.end_of_week(:monday)
+        @scheduled_jobs = @jobs.where(scheduled_date: week_start..week_end)
+        @date_range_label = "#{week_start.strftime("%b %d")} — #{week_end.strftime("%b %d, %Y")}"
+      when "month"
+        month_start = date.beginning_of_month
+        month_end = date.end_of_month
+        @scheduled_jobs = @jobs.where(scheduled_date: month_start..month_end)
+        @date_range_label = date.strftime("%B %Y")
+      end
+
+      @scheduler_view = view
+      @scheduler_date = date
+      @scheduled_tomorrow = @jobs.where(scheduled_date: Date.tomorrow)
+    when "accountant"
+      @pending_jobs = @jobs.pending
+      @scheduled_jobs = @jobs.scheduled
+      @in_progress_jobs = @jobs.in_progress
+      @completed_jobs = @jobs.completed
     when "scheduler"
       @pending_jobs = @jobs.pending
       build_schedule_view

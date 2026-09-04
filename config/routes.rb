@@ -11,6 +11,9 @@ Rails.application.routes.draw do
 
   root to: redirect("/users/sign_in")
 
+  get "/manifest.json" => "pages#manifest"
+  get "/offline" => "pages#offline"
+
   scope "/:username" do
     get "/" => "dashboard#index", as: "dashboard"
     delete "/logout" => "sessions#destroy", as: "logout"

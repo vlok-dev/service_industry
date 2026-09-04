@@ -1,23 +1,13 @@
 class User < ApplicationRecord
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+  devise :database_authenticatable,
+         :recoverable,
+         :rememberable
 
-  enum :role, { super_admin: 0, scheduler: 1, reporter: 2, plumber: 3, admin: 4 }
+  enum :role, { super_admin: 0, scheduler: 1, reporter: 2, plumber: 3, admin: 4, accountant: 5 }
 
   has_many :assigned_jobs, class_name: "Job", foreign_key: :assigned_to_id, dependent: :nullify
   has_many :jobs, dependent: :nullify
 
-  before_validation :generate_email_if_blank
-
-  private
-
-  def generate_email_if_blank
-    if email.blank?
-      base = name.to_s.downcase.parameterize.gsub(/[^a-z0-9]/, "")
-      base = "user#{id || Time.now.to_i}" if base.blank?
-      self.email = "#{base}@industroplumbers.local"
-    end
-  end
+  validates :email, uniqueness: true, allow_nil: true, allow_blank: true
+  validates :name, presence: true
 end

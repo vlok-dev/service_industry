@@ -14,46 +14,48 @@
     </div>
   <% end %>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :customer_name, "Customer Name" %><br>
-    <%= f.text_field :customer_name, required: true %>
-  </div>
+  <% unless current_user.accountant? %>
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :customer_name, "Customer Name" %><br>
+      <%= f.text_field :customer_name, required: true %>
+    </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :address %><br>
-    <%= f.text_area :address, required: true %>
-  </div>
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :address %><br>
+      <%= f.text_area :address, required: true %>
+    </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :description %><br>
-    <%= f.text_area :description, required: true %>
-  </div>
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :description %><br>
+      <%= f.text_area :description, required: true %>
+    </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :status %><br>
-    <%= f.select :status, Job.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: true }, { required: true } %>
-  </div>
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :status %><br>
+      <%= f.select :status, Job.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: true }, { required: true } %>
+    </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :priority %><br>
-    <%= f.select :priority, Job.priorities.keys.map { |p| [p.humanize, p] }, { include_blank: true }, { required: true } %>
-  </div>
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :priority %><br>
+      <%= f.select :priority, Job.priorities.keys.map { |p| [p.humanize, p] }, { include_blank: true }, { required: true } %>
+    </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :assigned_to_id, "Assign Plumber" %><br>
-    <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, f.object.assigned_to_id), { include_blank: "Select Plumber (optional)" } %>
-    <p style="color: #666; font-size: 0.875rem;">Optional: Pre-assign a plumber. Michael can change this when scheduling.</p>
-  </div>
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :assigned_to_id, "Assign Plumber" %><br>
+      <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, f.object.assigned_to_id), { include_blank: "Select Plumber (optional)" } %>
+      <p style="color: #666; font-size: 0.875rem;">Optional: Pre-assign a plumber. Michael can change this when scheduling.</p>
+    </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :notes %><br>
-    <%= f.text_area :notes %>
-  </div>
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :notes %><br>
+      <%= f.text_area :notes %>
+    </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :job_number, "Job Number" %><br>
-    <%= f.text_field :job_number %>
-  </div>
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :job_number, "Job Number" %><br>
+      <%= f.text_field :job_number %>
+    </div>
+  <% end %>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :invoice_number, "Invoice Number" %><br>

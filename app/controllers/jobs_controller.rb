@@ -82,7 +82,12 @@ class JobsController < ApplicationController
   end
 
   def job_params
-    params.require(:job).permit(:customer_name, :address, :description, :status, :priority, :assigned_to_id, :notes, :scheduled_date, :scheduled_time, :job_number, :invoice_number)
+    permitted = if current_user.accountant?
+      [:invoice_number]
+    else
+      [:customer_name, :address, :description, :status, :priority, :assigned_to_id, :notes, :scheduled_date, :scheduled_time, :job_number, :invoice_number]
+    end
+    params.require(:job).permit(permitted)
   end
 
   def schedule_params

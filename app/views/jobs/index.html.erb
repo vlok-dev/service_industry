@@ -42,6 +42,9 @@
           <% if policy(job).edit? %>
             <%= link_to "Edit", edit_job_path(job) %>
           <% end %>
+          <% if policy(job).destroy? %>
+            <%= button_to "Delete", job, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+          <% end %>
           <% if current_user.scheduler? && job.pending? %>
             <%= form_with url: schedule_job_path(job), method: :patch, local: true, style: "display: inline;" do |f| %>
               <%= f.hidden_field :status, value: "scheduled" %>
