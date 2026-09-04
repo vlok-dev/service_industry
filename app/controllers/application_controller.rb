@@ -10,6 +10,8 @@ class ApplicationController < ActionController::Base
 
   skip_before_action :set_session_scope, if: :devise_controller?
   skip_before_action :enforce_username_scope, if: :devise_controller?
+  skip_before_action :verify_authorized, if: :devise_controller?
+  skip_before_action :verify_policy_scoped, if: :devise_controller?
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
