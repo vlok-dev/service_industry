@@ -5,7 +5,12 @@ module Admin
     before_action :set_user, only: %i[ edit update destroy ]
 
     def index
+      @search_query = params[:q].to_s.strip
       @users = User.all.order(:role, :name)
+      if @search_query.present?
+        sanitized = "%#{ActiveRecord::Base.sanitize_sql_like(@search_query)}%"
+        @users = @users.where("name ILIKE :q OR email ILIKE :q OR phone_number ILIKE :q", q: sanitized)
+      end
     end
 
     def new

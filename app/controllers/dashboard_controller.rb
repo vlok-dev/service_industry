@@ -1,10 +1,15 @@
 class DashboardController < ApplicationController
   def index
     @jobs = policy_scope(Job)
+    @search_query = params[:q].to_s.strip
+
+    if @search_query.present?
+      @jobs = @jobs.search(@search_query)
+    end
 
     case current_user.role
     when "super_admin"
-      @my_jobs = @jobs.where(user: current_user)
+      @my_jobs = filter_jobs_for(@jobs.where(user: current_user))
       @pending_jobs = @jobs.pending
       @scheduled_jobs = @jobs.scheduled
       @in_progress_jobs = @jobs.in_progress
@@ -21,7 +26,7 @@ class DashboardController < ApplicationController
         week_start = date.beginning_of_week(:monday)
         week_end = date.end_of_week(:monday)
         @scheduled_jobs = @jobs.where(scheduled_date: week_start..week_end)
-        @date_range_label = "#{week_start.strftime("%b %d")} — #{week_end.strftime("%b %d, %Y")}"
+        @date_range_label = "#{week_start.strftime("%b %d")} \u2014 #{week_end.strftime("%b %d, %Y")}"
       when "month"
         month_start = date.beginning_of_month
         month_end = date.end_of_month
@@ -75,6 +80,10 @@ class DashboardController < ApplicationController
 
   private
 
+  def filter_jobs_for(scope)
+    @search_query.present? ? scope.search(@search_query) : scope
+  end
+
   def build_schedule_view
     @scheduler_view = params[:view].presence_in(%w[day week month]) || "day"
     @scheduler_date = Date.parse(params[:date]) rescue Date.tomorrow
@@ -82,7 +91,7 @@ class DashboardController < ApplicationController
   end
 
   def jobs_for_schedule_view
-    case @scheduler_view
+    base = case @scheduler_view
     when "day"
       @jobs.where(scheduled_date: @scheduler_date)
     when "week"
@@ -92,6 +101,7 @@ class DashboardController < ApplicationController
     when "month"
       @jobs.where(scheduled_date: @scheduler_date.beginning_of_month..@scheduler_date.end_of_month)
     end
+    @search_query.present? ? base.search(@search_query) : base
   end
 
   def schedule_range_label(view, date)

@@ -14,7 +14,9 @@ class Job < ApplicationRecord
   before_save :assign_invoice_number_on_completion
   scope :search, ->(query) {
     return all if query.blank?
-    where("job_number LIKE ? OR address LIKE ? OR invoice_number LIKE ?", "%#{query}%", "%#{query}%", "%#{query}%")
+    sanitized = "%#{ActiveRecord::Base.sanitize_sql_like(query.to_s.strip)}%"
+    where("CAST(job_number AS TEXT) ILIKE :q OR address ILIKE :q OR CAST(invoice_number AS TEXT) ILIKE :q OR customer_name ILIKE :q",
+          q: sanitized)
   }
 
   def self.next_job_number

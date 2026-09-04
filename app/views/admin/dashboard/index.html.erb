@@ -27,7 +27,16 @@
 <div class="card">
   <div class="card-header">
     <h2>User Management</h2>
-    <%= link_to "Add New User", new_admin_user_path, class: "btn" %>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+      <%= form_with url: admin_root_path, method: :get, local: true, style: "display: flex; gap: 0.5rem;" do |f| %>
+        <%= f.text_field :q, value: @search_query, placeholder: "Search users by name, email, or phone...", style: "padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; width: 320px;" %>
+        <%= f.submit "Search", class: "btn btn-sm" %>
+        <% if @search_query.present? %>
+          <%= link_to "Clear", admin_root_path, class: "btn btn-sm btn-secondary" %>
+        <% end %>
+      <% end %>
+      <%= link_to "Add New User", new_admin_user_path, class: "btn" %>
+    </div>
   </div>
   <div class="card-body no-padding">
     <table>
@@ -55,5 +64,8 @@
         <% end %>
       </tbody>
     </table>
+    <% if @users.empty? && @search_query.present? %>
+      <div class="empty-state">No users found matching "<%= @search_query %>".</div>
+    <% end %>
   </div>
 </div>
