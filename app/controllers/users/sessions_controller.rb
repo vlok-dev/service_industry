@@ -3,6 +3,15 @@ class Users::SessionsController < Devise::SessionsController
   before_action :load_remembered_user, only: :new
   before_action :handle_stay_logged_in, only: :create
 
+  def destroy
+    cookies.each do |name, _|
+      if name.start_with?("_industro_plumbers_")
+        cookies.delete(name)
+      end
+    end
+    super
+  end
+
   def stop_stay_logged_in
     cookies.delete(:remembered_email, domain: :all)
     cookies.delete(:remembered_user, domain: :all)
