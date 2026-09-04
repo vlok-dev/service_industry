@@ -1,4 +1,4 @@
-<p><%= link_to "Back to Jobs", jobs_path, class: "btn" %></p>
+<p><%= link_to "Back To Jobs", jobs_path, class: "btn" %></p>
 
 <h1>Job Details</h1>
 
@@ -16,6 +16,7 @@
 <% if policy(@job).edit? %>
   <%= link_to "Edit", edit_job_path(@job), class: "btn" %>
 <% end %>
+
 <% if policy(@job).show? %>
   <%= link_to "Send WhatsApp", whatsapp_job_path(@job), class: "btn", data: { confirm: "Open WhatsApp to send job details to plumber?" } %>
 <% end %>
