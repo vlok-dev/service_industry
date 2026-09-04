@@ -14,7 +14,7 @@ class WhatsAppService
       "Customer: #{job.customer_name}",
       "Address: #{job.address}",
       "Description: #{job.description}",
-      "Scheduled: #{job.scheduled_date&.strftime("%d %B %Y")} at #{job.scheduled_time&.strftime("%I:%M %p") || "TBD"}"
+      "Scheduled: #{job.scheduled_date&.strftime("%d %B %Y")} at #{job.scheduled_time&.strftime("%I:%M %p") || "TBD"}",
       "Priority: #{job.priority.humanize}",
       "Status: #{job.status.humanize}"
     ]
