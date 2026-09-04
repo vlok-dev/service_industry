@@ -8,6 +8,9 @@ class ApplicationController < ActionController::Base
   before_action :enforce_username_scope
   before_action :configure_permitted_parameters, if: :devise_controller?
 
+  skip_before_action :set_session_scope, if: :devise_controller?
+  skip_before_action :enforce_username_scope, if: :devise_controller?
+
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
   protected
@@ -49,6 +52,7 @@ class ApplicationController < ActionController::Base
   end
 
   def default_url_options
+    return {} if devise_controller?
     @username.present? ? { username: @username } : {}
   end
 
