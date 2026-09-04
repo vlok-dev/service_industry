@@ -11,7 +11,7 @@ class ApplicationController < ActionController::Base
   skip_before_action :set_session_scope, if: :devise_controller?
   skip_before_action :enforce_username_scope, if: :devise_controller?
 
-  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized unless devise_controller?
+  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
   protected
 
@@ -57,6 +57,7 @@ class ApplicationController < ActionController::Base
   end
 
   def user_not_authorized
+    return if devise_controller?
     flash[:alert] = "You are not authorized to perform this action."
     redirect_to(request.referrer || "/#{current_user&.name&.downcase&.parameterize || 'users/sign_in'}")
   end
