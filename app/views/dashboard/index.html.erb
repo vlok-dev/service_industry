@@ -1,328 +1,421 @@
-<h1>Dashboard</h1>
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <p>Welcome back, <%= current_user.name %></p>
+</div>
 
 <% if current_user.super_admin? %>
-  <h2>My Jobs (Michelle)</h2>
-  <p><%= link_to "Create New Job", new_job_path, class: "btn" %></p>
-  <%= form_with url: root_path, method: :get, local: true, style: "margin-bottom: 1rem;" do |f| %>
-    <%= f.text_field :q, value: params[:q], placeholder: "Search by Job Number, Address, or Invoice Number...", style: "padding: 0.5rem; width: 400px; max-width: 100%;" %>
-    <%= f.submit "Search", class: "btn" %>
-    <% if params[:q].present? %>
-      <%= link_to "Clear", root_path, class: "btn" %>
-    <% end %>
-  <% end %>
-  <% if @my_jobs.present? %>
-    <table>
-      <thead>
-        <tr>
-          <th>Job #</th>
-          <th>Customer</th>
-          <th>Address</th>
-          <th>Status</th>
-          <th>Scheduled Date</th>
-          <th>Assigned To</th>
-          <th>Invoice #</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @my_jobs.each do |job| %>
-          <tr>
-            <td><%= job.job_number || "N/A" %></td>
-            <td><%= job.customer_name %></td>
-            <td><%= job.address %></td>
-            <td>
-              <span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span>
-            </td>
-            <td><%= job.scheduled_date&.strftime("%Y-%m-%d") || "Not scheduled" %></td>
-            <td><%= job.assigned_to&.name || "Unassigned" %></td>
-            <td><%= job.invoice_number || "—" %></td>
-            <td>
-              <%= link_to "View", job %>
-              <%= link_to "Edit", edit_job_path(job) %>
-              <%= button_to "Delete", job, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
-            </td>
-          </tr>
+  <div class="card">
+    <div class="card-header">
+      <h2>My Jobs</h2>
+      <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <%= form_with url: root_path, method: :get, local: true, style: "display: flex; gap: 0.5rem;" do |f| %>
+          <%= f.text_field :q, value: params[:q], placeholder: "Search jobs...", style: "padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; width: 280px;" %>
+          <%= f.submit "Search", class: "btn btn-sm" %>
+          <% if params[:q].present? %>
+            <%= link_to "Clear", root_path, class: "btn btn-sm btn-secondary" %>
+          <% end %>
         <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    <p>No jobs yet.</p>
-  <% end %>
+        <%= link_to "New Job", new_job_path, class: "btn" %>
+      </div>
+    </div>
+    <div class="card-body no-padding">
+      <% if @my_jobs.present? %>
+        <table>
+          <thead>
+            <tr>
+              <th>Job #</th>
+              <th>Customer</th>
+              <th>Address</th>
+              <th>Status</th>
+              <th>Scheduled</th>
+              <th>Assigned To</th>
+              <th>Invoice</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @my_jobs.each do |job| %>
+              <tr>
+                <td><%= job.job_number || "N/A" %></td>
+                <td><%= job.customer_name %></td>
+                <td><%= job.address.truncate(40) %></td>
+                <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+                <td><%= job.scheduled_date&.strftime("%b %d") || "—" %></td>
+                <td><%= job.assigned_to&.name || "Unassigned" %></td>
+                <td><%= job.invoice_number || "—" %></td>
+                <td>
+                  <%= link_to "View", job, class: "btn btn-sm" %>
+                  <%= link_to "Edit", edit_job_path(job), class: "btn btn-sm btn-secondary" %>
+                  <%= button_to "Delete", job, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-sm btn-danger", style: "display: inline;" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <div class="empty-state">No jobs yet. Create your first job to get started.</div>
+      <% end %>
+    </div>
+  </div>
 
   <%= render "schedule_view" %>
 <% end %>
 
 <% if current_user.accountant? %>
-  <h2>All Jobs (Accountant)</h2>
-  <p>Assign invoice numbers to each job.</p>
-  <%= form_with url: root_path, method: :get, local: true, style: "margin-bottom: 1rem;" do |f| %>
-    <%= f.text_field :q, value: params[:q], placeholder: "Search by Job Number, Address, or Invoice Number...", style: "padding: 0.5rem; width: 400px; max-width: 100%;" %>
+  <div class="page-header">
+    <h2>Accounting Overview</h2>
+    <p>Assign invoice numbers and track payments across all jobs.</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Pending</span>
+      <span class="stat-value"><%= @pending_jobs.count %></span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Scheduled</span>
+      <span class="stat-value"><%= @scheduled_jobs.count %></span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">In Progress</span>
+      <span class="stat-value"><%= @in_progress_jobs.count %></span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Completed</span>
+      <span class="stat-value"><%= @completed_jobs.count %></span>
+    </div>
+  </div>
+
+  <%= form_with url: root_path, method: :get, local: true, style: "margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: center;" do |f| %>
+    <%= f.text_field :q, value: params[:q], placeholder: "Search by Job Number, Address, or Invoice Number...", style: "padding: 0.625rem 0.875rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; flex: 1; max-width: 400px;" %>
     <%= f.submit "Search", class: "btn" %>
     <% if params[:q].present? %>
-      <%= link_to "Clear", root_path, class: "btn" %>
+      <%= link_to "Clear", root_path, class: "btn btn-secondary" %>
     <% end %>
   <% end %>
+
   <% if @pending_jobs.present? %>
-    <h3>Pending Jobs</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Job #</th>
-          <th>Customer</th>
-          <th>Address</th>
-          <th>Priority</th>
-          <th>Created By</th>
-          <th>Invoice #</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @pending_jobs.each do |job| %>
-          <tr>
-            <td><%= job.job_number || "N/A" %></td>
-            <td><%= job.customer_name %></td>
-            <td><%= job.address %></td>
-            <td><%= job.priority.humanize %></td>
-            <td><%= job.user.name %></td>
-            <td><%= job.invoice_number || "—" %></td>
-            <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+    <div class="section-title">Pending Jobs</div>
+    <div class="card">
+      <div class="card-body no-padding">
+        <table>
+          <thead>
+            <tr>
+              <th>Job #</th>
+              <th>Customer</th>
+              <th>Address</th>
+              <th>Priority</th>
+              <th>Created By</th>
+              <th>Invoice #</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @pending_jobs.each do |job| %>
+              <tr>
+                <td><%= job.job_number || "N/A" %></td>
+                <td><%= job.customer_name %></td>
+                <td><%= job.address.truncate(40) %></td>
+                <td><%= job.priority.humanize %></td>
+                <td><%= job.user.name %></td>
+                <td><%= job.invoice_number || "—" %></td>
+                <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
   <% end %>
 
   <% if @scheduled_jobs.present? %>
-    <h3>Scheduled Jobs</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Job #</th>
-          <th>Customer</th>
-          <th>Address</th>
-          <th>Scheduled</th>
-          <th>Assigned To</th>
-          <th>Invoice #</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @scheduled_jobs.each do |job| %>
-          <tr>
-            <td><%= job.job_number || "N/A" %></td>
-            <td><%= job.customer_name %></td>
-            <td><%= job.address %></td>
-            <td><%= job.scheduled_date&.strftime("%Y-%m-%d") %> at <%= job.scheduled_time&.strftime("%H:%M") %></td>
-            <td><%= job.assigned_to&.name || "Unassigned" %></td>
-            <td><%= job.invoice_number || "—" %></td>
-            <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+    <div class="section-title">Scheduled Jobs</div>
+    <div class="card">
+      <div class="card-body no-padding">
+        <table>
+          <thead>
+            <tr>
+              <th>Job #</th>
+              <th>Customer</th>
+              <th>Address</th>
+              <th>Scheduled</th>
+              <th>Assigned To</th>
+              <th>Invoice #</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @scheduled_jobs.each do |job| %>
+              <tr>
+                <td><%= job.job_number || "N/A" %></td>
+                <td><%= job.customer_name %></td>
+                <td><%= job.address.truncate(40) %></td>
+                <td><%= job.scheduled_date&.strftime("%b %d, %Y") %> at <%= job.scheduled_time&.strftime("%H:%M") || "TBD" %></td>
+                <td><%= job.assigned_to&.name || "Unassigned" %></td>
+                <td><%= job.invoice_number || "—" %></td>
+                <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
   <% end %>
 
   <% if @in_progress_jobs.present? %>
-    <h3>In Progress Jobs</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Job #</th>
-          <th>Customer</th>
-          <th>Address</th>
-          <th>Assigned To</th>
-          <th>Invoice #</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @in_progress_jobs.each do |job| %>
-          <tr>
-            <td><%= job.job_number || "N/A" %></td>
-            <td><%= job.customer_name %></td>
-            <td><%= job.address %></td>
-            <td><%= job.assigned_to&.name || "Unassigned" %></td>
-            <td><%= job.invoice_number || "—" %></td>
-            <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+    <div class="section-title">In Progress Jobs</div>
+    <div class="card">
+      <div class="card-body no-padding">
+        <table>
+          <thead>
+            <tr>
+              <th>Job #</th>
+              <th>Customer</th>
+              <th>Address</th>
+              <th>Assigned To</th>
+              <th>Invoice #</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @in_progress_jobs.each do |job| %>
+              <tr>
+                <td><%= job.job_number || "N/A" %></td>
+                <td><%= job.customer_name %></td>
+                <td><%= job.address.truncate(40) %></td>
+                <td><%= job.assigned_to&.name || "Unassigned" %></td>
+                <td><%= job.invoice_number || "—" %></td>
+                <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
   <% end %>
 
   <% if @completed_jobs.present? %>
-    <h3>Completed Jobs</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Job #</th>
-          <th>Customer</th>
-          <th>Address</th>
-          <th>Completed At</th>
-          <th>Invoice #</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @completed_jobs.each do |job| %>
-          <tr>
-            <td><%= job.job_number || "N/A" %></td>
-            <td><%= job.customer_name %></td>
-            <td><%= job.address %></td>
-            <td><%= job.completed_at&.strftime("%Y-%m-%d %H:%M") || "N/A" %></td>
-            <td><%= job.invoice_number || "—" %></td>
-            <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+    <div class="section-title">Completed Jobs</div>
+    <div class="card">
+      <div class="card-body no-padding">
+        <table>
+          <thead>
+            <tr>
+              <th>Job #</th>
+              <th>Customer</th>
+              <th>Address</th>
+              <th>Completed</th>
+              <th>Invoice #</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @completed_jobs.each do |job| %>
+              <tr>
+                <td><%= job.job_number || "N/A" %></td>
+                <td><%= job.customer_name %></td>
+                <td><%= job.address.truncate(40) %></td>
+                <td><%= job.completed_at&.strftime("%b %d, %Y %H:%M") || "N/A" %></td>
+                <td><%= job.invoice_number || "—" %></td>
+                <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
   <% end %>
 <% end %>
 
 <% if current_user.scheduler? %>
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-    <h2 style="margin: 0;">Pending Jobs (Michael)</h2>
-    <%= link_to "📅 Calendar View", calendar_path, class: "btn" %>
+  <div class="card">
+    <div class="card-header">
+      <h2>Pending Jobs</h2>
+      <%= link_to "Calendar View", calendar_path, class: "btn btn-sm" %>
+    </div>
+    <div class="card-body no-padding">
+      <% if @pending_jobs.present? %>
+        <table>
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Address</th>
+              <th>Description</th>
+              <th>Priority</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @pending_jobs.each do |job| %>
+              <tr>
+                <td><%= job.customer_name %></td>
+                <td><%= job.address.truncate(40) %></td>
+                <td><%= job.description.truncate(60) %></td>
+                <td><%= job.priority.humanize %></td>
+                <td>
+                  <%= form_with url: schedule_job_path(job), method: :patch, local: true do |f| %>
+                    <%= f.hidden_field :status, value: "scheduled" %>
+                    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                      <%= f.date_field :scheduled_date, value: @scheduler_date, required: true, style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" %>
+                      <%= f.time_field :scheduled_time, value: "08:00", required: true, style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" %>
+                      <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, job.assigned_to_id), { include_blank: "Plumber" }, { style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" } %>
+                      <%= f.submit "Schedule", class: "btn btn-sm btn-success" %>
+                    </div>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <div class="empty-state">All jobs are scheduled!</div>
+      <% end %>
+    </div>
   </div>
-  <% if @pending_jobs.present? %>
-    <table>
-      <thead>
-        <tr>
-          <th>Customer</th>
-          <th>Address</th>
-          <th>Description</th>
-          <th>Priority</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @pending_jobs.each do |job| %>
-          <tr>
-            <td><%= job.customer_name %></td>
-            <td><%= job.address %></td>
-            <td><%= job.description.truncate(50) %></td>
-            <td><%= job.priority.humanize %></td>
-            <td>
-              <%= form_with url: schedule_job_path(job), method: :patch, local: true do |f| %>
-                <%= f.hidden_field :status, value: "scheduled" %>
-                <%= f.date_field :scheduled_date, value: @scheduler_date, required: true %>
-                <%= f.time_field :scheduled_time, value: "08:00", required: true %>
-                <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, job.assigned_to_id), include_blank: "Select Plumber" %>
-                <%= f.submit "Schedule", class: "btn btn-success" %>
-              <% end %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    <p>No pending jobs.</p>
-  <% end %>
 
   <%= render "schedule_view" %>
+
   <% if @scheduler_view == "day" && @scheduled_jobs.present? %>
-    <%= link_to "Send All #{@scheduler_date.strftime('%A')}'s Jobs via WhatsApp", bulk_whatsapp_jobs_path(scheduled_date: @scheduler_date), class: "btn btn-success" %>
+    <%= link_to "Send All #{@scheduler_date.strftime('%A')}'s Jobs via WhatsApp", bulk_whatsapp_jobs_path(scheduled_date: @scheduler_date), class: "btn btn-success", style: "margin-top: 1rem;" %>
   <% end %>
 <% end %>
 
 <% if current_user.reporter? %>
-  <h2>Daily Report - <%= Date.today.strftime("%B %d, %Y") %> (Lee Anne)</h2>
+  <div class="page-header">
+    <h2>Daily Report - <%= Date.today.strftime("%B %d, %Y") %></h2>
+    <p>Track today's job activity and purchase orders.</p>
+  </div>
 
-  <h3>Today's Jobs</h3>
-  <% if @today_jobs.present? %>
-    <table>
-      <thead>
-        <tr>
-          <th>Job #</th>
-          <th>Time Logged</th>
-          <th>Customer</th>
-          <th>Address</th>
-          <th>Description</th>
-          <th>Logged By</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @today_jobs.each do |job| %>
-          <tr>
-            <td>
-              <%= link_to (job.job_number || "N/A"), new_job_purchase_order_path(job), style: "color: #2563eb; text-decoration: underline;", title: "Click to add Purchase Order" %>
-            </td>
-            <td><%= job.created_at.strftime("%H:%M") %></td>
-            <td><%= job.customer_name %></td>
-            <td><%= job.address %></td>
-            <td><%= job.description.truncate(50) %></td>
-            <td><%= job.user.name %></td>
-            <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
-            <td><%= link_to "Add PO", new_job_purchase_order_path(job), class: "btn", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-    <p>Total jobs today: <%= @today_jobs.count %></p>
-  <% else %>
-    <p>No jobs logged today.</p>
-  <% end %>
+  <h3 class="section-title">Today's Jobs</h3>
+  <div class="card">
+    <div class="card-body no-padding">
+      <% if @today_jobs.present? %>
+        <table>
+          <thead>
+            <tr>
+              <th>Job #</th>
+              <th>Time</th>
+              <th>Customer</th>
+              <th>Address</th>
+              <th>Description</th>
+              <th>Logged By</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @today_jobs.each do |job| %>
+              <tr>
+                <td><%= link_to (job.job_number || "N/A"), new_job_purchase_order_path(job), style: "color: var(--primary); text-decoration: none; font-weight: 500;" %></td>
+                <td><%= job.created_at.strftime("%H:%M") %></td>
+                <td><%= job.customer_name %></td>
+                <td><%= job.address.truncate(35) %></td>
+                <td><%= job.description.truncate(50) %></td>
+                <td><%= job.user.name %></td>
+                <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+                <td><%= link_to "Add PO", new_job_purchase_order_path(job), class: "btn btn-sm" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <div style="padding: 1rem 1.5rem; background: var(--bg); font-size: 0.875rem; color: var(--text-muted);">
+          Total jobs today: <strong><%= @today_jobs.count %></strong>
+        </div>
+      <% else %>
+        <div class="empty-state">No jobs logged today.</div>
+      <% end %>
+    </div>
+  </div>
 
-  <h3>All Jobs (click Job # to add Purchase Order)</h3>
-  <% if @all_jobs.present? %>
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Customer</th>
-          <th>Address</th>
-          <th>Status</th>
-          <th>Logged By</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @all_jobs.each do |job| %>
-          <tr>
-            <td><%= job.created_at.strftime("%Y-%m-%d") %></td>
-            <td><%= job.customer_name %></td>
-            <td><%= job.address %></td>
-            <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
-            <td><%= job.user.name %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    <p>No jobs in system.</p>
-  <% end %>
+  <h3 class="section-title">All Jobs</h3>
+  <div class="card">
+    <div class="card-body no-padding">
+      <% if @all_jobs.present? %>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Address</th>
+              <th>Status</th>
+              <th>Logged By</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @all_jobs.each do |job| %>
+              <tr>
+                <td><%= job.created_at.strftime("%Y-%m-%d") %></td>
+                <td><%= job.customer_name %></td>
+                <td><%= job.address.truncate(40) %></td>
+                <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+                <td><%= job.user.name %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <div class="empty-state">No jobs in system.</div>
+      <% end %>
+    </div>
+  </div>
 <% end %>
 
 <% if current_user.plumber? %>
-  <h2>My Jobs</h2>
+  <div class="page-header">
+    <h2>My Jobs</h2>
+    <p>Jobs assigned to you and their current status.</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Pending</span>
+      <span class="stat-value"><%= @pending_jobs.count %></span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">In Progress</span>
+      <span class="stat-value"><%= @in_progress_jobs.count %></span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Completed</span>
+      <span class="stat-value"><%= @completed_jobs.count %></span>
+    </div>
+  </div>
+
   <% if @my_jobs.present? %>
-    <table>
-      <thead>
-        <tr>
-          <th>Customer</th>
-          <th>Address</th>
-          <th>Scheduled</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @my_jobs.each do |job| %>
-          <tr>
-            <td><%= job.customer_name %></td>
-            <td><%= job.address %></td>
-            <td><%= job.scheduled_date&.strftime("%Y-%m-%d") %> at <%= job.scheduled_time&.strftime("%H:%M") %></td>
-            <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
-            <td>
-              <%= link_to "Update Status", edit_job_path(job) %>
-              <%= link_to "Send WhatsApp", whatsapp_job_path(job), class: "btn", data: { confirm: "Open WhatsApp to send address to customer?" } %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+    <div class="card">
+      <div class="card-body no-padding">
+        <table>
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Address</th>
+              <th>Scheduled</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @my_jobs.each do |job| %>
+              <tr>
+                <td><%= job.customer_name %></td>
+                <td><%= job.address.truncate(40) %></td>
+                <td><%= job.scheduled_date&.strftime("%b %d, %Y") %> at <%= job.scheduled_time&.strftime("%H:%M") || "TBD" %></td>
+                <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+                <td>
+                  <%= link_to "Update Status", edit_job_path(job), class: "btn btn-sm" %>
+                  <%= link_to "WhatsApp", whatsapp_job_path(job), class: "btn btn-sm btn-success", data: { confirm: "Open WhatsApp to send address to customer?" } %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
   <% else %>
-    <p>No jobs assigned to you.</p>
+    <div class="card">
+      <div class="card-body">
+        <div class="empty-state">No jobs assigned to you. Check back later or contact the scheduler.</div>
+      </div>
+    </div>
   <% end %>
 <% end %>

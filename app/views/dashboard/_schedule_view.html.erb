@@ -1,47 +1,50 @@
-<div class="scheduler-controls">
-  <div class="view-tabs">
-    <%= link_to "Day", dashboard_path(view: "day", date: @scheduler_date), class: "view-tab #{@scheduler_view == 'day' ? 'active' : ''}" %>
-    <%= link_to "Week", dashboard_path(view: "week", date: @scheduler_date), class: "view-tab #{@scheduler_view == 'week' ? 'active' : ''}" %>
-    <%= link_to "Month", dashboard_path(view: "month", date: @scheduler_date), class: "view-tab #{@scheduler_view == 'month' ? 'active' : ''}" %>
+<div class="card" style="margin-top: 1.5rem;">
+  <div class="card-header">
+    <h2 id="schedule-range-label"><%= @date_range_label %></h2>
+    <div class="view-tabs">
+      <%= link_to "Day", dashboard_path(view: "day", date: @scheduler_date), class: "view-tab #{@scheduler_view == 'day' ? 'active' : ''}" %>
+      <%= link_to "Week", dashboard_path(view: "week", date: @scheduler_date), class: "view-tab #{@scheduler_view == 'week' ? 'active' : ''}" %>
+      <%= link_to "Month", dashboard_path(view: "month", date: @scheduler_date), class: "view-tab #{@scheduler_view == 'month' ? 'active' : ''}" %>
+    </div>
   </div>
-  <div class="date-navigation">
-    <%= link_to "&#9664; Prev".html_safe, dashboard_path(view: @scheduler_view, date: prev_date), class: "btn btn-secondary" %>
-    <%= form_with url: dashboard_path, method: :get, local: true, style: "display: inline;" do |f| %>
-      <%= f.hidden_field :view, value: @scheduler_view %>
-      <%= f.date_field :date, value: @scheduler_date, onchange: "this.form.submit();", class: "date-picker" %>
+  <div class="card-body" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+    <div class="date-navigation">
+      <%= link_to "&#9664; Prev".html_safe, dashboard_path(view: @scheduler_view, date: prev_date), class: "btn btn-sm btn-secondary" %>
+      <%= form_with url: dashboard_path, method: :get, local: true, style: "display: flex; align-items: center; gap: 0.5rem;" do |f| %>
+        <%= f.hidden_field :view, value: @scheduler_view %>
+        <%= f.date_field :date, value: @scheduler_date, onchange: "this.form.submit();", class: "date-picker" %>
+      <% end %>
+      <%= link_to "Next &#9654;".html_safe, dashboard_path(view: @scheduler_view, date: next_date), class: "btn btn-sm btn-secondary" %>
+    </div>
+  </div>
+  <div class="card-body no-padding">
+    <% if @scheduled_jobs.present? %>
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Customer</th>
+            <th>Address</th>
+            <th>Plumber</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @scheduled_jobs.order(:scheduled_date, :scheduled_time).each do |job| %>
+            <tr>
+              <td><%= job.scheduled_time&.strftime("%H:%M") %></td>
+              <td><%= job.customer_name %></td>
+              <td><%= job.address.truncate(40) %></td>
+              <td><%= job.assigned_to&.name || "Unassigned" %></td>
+              <td>
+                <%= link_to "Send WhatsApp", whatsapp_job_path(job), class: "btn btn-sm", data: { confirm: "Open WhatsApp to send job details to plumber?" } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="empty-state">No jobs scheduled for this period.</div>
     <% end %>
-    <%= link_to "Next &#9654;".html_safe, dashboard_path(view: @scheduler_view, date: next_date), class: "btn btn-secondary" %>
-  </div>
-  <div class="date-display">
-    <h2><%= @date_range_label %></h2>
   </div>
 </div>
-
-<% if @scheduled_jobs.present? %>
-  <table>
-    <thead>
-      <tr>
-        <th>Time</th>
-        <th>Customer</th>
-        <th>Address</th>
-        <th>Plumber</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @scheduled_jobs.order(:scheduled_date, :scheduled_time).each do |job| %>
-        <tr>
-          <td><%= job.scheduled_time&.strftime("%H:%M") %></td>
-          <td><%= job.customer_name %></td>
-          <td><%= job.address %></td>
-          <td><%= job.assigned_to&.name || "Unassigned" %></td>
-          <td>
-            <%= link_to "Send WhatsApp to Plumber", whatsapp_job_path(job), class: "btn", data: { confirm: "Open WhatsApp to send job details to plumber?" } %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-<% else %>
-  <p>No jobs scheduled for this period.</p>
-<% end %>

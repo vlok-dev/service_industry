@@ -1,33 +1,59 @@
-<h1>Admin Dashboard</h1>
+<div class="page-header">
+  <h1>Admin Dashboard</h1>
+  <p>Manage users, settings, and system configuration.</p>
+</div>
 
-  <h2>Company Settings</h2>
-  <p><%= link_to "Edit Settings", edit_admin_settings_path %></p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+  <div class="card">
+    <div class="card-body">
+      <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">Total Users</div>
+      <div style="font-size: 2rem; font-weight: 700; color: var(--text);"><%= @users.count %></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">Total Jobs</div>
+      <div style="font-size: 2rem; font-weight: 700; color: var(--text);"><%= @jobs.count %></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">System Status</div>
+      <div style="font-size: 1rem; font-weight: 600; color: #059669;">Operational</div>
+    </div>
+  </div>
+</div>
 
-<h2>User Management</h2>
-<p><%= link_to "Add New User", new_admin_user_path, class: "btn" %></p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Role</th>
-      <th>WhatsApp Tel</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @users.each do |user| %>
-      <tr>
-        <td><%= user.name %></td>
-        <td><%= user.email %></td>
-        <td><%= user.role&.humanize || "N/A" %></td>
-        <td><%= user.phone_number || "N/A" %></td>
-        <td>
-          <%= link_to "Edit", edit_admin_user_path(user) %>
-          <%= button_to "Delete", admin_user_path(user), method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+<div class="card">
+  <div class="card-header">
+    <h2>User Management</h2>
+    <%= link_to "Add New User", new_admin_user_path, class: "btn" %>
+  </div>
+  <div class="card-body no-padding">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>WhatsApp</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @users.each do |user| %>
+          <tr>
+            <td><%= user.name %></td>
+            <td><%= user.email || "—" %></td>
+            <td><span class="badge badge-<%= user.role == 'admin' || user.role == 'super_admin' ? 'scheduled' : 'pending' %>"><%= user.role&.humanize || "N/A" %></span></td>
+            <td><%= user.phone_number || "N/A" %></td>
+            <td>
+              <%= link_to "Edit", edit_admin_user_path(user), class: "btn btn-sm" %>
+              <%= button_to "Delete", admin_user_path(user), method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-sm btn-danger", style: "display: inline;" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
