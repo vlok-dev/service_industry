@@ -34,6 +34,21 @@ module Admin
     end
 
     def destroy
+      if @user == current_user
+        redirect_to admin_users_path, alert: "You cannot delete your own account while logged in."
+        return
+      end
+
+      if @user.jobs.exists?
+        fallback = User.where.not(id: @user.id).where(role: [:super_admin, :admin]).first
+        if fallback
+          @user.jobs.update_all(user_id: fallback.id)
+        else
+          redirect_to admin_users_path, alert: "Cannot delete this user because they have created jobs and no other admin exists to reassign them to."
+          return
+        end
+      end
+
       @user.destroy
       redirect_to admin_users_path, notice: "User was successfully deleted."
     end
