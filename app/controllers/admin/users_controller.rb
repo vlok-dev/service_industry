@@ -25,13 +25,19 @@ module Admin
     def edit
     end
 
-    def update
-      if @user.update(user_params)
-        redirect_to admin_users_path, notice: "User was successfully updated."
-      else
-        render :edit, status: :unprocessable_entity
-      end
+  def update
+    update_params = user_params
+    if update_params[:password].blank?
+      update_params.delete(:password)
+      update_params.delete(:password_confirmation)
     end
+
+    if @user.update(update_params)
+      redirect_to admin_users_path, notice: "User was successfully updated."
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
 
     def destroy
       if @user == current_user
