@@ -566,7 +566,7 @@
             <% if current_user.admin? || current_user.super_admin? %>
               <%= link_to "Admin", admin_root_path %>
             <% end %>
-            <%= link_to "Logout", logout_path, data: { turbo_method: :delete }, style: "color: var(--text-muted); cursor: pointer; text-decoration: underline; display: inline; padding: 0; font-size: 0.875rem;" %>
+            <%= link_to "Logout", logout_path(username: current_user.name.to_s.downcase.parameterize), data: { turbo_method: :delete }, style: "color: var(--text-muted); cursor: pointer; text-decoration: underline; display: inline; padding: 0; font-size: 0.875rem;" %>
           </div>
         <% else %>
           <div class="nav-links">
