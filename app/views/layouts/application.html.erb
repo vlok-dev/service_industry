@@ -560,6 +560,10 @@
             </div>
             <%= link_to "Jobs", jobs_path %>
             <%= link_to "Dashboard", dashboard_path %>
+            <% if current_user.admin? || current_user.super_admin? %>
+              <%= link_to "Suppliers", suppliers_path %>
+              <%= link_to "Inventory", inventory_items_path %>
+            <% end %>
             <% if current_user.scheduler? %>
               <%= link_to "Calendar", calendar_path %>
             <% end %>

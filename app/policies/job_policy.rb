@@ -35,6 +35,10 @@ class JobPolicy < ApplicationPolicy
     user.scheduler?
   end
 
+  def add_extra_day?
+    user.scheduler? || user.super_admin? || user.admin?
+  end
+
   private
 
   def record_owner_or_admin?

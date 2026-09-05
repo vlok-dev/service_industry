@@ -1,0 +1,20 @@
+<tr class="item-row">
+  <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">
+    <%= f.hidden_field :inventory_item_id, class: "inventory-id" %>
+    <%= f.text_field :code, placeholder: "Type to search codes...", class: "code-search", autocomplete: "off", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" %>
+    <ul class="code-results" style="display:none; max-height:160px; overflow-y:auto; margin:0; padding:0; border:1px solid var(--border); border-top:none; border-radius:0 0 6px 6px; list-style:none; background:var(--surface);"></ul>
+  </td>
+  <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">
+    <%= f.text_field :description, class: "item-description", readonly: true, placeholder: "Auto-filled from inventory", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; background:var(--bg);" %>
+  </td>
+  <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">
+    <%= f.number_field :quantity, min: 1, step: 1, class: "qty", placeholder: "Qty", style: "width: 100px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" %>
+  </td>
+  <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">
+    <%= f.number_field :unit_price, min: 0, step: 0.01, class: "price", readonly: true, placeholder: "Auto-filled", style: "width: 120px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; background:var(--bg);" %>
+  </td>
+  <td class="line-total" style="padding: 0.75rem; border-bottom: 1px solid var(--border); font-weight: 600;">R <%= number_with_precision((f.object.quantity || 0) * (f.object.unit_price || 0), precision: 2) %></td>
+  <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">
+    <%= link_to "Remove", "#", class: "remove-line btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+  </td>
+</tr>

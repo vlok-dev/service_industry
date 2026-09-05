@@ -1,0 +1,52 @@
+<p><%= link_to "← Back to Job", job_path(@job), class: "btn" %></p>
+
+<h1>Claims for <%= @job.job_number || "N/A" %></h1>
+<p><strong>Customer:</strong> <%= @job.customer_name %></p>
+
+<p style="margin-bottom: 1rem;">
+  <span class="badge badge-<%= @job.status %>"><%= @job.status.humanize %></span>
+  <% if @job.is_project? %>
+    <span class="badge badge-scheduled">Project</span>
+  <% end %>
+</p>
+
+<p>
+  <%= link_to "Add Claim", new_job_claim_path(@job), class: "btn btn-success" %>
+</p>
+
+<% if @claims.present? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Amount (R)</th>
+        <th>Status</th>
+        <th>Reference</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @claims.each do |claim| %>
+        <tr>
+          <td><%= claim.claim_date&.strftime("%Y-%m-%d") %></td>
+          <td><%= number_with_precision(claim.amount, precision: 2) %></td>
+          <td><span class="badge badge-<%= claim.status %>"><%= claim.status.humanize %></span></td>
+          <td><%= claim.reference %></td>
+          <td>
+            <%= link_to "Edit", edit_job_claim_path(@job, claim), class: "btn btn-sm" %>
+            <%= button_to "Delete", job_claim_path(@job, claim), method: :delete, data: { confirm: "Delete this claim?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="1" style="text-align: right; font-weight: 700;">Total claimed</td>
+        <td><%= number_with_precision(@claims.sum(:amount), precision: 2) %></td>
+        <td colspan="3"></td>
+      </tr>
+    </tfoot>
+  </table>
+<% else %>
+  <p>No claims for this project.</p>
+<% end %>

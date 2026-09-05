@@ -9,6 +9,12 @@
 <p><strong>Priority:</strong> <%= @job.priority.humanize %></p>
 <p><strong>Scheduled Date:</strong> <%= @job.scheduled_date&.strftime("%Y-%m-%d") || "Not scheduled" %></p>
 <p><strong>Scheduled Time:</strong> <%= @job.scheduled_time&.strftime("%H:%M") || "Not scheduled" %></p>
+<% if @job.scheduled_end_date.present? && @job.scheduled_end_date > @job.scheduled_date %>
+  <p><strong>Scheduled End Date:</strong> <%= @job.scheduled_end_date.strftime("%Y-%m-%d") %></p>
+<% end %>
+<% if policy(@job).add_extra_day? %>
+  <%= button_to "Add Extra Day", add_extra_day_job_path(@job), method: :patch, data: { confirm: "Extend the scheduled end date by one day?" }, class: "btn btn-secondary", style: "display: inline;" %>
+<% end %>
 <p><strong>Assigned To:</strong> <%= @job.assigned_to&.name || "Unassigned" %></p>
 <p><strong>Notes:</strong> <%= @job.notes || "None" %></p>
 <p><strong>Logged By:</strong> <%= @job.user.name %></p>
@@ -49,4 +55,39 @@
   <p>No purchase orders for this job.</p>
 <% end %>
 
-<%= link_to "Add Purchase Order", new_job_purchase_order_path(@job), class: "btn btn-success" %>
+  <%= link_to "Add Purchase Order", new_job_purchase_order_path(@job), class: "btn btn-success" %>
+
+<% if @job.is_project? %>
+  <hr>
+  <h3>Claims (project)</h3>
+  <p>
+    <%= link_to "View All Claims", job_claims_path(@job), class: "btn" %>
+    <%= link_to "Add Claim", new_job_claim_path(@job), class: "btn btn-success" %>
+  </p>
+  <% if @job.claims.exists? %>
+    <% total_claimed = @job.claims.sum(:amount) %>
+    <p><strong>Total claimed:</strong> R <%= number_with_precision(total_claimed, precision: 2) %></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Amount (R)</th>
+          <th>Status</th>
+          <th>Reference</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @job.claims.order(claim_date: :desc).limit(5).each do |claim| %>
+          <tr>
+            <td><%= claim.claim_date&.strftime("%Y-%m-%d") %></td>
+            <td><%= number_with_precision(claim.amount, precision: 2) %></td>
+            <td><span class="badge badge-<%= claim.status %>"><%= claim.status.humanize %></span></td>
+            <td><%= claim.reference %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p>No claims submitted for this project yet.</p>
+  <% end %>
+<% end %>

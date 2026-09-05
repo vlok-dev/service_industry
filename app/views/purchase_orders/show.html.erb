@@ -4,9 +4,8 @@
 
 <div style="background: #f9fafb; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
   <p><strong>Job:</strong> <%= link_to @job.job_number, job_path(@job) %> — <%= @job.customer_name %></p>
-  <p><strong>Supplier:</strong> <%= @purchase_order.supplier_name %></p>
+  <p><strong>Supplier:</strong> <%= @purchase_order.supplier_display_name %></p>
   <p><strong>Order Date:</strong> <%= @purchase_order.order_date&.strftime("%Y-%m-%d") || "N/A" %></p>
-  <p><strong>Status:</strong> <%= @purchase_order.status.present? ? "<span class=\"badge badge-#{@purchase_order.status}\">#{@purchase_order.status.humanize}</span>".html_safe : "Draft" %></p>
   <p><strong>Created By:</strong> <%= @purchase_order.created_by&.name || "N/A" %></p>
 </div>
 

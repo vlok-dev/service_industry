@@ -1,0 +1,41 @@
+<%= form_with model: [@job, @claim], local: true do |f| %>
+  <% if @claim.errors.any? %>
+    <div class="alert">
+      <h2><%= pluralize(@claim.errors.count, "error") %> prohibited this claim from being saved:</h2>
+      <ul>
+        <% @claim.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <p><strong>Job:</strong> <%= @job.job_number || "N/A" %> — <%= @job.customer_name %></p>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :claim_date, "Claim Date" %><br>
+    <%= f.date_field :claim_date, value: Date.today, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :amount, "Amount (R)" %><br>
+    <%= f.number_field :amount, min: 0, step: 0.01, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :status %><br>
+    <%= f.select :status, Claim.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: true }, { required: true } %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :reference, "Reference" %><br>
+    <%= f.text_field :reference, placeholder: "e.g. INV-00045" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :description %><br>
+    <%= f.text_area :description, placeholder: "Notes about this claim..." %>
+  </div>
+
+  <%= f.submit class: "btn" %>
+<% end %>

@@ -1,0 +1,15 @@
+<p><%= link_to "← Back to Suppliers", suppliers_path, class: "btn" %></p>
+
+<h1><%= @supplier.name %></h1>
+
+<div style="background: #f9fafb; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+  <p><strong>Contact Person:</strong> <%= @supplier.contact_person || "—" %></p>
+  <p><strong>Phone:</strong> <%= @supplier.phone || "—" %></p>
+  <p><strong>Email:</strong> <%= @supplier.email || "—" %></p>
+  <p><strong>Address:</strong> <%= simple_format(@supplier.address) if @supplier.address.present? %></p>
+</div>
+
+<p>
+  <%= link_to "Edit", edit_supplier_path(@supplier), class: "btn" %>
+  <%= button_to "Delete", @supplier, method: :delete, data: { confirm: "Delete this supplier?" }, class: "btn btn-danger", style: "display: inline;" %>
+</p>

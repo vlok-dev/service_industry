@@ -62,6 +62,12 @@
   </div>
 
   <div style="margin-bottom: 1rem;">
+    <%= f.label :is_project, "Project?" %><br>
+    <%= f.check_box :is_project %>
+    <p style="color: #666; font-size: 0.875rem;">Mark as a project to run over multiple days and attach claims.</p>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
     <%= f.submit "Create Job", class: "btn" %>
   </div>
 <% end %>

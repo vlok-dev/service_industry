@@ -1,0 +1,41 @@
+<p><%= link_to "New Supplier", new_supplier_path, class: "btn btn-success" %></p>
+
+<h1>Suppliers</h1>
+
+<%= form_with url: suppliers_path, method: :get, local: true, style: "margin-bottom: 1rem;" do |f| %>
+  <%= f.text_field :q, value: params[:q], placeholder: "Search suppliers...", style: "padding: 0.5rem; width: 300px;" %>
+  <%= f.submit "Search", class: "btn" %>
+  <% if params[:q].present? %>
+    <%= link_to "Clear", suppliers_path, class: "btn" %>
+  <% end %>
+<% end %>
+
+<% if @suppliers.present? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Contact Person</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @suppliers.each do |supplier| %>
+        <tr>
+          <td><%= supplier.name %></td>
+          <td><%= supplier.contact_person %></td>
+          <td><%= supplier.phone %></td>
+          <td><%= supplier.email %></td>
+          <td>
+            <%= link_to "Edit", edit_supplier_path(supplier), class: "btn btn-sm" %>
+            <%= button_to "Delete", supplier, method: :delete, data: { confirm: "Delete this supplier?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No suppliers found.</p>
+<% end %>

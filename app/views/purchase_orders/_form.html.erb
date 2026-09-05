@@ -1,0 +1,175 @@
+<%= form_with model: [@job, @purchase_order], local: true do |f| %>
+  <% if @purchase_order.errors.any? %>
+    <div class="alert">
+      <h2><%= pluralize(@purchase_order.errors.count, "error") %> prohibited this purchase order from being saved:</h2>
+      <ul>
+        <% @purchase_order.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :supplier_id, "Supplier" %><br>
+    <%= f.collection_select :supplier_id, Supplier.order(:name), :id, :name,
+          { include_blank: "Select a supplier" },
+          style: "padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; width: 100%; max-width: 400px;" %>
+    <p style="color: #666; font-size: 0.875rem;">Pick a supplier from the list, or type a name below if it isn't here.</p>
+    <%= f.text_field :supplier_name, placeholder: "Supplier name (fallback if not in list)", style: "padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; width: 100%; max-width: 400px; margin-top: 0.5rem;" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :order_date, "Date Bought" %><br>
+    <%= f.date_field :order_date, value: (@purchase_order.order_date || Date.today), required: true, style: "padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :expected_delivery, "Expected Delivery" %><br>
+    <%= f.date_field :expected_delivery, value: @purchase_order.expected_delivery, style: "padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :notes %><br>
+    <%= f.text_area :notes, placeholder: "Any additional notes..." %>
+  </div>
+
+  <h3>Line Items</h3>
+  <table style="width: 100%; margin-bottom: 1rem; border-collapse: collapse;">
+    <thead>
+      <tr>
+        <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Code</th>
+        <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Material / Description</th>
+        <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Quantity</th>
+        <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Unit Price (R)</th>
+        <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Total (R)</th>
+        <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);"></th>
+      </tr>
+    </thead>
+    <tbody id="items">
+      <%= f.fields_for :items do |item_form| %>
+        <%= render "item_fields", f: item_form %>
+      <% end %>
+    </tbody>
+  </table>
+  <p><%= link_to "Add Item", "#", id: "add-item", class: "btn btn-sm" %></p>
+
+  <h3>Order Total</h3>
+  <table style="width: 100%; margin-bottom: 1rem; border-collapse: collapse;">
+    <tfoot>
+      <tr>
+        <td colspan="3" style="text-align: right; padding: 0.75rem; font-weight: 600; color: var(--text-muted);">Subtotal (excl. VAT):</td>
+        <td id="subtotal" style="padding: 0.75rem; font-weight: 600; color: var(--text-muted);">R 0.00</td>
+        <td colspan="2"></td>
+      </tr>
+      <tr>
+        <td colspan="3" style="text-align: right; padding: 0.75rem; font-weight: 600; color: var(--text-muted);">VAT (<%= @purchase_order.vat_rate || 15 %>%):</td>
+        <td id="vat-amount" style="padding: 0.75rem; font-weight: 600; color: var(--text-muted);">R 0.00</td>
+        <td colspan="2"></td>
+      </tr>
+      <tr>
+        <td colspan="3" style="text-align: right; padding: 0.75rem; font-weight: 700; font-size: 1.05rem; border-top: 2px solid var(--border);">Total (incl. VAT):</td>
+        <td id="grand-total" style="padding: 0.75rem; font-weight: 700; font-size: 1.05rem; border-top: 2px solid var(--border);">R 0.00</td>
+        <td colspan="2"></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<script>
+function recalc() {
+  let subtotal = 0;
+  document.querySelectorAll('#items .item-row').forEach(row => {
+    const qty = parseFloat(row.querySelector('.qty').value) || 0;
+    const price = parseFloat(row.querySelector('.price').value) || 0;
+    const lineTotal = qty * price;
+    row.querySelector('.line-total').textContent = 'R ' + lineTotal.toFixed(2);
+    subtotal += lineTotal;
+  });
+  const vatRate = <%= @purchase_order.vat_rate || 15 %>;
+  const vatAmount = subtotal * (vatRate / 100.0);
+  const total = subtotal + vatAmount;
+  document.getElementById('subtotal').textContent = 'R ' + subtotal.toFixed(2);
+  document.getElementById('vat-amount').textContent = 'R ' + vatAmount.toFixed(2);
+  document.getElementById('grand-total').textContent = 'R ' + total.toFixed(2);
+}
+
+function fillRow(row, item) {
+  const codeField = row.querySelector('.code-search');
+  const desc = row.querySelector('.item-description');
+  const price = row.querySelector('.price');
+  const invId = row.querySelector('.inventory-id');
+  if (codeField) codeField.value = item.code;
+  if (desc) desc.value = item.name;
+  if (price) price.value = item.unit_price;
+  if (invId) invId.value = item.id;
+  recalc();
+}
+
+document.addEventListener('input', function(e) {
+  if (!e.target || !e.target.classList.contains('code-search')) return;
+  const input = e.target;
+  const row = input.closest('.item-row');
+  const results = row.querySelector('.code-results');
+  const code = input.value.trim();
+  clearTimeout(input._searchT);
+  if (!code) { results.innerHTML = ''; results.style.display = 'none'; return; }
+  input._searchT = setTimeout(() => {
+    fetch('/inventory_items/search?q=' + encodeURIComponent(code) + '&format=json', { headers: { 'Accept': 'application/json' } })
+      .then(r => r.json())
+      .then(items => {
+        results.innerHTML = '';
+        if (items && items.length) {
+          items.forEach(item => {
+            const li = document.createElement('li');
+            li.dataset.code = item.code;
+            li.dataset.name = item.name;
+            li.dataset.price = item.unit_price;
+            li.dataset.id = item.id;
+            li.textContent = item.code + ' — ' + item.name + (item.unit_price ? ' (R ' + parseFloat(item.unit_price).toFixed(2) + ')' : '');
+            li.addEventListener('click', () => { fillRow(row, item); results.innerHTML = ''; results.style.display = 'none'; });
+            results.appendChild(li);
+          });
+          results.style.display = 'block';
+        } else {
+          results.style.display = 'none';
+        }
+      });
+  }, 250);
+});
+
+// close any open results list when clicking elsewhere
+document.addEventListener('click', function(e) {
+  if (!e.target.classList.contains('code-search') && !e.target.closest('.code-results')) {
+    document.querySelectorAll('.code-results').forEach(r => { r.innerHTML = ''; r.style.display = 'none'; });
+  }
+});
+
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.classList.contains('remove-line')) {
+    e.preventDefault();
+    const row = e.target.closest('.item-row');
+    if (row) row.remove();
+    recalc();
+  }
+});
+
+document.getElementById('add-item').addEventListener('click', function(e) {
+  e.preventDefault();
+  const tbody = document.getElementById('items');
+  const first = tbody.querySelector('.item-row');
+  if (!first) return;
+  const clone = first.cloneNode(true);
+  clone.querySelectorAll('input').forEach(i => i.value = '');
+  clone.querySelectorAll('.code-results').forEach(r => { r.innerHTML = ''; r.style.display = 'none'; });
+  clone.querySelector('.line-total').textContent = 'R 0.00';
+  tbody.appendChild(clone);
+});
+
+document.querySelectorAll('.qty, .price').forEach(input => input.addEventListener('input', recalc));
+recalc();
+</script>

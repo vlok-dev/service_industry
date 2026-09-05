@@ -1,0 +1,39 @@
+<%= form_with model: @supplier, local: true do |f| %>
+  <% if @supplier.errors.any? %>
+    <div class="alert">
+      <h2><%= pluralize(@supplier.errors.count, "error") %> prohibited this supplier from being saved:</h2>
+      <ul>
+        <% @supplier.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :name, "Name" %><br>
+    <%= f.text_field :name, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :contact_person, "Contact Person" %><br>
+    <%= f.text_field :contact_person %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :phone %><br>
+    <%= f.text_field :phone %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :email %><br>
+    <%= f.email_field :email %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :address %><br>
+    <%= f.text_area :address %>
+  </div>
+
+  <%= f.submit class: "btn" %>
+<% end %>

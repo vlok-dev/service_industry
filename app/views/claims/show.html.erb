@@ -1,0 +1,19 @@
+<p><%= link_to "← Back to Claims", job_claims_path(@job), class: "btn" %></p>
+
+<h1>Claim <%= @claim.id %></h1>
+
+<div style="background: #f9fafb; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+  <p><strong>Job:</strong> <%= link_to @claim.job_number, job_path(@job) %> — <%= @claim.customer_name %></p>
+  <p><strong>Date:</strong> <%= @claim.claim_date&.strftime("%Y-%m-%d") %></p>
+  <p><strong>Amount (R):</strong> <%= number_with_precision(@claim.amount, precision: 2) %></p>
+  <p><strong>Status:</strong> <span class="badge badge-<%= @claim.status %>"><%= @claim.status.humanize %></span></p>
+  <p><strong>Reference:</strong> <%= @claim.reference || "—" %></p>
+  <% if @claim.description.present? %>
+    <p><strong>Description:</strong> <%= simple_format(@claim.description) %></p>
+  <% end %>
+</div>
+
+<p>
+  <%= link_to "Edit", edit_job_claim_path(@job, @claim), class: "btn" %>
+  <%= button_to "Delete", job_claim_path(@job, @claim), method: :delete, data: { confirm: "Delete this claim?" }, class: "btn btn-danger", style: "display: inline;" %>
+</p>

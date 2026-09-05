@@ -13,12 +13,21 @@ Rails.application.routes.draw do
   resources :jobs do
     member do
       patch :schedule
+      patch :add_extra_day
       get :whatsapp
     end
     collection do
       get :bulk_whatsapp
     end
     resources :purchase_orders, only: [:new, :create, :show, :edit, :update, :destroy]
+    resources :claims
+  end
+
+  resources :suppliers
+  resources :inventory_items do
+    collection do
+      get :search
+    end
   end
 
   get "/calendar" => "calendars#index", as: :calendar

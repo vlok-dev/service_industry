@@ -15,27 +15,8 @@ class DashboardController < ApplicationController
       @in_progress_jobs = @jobs.in_progress
       @completed_jobs = @jobs.completed
 
-      view = params[:view].presence_in(%w[day week month]) || "day"
-      date = Date.parse(params[:date]) rescue Date.tomorrow
-
-      case view
-      when "day"
-        @scheduled_jobs = @jobs.where(scheduled_date: date)
-        @date_range_label = date.strftime("%A, %B %d, %Y")
-      when "week"
-        week_start = date.beginning_of_week(:monday)
-        week_end = date.end_of_week(:monday)
-        @scheduled_jobs = @jobs.where(scheduled_date: week_start..week_end)
-        @date_range_label = "#{week_start.strftime("%b %d")} \u2014 #{week_end.strftime("%b %d, %Y")}"
-      when "month"
-        month_start = date.beginning_of_month
-        month_end = date.end_of_month
-        @scheduled_jobs = @jobs.where(scheduled_date: month_start..month_end)
-        @date_range_label = date.strftime("%B %Y")
-      end
-
-      @scheduler_view = view
-      @scheduler_date = date
+      build_schedule_view
+      @scheduled_jobs = jobs_for_schedule_view
       @scheduled_tomorrow = @jobs.where(scheduled_date: Date.tomorrow)
     when "accountant"
       @pending_jobs = @jobs.pending
@@ -91,17 +72,25 @@ class DashboardController < ApplicationController
   end
 
   def jobs_for_schedule_view
-    base = case @scheduler_view
+    case @scheduler_view
     when "day"
-      @jobs.where(scheduled_date: @scheduler_date)
+      overlaps_period(@scheduler_date, @scheduler_date)
     when "week"
       week_start = @scheduler_date.beginning_of_week(:monday)
       week_end = @scheduler_date.end_of_week(:monday)
-      @jobs.where(scheduled_date: week_start..week_end)
+      overlaps_period(week_start, week_end)
     when "month"
-      @jobs.where(scheduled_date: @scheduler_date.beginning_of_month..@scheduler_date.end_of_month)
+      month_start = @scheduler_date.beginning_of_month
+      month_end = @scheduler_date.end_of_month
+      overlaps_period(month_start, month_end)
     end
-    @search_query.present? ? base.search(@search_query) : base
+  end
+
+  # A job occupies every day in its scheduled range (scheduled_date..scheduled_end_date),
+  # or just scheduled_date when no end date is set. Use this to make multi-day jobs
+  # (projects) appear on each day they run in the schedule view.
+  def overlaps_period(start_date, end_date)
+    @jobs.where("scheduled_date <= :end AND (scheduled_end_date IS NULL OR scheduled_end_date >= :start)", start: start_date, end: end_date)
   end
 
   def schedule_range_label(view, date)

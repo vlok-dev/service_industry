@@ -1,5 +1,5 @@
 class JobsController < ApplicationController
-  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp ]
+  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp add_extra_day ]
 
   def index
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
@@ -54,6 +54,12 @@ class JobsController < ApplicationController
     end
   end
 
+  def add_extra_day
+    authorize @job, :add_extra_day?
+    @job.add_extra_day!
+    redirect_back(fallback_location: job_path(@job), notice: "Extended the job end date by one day.")
+  end
+
   def whatsapp
     authorize @job, :show?
 
@@ -83,9 +89,9 @@ class JobsController < ApplicationController
 
   def job_params
     permitted = if current_user.accountant?
-      [:invoice_number]
+      [ :invoice_number ]
     else
-      [:customer_name, :address, :description, :status, :priority, :assigned_to_id, :notes, :scheduled_date, :scheduled_time, :job_number, :invoice_number]
+      [ :customer_name, :address, :description, :status, :priority, :assigned_to_id, :notes, :scheduled_date, :scheduled_time, :scheduled_end_date, :job_number, :invoice_number, :is_project ]
     end
     params.require(:job).permit(permitted)
   end

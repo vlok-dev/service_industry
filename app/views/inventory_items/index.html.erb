@@ -1,0 +1,41 @@
+<p><%= link_to "New Item", new_inventory_item_path, class: "btn btn-success" %></p>
+
+<h1>Inventory</h1>
+
+<%= form_with url: inventory_items_path, method: :get, local: true, style: "margin-bottom: 1rem;" do |f| %>
+  <%= f.text_field :q, value: params[:q], placeholder: "Search by code or name...", style: "padding: 0.5rem; width: 300px;" %>
+  <%= f.submit "Search", class: "btn" %>
+  <% if params[:q].present? %>
+    <%= link_to "Clear", inventory_items_path, class: "btn" %>
+  <% end %>
+<% end %>
+
+<% if @inventory_items.present? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Name</th>
+        <th>Unit Price (R)</th>
+        <th>Unit</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @inventory_items.each do |item| %>
+        <tr>
+          <td><%= item.code %></td>
+          <td><%= item.name %></td>
+          <td><%= number_with_precision(item.unit_price, precision: 2) if item.unit_price %></td>
+          <td><%= item.unit %></td>
+          <td>
+            <%= link_to "Edit", edit_inventory_item_path(item), class: "btn btn-sm" %>
+            <%= button_to "Delete", item, method: :delete, data: { confirm: "Delete this inventory item?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No inventory items found.</p>
+<% end %>

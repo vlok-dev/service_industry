@@ -2,6 +2,7 @@ class Job < ApplicationRecord
   belongs_to :user
   belongs_to :assigned_to, class_name: "User", optional: true
   has_many :purchase_orders, dependent: :destroy
+  has_many :claims, dependent: :destroy
 
   enum :status, { pending: 0, scheduled: 1, in_progress: 2, completed: 3, cancelled: 4 }
   enum :priority, { low: 0, medium: 1, high: 2, emergency: 3 }
@@ -9,6 +10,9 @@ class Job < ApplicationRecord
   validates :customer_name, :address, :description, :status, :priority, :user, presence: true
   validates :job_number, uniqueness: { allow_blank: true }
   validate :no_conflicting_scheduled_time, if: -> { scheduled_date.present? && scheduled_time.present? }
+  validates :scheduled_end_date,
+            comparison: { greater_than_or_equal_to: :scheduled_date },
+            if: -> { scheduled_date.present? && scheduled_end_date.present? }
 
   before_validation :assign_job_number, on: :create
   before_save :assign_invoice_number_on_completion
@@ -37,6 +41,15 @@ class Job < ApplicationRecord
 
   def completed_with_invoice?
     completed? && invoice_number.present?
+  end
+
+  def multi_day?
+    scheduled_end_date.present? && scheduled_end_date > scheduled_date
+  end
+
+  def add_extra_day!
+    self.scheduled_end_date = (scheduled_end_date || scheduled_date) + 1.day
+    save
   end
 
   def no_conflicting_scheduled_time
