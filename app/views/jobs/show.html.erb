@@ -27,6 +27,10 @@
   <%= link_to "Send WhatsApp", whatsapp_job_path(@job), class: "btn", data: { confirm: "Open WhatsApp to send job details to plumber?" } %>
 <% end %>
 
+<% if !@job.completed? && policy(@job).close? %>
+  <%= button_to "Close Job", close_job_path(@job), method: :patch, data: { confirm: "Close this job and mark it as completed with invoice?" }, class: "btn btn-success" %>
+<% end %>
+
 <h3>Purchase Orders</h3>
 <% if @job.purchase_orders.any? %>
   <table>

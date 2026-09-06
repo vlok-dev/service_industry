@@ -39,6 +39,14 @@ class JobPolicy < ApplicationPolicy
     user.scheduler? || user.super_admin? || user.admin?
   end
 
+  def close?
+    user.admin? || user.super_admin? || user.accountant?
+  end
+
+  def update_status?
+    record_owner_or_admin? || assigned_plumber? || user.accountant?
+  end
+
   private
 
   def record_owner_or_admin?

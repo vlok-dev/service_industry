@@ -1,0 +1,29 @@
+<p><%= link_to "Back to Clients", clients_path, class: "btn" %></p>
+
+<h1>Import Clients from CSV</h1>
+
+<div style="background: #f9fafb; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; border: 1px solid var(--border);">
+  <p><strong>CSV Format:</strong></p>
+  <p><code>Name,Surname,Company,Contact Number,Address,Email Address</code></p>
+  <ul>
+    <li><strong>Name</strong> and <strong>Surname</strong> — Optional if Company is provided</li>
+    <li><strong>Company</strong> — Used as client name if provided; otherwise Name + Surname is used</li>
+    <li><strong>Contact Number</strong> — Maps to phone number</li>
+    <li><strong>Address</strong> — Maps to client address</li>
+    <li><strong>Email Address</strong> — Optional</li>
+  </ul>
+  <p>Example:</p>
+  <pre style="background: white; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); overflow-x: auto;">
+Name,Surname,Company,Contact Number,Address,Email Address
+John,Smith,,011 123 4567,"123 Main St, Johannesburg",john@example.com
+,,Acme Plumbing,011 987 6543,"456 Business Ave, Sandton",
+  </pre>
+</div>
+
+<%= form_with url: import_create_clients_path, method: :post, local: true, enctype: "multipart/form-data" do |f| %>
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :file, "CSV File" %><br>
+    <%= f.file_field :file, accept: ".csv,text/csv", required: true %>
+  </div>
+  <%= f.submit "Import Clients", class: "btn btn-success" %>
+<% end %>

@@ -1,11 +1,12 @@
 class Job < ApplicationRecord
   belongs_to :user
   belongs_to :assigned_to, class_name: "User", optional: true
+  belongs_to :client, optional: true
   has_many :purchase_orders, dependent: :destroy
   has_many :claims, dependent: :destroy
 
   enum :status, { pending: 0, scheduled: 1, in_progress: 2, completed: 3, cancelled: 4 }
-  enum :priority, { low: 0, medium: 1, high: 2, emergency: 3 }
+  enum :priority, { maintenance: 0, project: 1 }
 
   validates :customer_name, :address, :description, :status, :priority, :user, presence: true
   validates :job_number, uniqueness: { allow_blank: true }
@@ -15,13 +16,17 @@ class Job < ApplicationRecord
             if: -> { scheduled_date.present? && scheduled_end_date.present? }
 
   before_validation :assign_job_number, on: :create
+  before_validation :populate_from_client, if: -> { client_id_changed? && client_id.present? }
   before_save :assign_invoice_number_on_completion
+  before_save :set_completed_at_on_completion
   scope :search, ->(query) {
     return all if query.blank?
     sanitized = "%#{ActiveRecord::Base.sanitize_sql_like(query.to_s.strip)}%"
     where("CAST(job_number AS TEXT) ILIKE :q OR address ILIKE :q OR CAST(invoice_number AS TEXT) ILIKE :q OR customer_name ILIKE :q",
           q: sanitized)
   }
+  scope :created_today, -> { where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day) }
+  scope :outstanding, -> { created_today.where.missing(:purchase_orders) }
 
   def self.next_job_number
     last_job = Job.order(:id).last
@@ -41,6 +46,10 @@ class Job < ApplicationRecord
 
   def completed_with_invoice?
     completed? && invoice_number.present?
+  end
+
+  def costed?
+    purchase_orders.exists?
   end
 
   def multi_day?
@@ -72,5 +81,18 @@ class Job < ApplicationRecord
     if status_changed? && completed? && invoice_number.blank?
       self.invoice_number = Job.next_invoice_number
     end
+  end
+
+  def set_completed_at_on_completion
+    if status_changed? && completed?
+      self.completed_at = Time.current
+    elsif status_changed? && !completed?
+      self.completed_at = nil
+    end
+  end
+
+  def populate_from_client
+    self.customer_name = client.name if client.present? && customer_name.blank?
+    self.address = client.address if client.present? && address.blank?
   end
 end

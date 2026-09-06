@@ -1,0 +1,7 @@
+<% if policy(job).update_status? %>
+  <%= form_with url: update_status_job_path(job), method: :patch, local: true, data: { turbo: false }, style: "display: inline;" do |f| %>
+    <%= f.select :status, Job.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: false, selected: job.status }, { onchange: "this.form.submit();", style: "padding: 0.25rem 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; background: white; cursor: pointer;" } %>
+  <% end %>
+<% else %>
+  <span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span>
+<% end %>

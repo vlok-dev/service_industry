@@ -32,7 +32,7 @@
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :default_job_priority %><br>
-    <%= f.select :default_job_priority, options_for_select([["Low", "low"], ["Medium", "medium"], ["High", "high"]], @setting.default_job_priority || "medium") %>
+    <%= f.select :default_job_priority, options_for_select([["Maintenance", "maintenance"], ["Project", "project"]], @setting.default_job_priority || "maintenance") %>
   </div>
 
   <div style="margin-bottom: 1rem;">

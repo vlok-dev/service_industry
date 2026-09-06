@@ -1,0 +1,94 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+#
+# bin/clone_db
+#
+# Clone the LIVE (production) database down into your LOCAL database using
+# `pg_dump` -> `psql`, the same approach as the standalone `./clone` script.
+#
+# This is a SAFE one-way copy: the LIVE database is only READ (pg_dump). The
+# LOCAL database is replaced (dropped and rebuilt) from the dump. Never run it
+# against a database you care about without a backup.
+#
+# Requirements:
+#   * `pg_dump` and `psql` (PostgreSQL client tools) on your PATH.
+#   * A local PostgreSQL database to restore into.
+#
+# Environment variables:
+#   LIVE_DATABASE_URL   libpq URL of the LIVE database to copy from.
+#                       Falls back to DATABASE_URL if unset.
+#   LOCAL_DATABASE_URL  libpq URL of the LOCAL database to restore into.
+#                       REQUIRED unless SKIP_RESTORE=1.
+#   DUMP_FILE           Where to write the SQL dump (default: tmp/live_db_dump.sql).
+#   SKIP_RESTORE        Set to anything to only write the dump file (no psql).
+#   SKIP_CONFIRM        Set to anything to skip the confirmation prompt.
+#
+# Usage:
+#   bundle exec ruby bin/clone_db
+#   LIVE_DATABASE_URL="postgres://user:pass@live-host:5432/dbname" \
+#   LOCAL_DATABASE_URL="postgresql://localhost/industro_local" \
+#   bundle exec ruby bin/clone_db
+#
+# NOTE for this app: the development DB is SQLite. pg_dump restores into
+# PostgreSQL, so point LOCAL_DATABASE_URL at a local Postgres database. To make
+# the clone land in your local dev DB automatically, point this app's dev
+# database (config/database.yml) at that local Postgres — say the word and I
+# will switch the dev adapter to PostgreSQL and migrate for you.
+
+require "fileutils"
+require "shellwords"
+
+def abort!(msg)
+  warn "Error: #{msg}"
+  exit 1
+end
+
+def sh(cmd)
+  puts "$ #{cmd}"
+  ok = system(cmd)
+  abort!("command failed: #{cmd}") unless ok
+end
+
+live_url = ENV["LIVE_DATABASE_URL"] || ENV["DATABASE_URL"]
+local_url = ENV["LOCAL_DATABASE_URL"]
+dump_file = ENV["DUMP_FILE"] || "tmp/live_db_dump.sql"
+
+abort!("Set LIVE_DATABASE_URL (or DATABASE_URL) before running.") if live_url.to_s.empty?
+abort!("Refusing to run: LIVE and LOCAL URLs are identical.") if local_url && local_url == live_url
+if local_url && local_url !~ %r{\Apostgresql?://}
+  abort!("LOCAL_DATABASE_URL must be a postgres:// or postgresql:// URL (local dev here is SQLite).")
+end
+
+puts "Source (LIVE) : #{live_url}"
+puts "Target (LOCAL): #{local_url || '(dump file only - set LOCAL_DATABASE_URL to restore)'}"
+puts "Dump file     : #{dump_file}"
+puts
+
+unless ENV["SKIP_CONFIRM"] || ENV["SKIP_RESTORE"]
+  puts "WARNING: This will DROP and REPLACE every object in the LOCAL database."
+  print "Type the local URL to confirm: "
+  $stdout.flush
+  confirm = STDIN.gets.to_s.strip
+  abort!("Confirmation did not match. Aborting for safety.") unless confirm == local_url
+end
+
+FileUtils.mkdir_p("tmp")
+FileUtils.rm_f(dump_file)
+
+# 1. Dump the live database (read-only). --clean/--if-exists let the dump
+#    recreate objects cleanly on restore; --no-owner/--no-privileges avoid
+#    copying roles/privileges that don't exist locally.
+sh(%(pg_dump --no-owner --no-privileges --no-comments --clean --if-exists "#{live_url}" > "#{dump_file}"))
+puts "Dump written to #{dump_file} (#{File.size(dump_file)} bytes)."
+
+if local_url && !ENV["SKIP_RESTORE"]
+  # 2. Restore into the local database in a single transaction so a failure
+  #    rolls back cleanly rather than leaving a half-restored DB.
+  sh(%(psql --single-transaction --set ON_ERROR_STOP=1 #{Shellwords.shellescape(local_url)} < #{Shellwords.shellescape(dump_file)}))
+  puts "Local database restored from #{live_url}."
+else
+  puts
+  puts "SKIP_RESTORE=1 (or no LOCAL_DATABASE_URL): only wrote the dump."
+  puts "Restore manually with:"
+  puts "  psql --single-transaction #{local_url || 'LOCAL_DATABASE_URL'} < #{dump_file}"
+end

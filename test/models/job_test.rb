@@ -15,7 +15,7 @@ class JobTest < ActiveSupport::TestCase
       address: "123 Test St",
       description: "Fix leak",
       status: :scheduled,
-      priority: :medium,
+      priority: :maintenance,
       user: valid_user,
       scheduled_date: Date.new(2026, 9, 10),
       scheduled_time: Time.zone.parse("09:00")

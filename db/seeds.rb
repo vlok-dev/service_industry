@@ -116,6 +116,6 @@ plumber9 = User.find_or_create_by!(email: "david@industroplumbers.co.za") do |u|
 end
 
 # Sample Jobs
-Job.find_or_create_by!(customer_name: "John Smith", address: "123 Main Street, Johannesburg", description: "Leaking kitchen tap", status: :pending, priority: :medium, user: michelle)
-Job.find_or_create_by!(customer_name: "Sarah Johnson", address: "456 Oak Avenue, Sandton", description: "Burst pipe in bathroom", status: :scheduled, priority: :high, user: michelle, scheduled_date: Date.tomorrow, scheduled_time: "09:00", assigned_to: plumber1)
-Job.find_or_create_by!(customer_name: "Mike Williams", address: "789 Pine Road, Randburg", description: "Geyser installation", status: :in_progress, priority: :low, user: michelle, scheduled_date: Date.today, scheduled_time: "10:00", assigned_to: plumber2)
+Job.find_or_create_by!(customer_name: "John Smith", address: "123 Main Street, Johannesburg", description: "Leaking kitchen tap", status: :pending, priority: :maintenance, user: michelle)
+Job.find_or_create_by!(customer_name: "Sarah Johnson", address: "456 Oak Avenue, Sandton", description: "Burst pipe in bathroom", status: :scheduled, priority: :project, user: michelle, scheduled_date: Date.tomorrow, scheduled_time: "09:00", assigned_to: plumber1)
+Job.find_or_create_by!(customer_name: "Mike Williams", address: "789 Pine Road, Randburg", description: "Geyser installation", status: :in_progress, priority: :maintenance, user: michelle, scheduled_date: Date.today, scheduled_time: "10:00", assigned_to: plumber2)

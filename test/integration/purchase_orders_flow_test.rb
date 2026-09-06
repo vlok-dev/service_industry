@@ -14,7 +14,7 @@ class PurchaseOrdersFlowTest < ActionDispatch::IntegrationTest
   def create_job
     Job.create!(
       customer_name: "C", address: "A", description: "D",
-      status: :scheduled, priority: :medium, user: @user,
+      status: :scheduled, priority: :maintenance, user: @user,
       scheduled_date: Date.today, scheduled_time: Time.zone.parse("09:00")
     )
   end

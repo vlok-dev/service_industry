@@ -14,6 +14,8 @@ Rails.application.routes.draw do
     member do
       patch :schedule
       patch :add_extra_day
+      patch :close
+      patch :update_status
       get :whatsapp
     end
     collection do
@@ -24,6 +26,12 @@ Rails.application.routes.draw do
   end
 
   resources :suppliers
+  resources :clients do
+    collection do
+      get :import
+      post :import_create
+    end
+  end
   resources :inventory_items do
     collection do
       get :search

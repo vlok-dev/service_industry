@@ -17,7 +17,7 @@ class SmokeNewFeaturesTest < ActionDispatch::IntegrationTest
       address: "123 Smoke St",
       description: "Test work",
       status: :scheduled,
-      priority: :medium,
+      priority: :maintenance,
       user: @user,
       scheduled_date: Date.new(2026, 9, 10),
       scheduled_time: Time.zone.parse("09:00"),

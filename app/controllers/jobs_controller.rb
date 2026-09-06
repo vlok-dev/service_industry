@@ -1,5 +1,5 @@
 class JobsController < ApplicationController
-  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp add_extra_day ]
+  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp add_extra_day close update_status ]
 
   def index
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
@@ -60,6 +60,33 @@ class JobsController < ApplicationController
     redirect_back(fallback_location: job_path(@job), notice: "Extended the job end date by one day.")
   end
 
+  def update_status
+    authorize @job, :update_status?
+
+    @job.status = params[:status]
+    if @job.save
+      redirect_back(fallback_location: dashboard_path, notice: "Job status was updated.")
+    else
+      redirect_back(fallback_location: dashboard_path, alert: @job.errors.full_messages.join(", "))
+    end
+  end
+
+  def close
+    authorize @job, :close?
+
+    if @job.completed?
+      redirect_back(fallback_location: @job, notice: "Job is already completed.")
+      return
+    end
+
+    @job.status = :completed
+    if @job.save
+      redirect_back(fallback_location: @job, notice: "Job was closed and marked as completed (Invoice: #{@job.invoice_number}).")
+    else
+      redirect_back(fallback_location: @job, alert: @job.errors.full_messages.join(", "))
+    end
+  end
+
   def whatsapp
     authorize @job, :show?
 
@@ -91,7 +118,7 @@ class JobsController < ApplicationController
     permitted = if current_user.accountant?
       [ :invoice_number ]
     else
-      [ :customer_name, :address, :description, :status, :priority, :assigned_to_id, :notes, :scheduled_date, :scheduled_time, :scheduled_end_date, :job_number, :invoice_number, :is_project ]
+      [ :customer_name, :address, :description, :status, :priority, :assigned_to_id, :notes, :scheduled_date, :scheduled_time, :scheduled_end_date, :job_number, :invoice_number, :is_project, :client_id ]
     end
     params.require(:job).permit(permitted)
   end
@@ -108,6 +135,8 @@ class JobsController < ApplicationController
       policy_scope(Job).scheduled
     when "completed"
       policy_scope(Job).completed
+    when "outstanding"
+      policy_scope(Job).outstanding
     when "my_jobs"
       policy_scope(Job).where(assigned_to: current_user)
     else

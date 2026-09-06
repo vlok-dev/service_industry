@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_05_203000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_06_201753) do
   create_table "claims", force: :cascade do |t|
     t.decimal "amount", precision: 12, scale: 2, null: false
     t.date "claim_date", null: false
@@ -22,6 +22,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_05_203000) do
     t.datetime "updated_at", null: false
     t.index ["job_id"], name: "index_claims_on_job_id"
     t.index ["status"], name: "index_claims_on_status"
+  end
+
+  create_table "clients", force: :cascade do |t|
+    t.text "address"
+    t.string "company"
+    t.string "contact_person"
+    t.datetime "created_at", null: false
+    t.string "email"
+    t.string "first_name"
+    t.string "last_name"
+    t.string "name", null: false
+    t.string "phone_number"
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_clients_on_name"
   end
 
   create_table "inventory_items", force: :cascade do |t|
@@ -39,6 +53,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_05_203000) do
     t.text "address"
     t.integer "assigned_to_id"
     t.datetime "cancelled_at"
+    t.integer "client_id"
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.string "customer_name"
@@ -55,6 +70,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_05_203000) do
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.index ["assigned_to_id"], name: "index_jobs_on_assigned_to_id"
+    t.index ["client_id"], name: "index_jobs_on_client_id"
     t.index ["is_project"], name: "index_jobs_on_is_project"
     t.index ["user_id"], name: "index_jobs_on_user_id"
   end
@@ -139,6 +155,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_05_203000) do
   end
 
   add_foreign_key "claims", "jobs"
+  add_foreign_key "jobs", "clients"
   add_foreign_key "jobs", "users"
   add_foreign_key "jobs", "users", column: "assigned_to_id"
   add_foreign_key "purchase_order_items", "inventory_items"

@@ -1,0 +1,48 @@
+<%= form_with model: @client, local: true do |f| %>
+  <% if @client.errors.any? %>
+    <div class="alert">
+      <h2><%= pluralize(@client.errors.count, "error") %> prohibited this client from being saved:</h2>
+      <ul>
+        <% @client.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :first_name, "Name" %><br>
+    <%= f.text_field :first_name %>
+    <p style="color: #666; font-size: 0.875rem;">First name of the contact person. Optional if Company is provided.</p>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :last_name, "Surname" %><br>
+    <%= f.text_field :last_name %>
+    <p style="color: #666; font-size: 0.875rem;">Last name / surname of the contact person.</p>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :company, "Company" %><br>
+    <%= f.text_field :company %>
+    <p style="color: #666; font-size: 0.875rem;">If this is a company, the company name will be used as the client name.</p>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :phone_number, "Contact Number" %><br>
+    <%= f.text_field :phone_number %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :address, "Address" %><br>
+    <%= f.text_area :address, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :email, "Email Address" %><br>
+    <%= f.email_field :email %>
+    <p style="color: #666; font-size: 0.875rem;">Optional</p>
+  </div>
+
+  <%= f.submit class: "btn" %>
+<% end %>

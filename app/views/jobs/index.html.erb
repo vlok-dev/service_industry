@@ -10,6 +10,10 @@
   <% if @search_query.present? %>
     <%= link_to "Clear", jobs_path, class: "btn" %>
   <% end %>
+  <% if @search_query.blank? && (current_user.accountant? || current_user.reporter? || current_user.super_admin? || current_user.scheduler?) %>
+    <% outstanding_count = Job.outstanding.count %>
+    <%= link_to "Outstanding (#{outstanding_count})", jobs_path(filter: "outstanding"), class: "btn btn-secondary" %>
+  <% end %>
 <% end %>
 
 <table>

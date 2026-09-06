@@ -15,6 +15,12 @@
   <% end %>
 
   <div style="margin-bottom: 1rem;">
+    <%= f.label :client_id, "Client" %><br>
+    <%= f.collection_select :client_id, Client.ordered, :id, :name, { include_blank: "Select a client (optional)" }, { onchange: "populateFromClient(this.value);" } %>
+    <p style="color: #666; font-size: 0.875rem;">Optional: Select a saved client to auto-fill customer name and address.</p>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
     <%= f.label :customer_name, "Customer Name" %><br>
     <%= f.text_field :customer_name, required: true %>
   </div>
@@ -41,8 +47,7 @@
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :assigned_to_id, "Assign Plumber" %><br>
-    <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name), { include_blank: "Select Plumber (optional)" } %>
-    <p style="color: #666; font-size: 0.875rem;">Optional: Pre-assign a plumber. Michael can change this when scheduling.</p>
+    <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, f.object.assigned_to_id), { include_blank: "Select Plumber (optional)" } %>
   </div>
 
   <div style="margin-bottom: 1rem;">
@@ -70,4 +75,17 @@
   <div style="margin-bottom: 1rem;">
     <%= f.submit "Create Job", class: "btn" %>
   </div>
+
+  <script>
+    function populateFromClient(clientId) {
+      if (!clientId) return;
+      var clients = <%= raw Client.ordered.map { |c| [c.id, { name: c.name, address: c.address }] }.to_json %>;
+      var client = clients[clientId];
+      if (client) {
+        document.getElementById("job_customer_name").value = client.name;
+        document.getElementById("job_address").value = client.address;
+      }
+    }
+  </script>
+
 <% end %>

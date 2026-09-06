@@ -1,0 +1,43 @@
+<% if @outstanding_jobs.present? %>
+  <div class="section-title">Outstanding Job Cards</div>
+  <div class="card">
+    <div class="card-body no-padding">
+      <table>
+        <thead>
+          <tr>
+            <th>Job #</th>
+            <th>Customer</th>
+            <th>Address</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Assigned To</th>
+            <th>Invoice #</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @outstanding_jobs.each do |job| %>
+            <tr>
+              <td><%= job.job_number || "N/A" %></td>
+              <td><%= job.customer_name %></td>
+              <td><%= job.address.truncate(40) %></td>
+              <td><%= render "status_dropdown", job: job %></td>
+              <td><%= job.created_at.strftime("%b %d, %Y") %></td>
+              <td><%= job.assigned_to&.name || "Unassigned" %></td>
+              <td><%= job.invoice_number || "—" %></td>
+              <td>
+                <%= link_to "View", job, class: "btn btn-sm" %>
+                <% if !job.completed? && policy(job).close? %>
+                  <%= button_to "Close Job", close_job_path(job), method: :patch, data: { confirm: "Close this job and mark it as completed with invoice?" }, class: "btn btn-sm btn-success", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+                <% end %>
+                <% if current_user.reporter? && !job.costed? %>
+                  <%= link_to "Cost (Add PO)", new_job_purchase_order_path(job), class: "btn btn-sm" %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% end %>

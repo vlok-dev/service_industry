@@ -39,7 +39,7 @@
                 <td><%= job.job_number || "N/A" %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
-                <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+                <td><%= render "status_dropdown", job: job %></td>
                 <td><%= job.scheduled_date&.strftime("%b %d") || "—" %></td>
                 <td><%= job.assigned_to&.name || "Unassigned" %></td>
                 <td><%= job.invoice_number || "—" %></td>
@@ -58,6 +58,7 @@
     </div>
   </div>
 
+  <%= render "outstanding_jobs" %>
   <%= render "schedule_view" %>
 <% end %>
 
@@ -86,6 +87,8 @@
     </div>
   </div>
 
+  <%= render "outstanding_jobs" %>
+
   <%= form_with url: dashboard_path, method: :get, local: true, style: "margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: center;" do |f| %>
     <%= f.text_field :q, value: @search_query, placeholder: "Search by Job Number, Address, or Invoice Number...", style: "padding: 0.625rem 0.875rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; flex: 1; max-width: 400px;" %>
     <%= f.submit "Search", class: "btn" %>
@@ -104,6 +107,7 @@
               <th>Job #</th>
               <th>Customer</th>
               <th>Address</th>
+              <th>Status</th>
               <th>Priority</th>
               <th>Created By</th>
               <th>Invoice #</th>
@@ -116,10 +120,14 @@
                 <td><%= job.job_number || "N/A" %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
+                <td><%= render "status_dropdown", job: job %></td>
                 <td><%= job.priority.humanize %></td>
                 <td><%= job.user.name %></td>
                 <td><%= job.invoice_number || "—" %></td>
-                <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %></td>
+                <td>
+                  <%= button_to "Close Job", close_job_path(job), method: :patch, data: { confirm: "Close this job and mark it as completed with invoice?" }, class: "btn btn-sm btn-success", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+                  <%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %>
+                </td>
               </tr>
             <% end %>
           </tbody>
@@ -138,6 +146,7 @@
               <th>Job #</th>
               <th>Customer</th>
               <th>Address</th>
+              <th>Status</th>
               <th>Scheduled</th>
               <th>Assigned To</th>
               <th>Invoice #</th>
@@ -150,10 +159,14 @@
                 <td><%= job.job_number || "N/A" %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
+                <td><%= render "status_dropdown", job: job %></td>
                 <td><%= job.scheduled_date&.strftime("%b %d, %Y") %> at <%= job.scheduled_time&.strftime("%H:%M") || "TBD" %></td>
                 <td><%= job.assigned_to&.name || "Unassigned" %></td>
                 <td><%= job.invoice_number || "—" %></td>
-                <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %></td>
+                <td>
+                  <%= button_to "Close Job", close_job_path(job), method: :patch, data: { confirm: "Close this job and mark it as completed with invoice?" }, class: "btn btn-sm btn-success", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+                  <%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %>
+                </td>
               </tr>
             <% end %>
           </tbody>
@@ -172,6 +185,7 @@
               <th>Job #</th>
               <th>Customer</th>
               <th>Address</th>
+              <th>Status</th>
               <th>Assigned To</th>
               <th>Invoice #</th>
               <th>Action</th>
@@ -183,9 +197,13 @@
                 <td><%= job.job_number || "N/A" %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
+                <td><%= render "status_dropdown", job: job %></td>
                 <td><%= job.assigned_to&.name || "Unassigned" %></td>
                 <td><%= job.invoice_number || "—" %></td>
-                <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %></td>
+                <td>
+                  <%= button_to "Close Job", close_job_path(job), method: :patch, data: { confirm: "Close this job and mark it as completed with invoice?" }, class: "btn btn-sm btn-success", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+                  <%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %>
+                </td>
               </tr>
             <% end %>
           </tbody>
@@ -228,6 +246,27 @@
 <% end %>
 
 <% if current_user.scheduler? %>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Pending</span>
+      <span class="stat-value"><%= @pending_jobs.count %></span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Scheduled</span>
+      <span class="stat-value"><%= @scheduled_count %></span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">In Progress</span>
+      <span class="stat-value"><%= @in_progress_jobs.count %></span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Completed</span>
+      <span class="stat-value"><%= @completed_jobs.count %></span>
+    </div>
+  </div>
+
+  <%= render "outstanding_jobs" %>
+
   <div class="card">
     <div class="card-header">
       <h2>Pending Jobs</h2>
@@ -241,6 +280,7 @@
               <th>Customer</th>
               <th>Address</th>
               <th>Description</th>
+              <th>Status</th>
               <th>Priority</th>
               <th>Actions</th>
             </tr>
@@ -251,6 +291,7 @@
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
                 <td><%= job.description.truncate(60) %></td>
+                <td><%= render "status_dropdown", job: job %></td>
                 <td><%= job.priority.humanize %></td>
                 <td>
                   <%= form_with url: schedule_job_path(job), method: :patch, local: true do |f| %>
@@ -281,6 +322,8 @@
 <% end %>
 
 <% if current_user.reporter? %>
+  <%= render "outstanding_jobs" %>
+
   <div class="page-header">
     <h2>Daily Report - <%= Date.today.strftime("%B %d, %Y") %></h2>
     <p>Track today's job activity and purchase orders.</p>
@@ -312,7 +355,7 @@
                 <td><%= job.address.truncate(35) %></td>
                 <td><%= job.description.truncate(50) %></td>
                 <td><%= job.user.name %></td>
-                <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+                <td><%= render "status_dropdown", job: job %></td>
                 <td><%= link_to "Add PO", new_job_purchase_order_path(job), class: "btn btn-sm" %></td>
               </tr>
             <% end %>
@@ -350,7 +393,7 @@
                 <td><%= job.created_at.strftime("%Y-%m-%d") %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
-                <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+                <td><%= render "status_dropdown", job: job %></td>
                 <td><%= job.user.name %></td>
                 <td><%= link_to "Add PO", new_job_purchase_order_path(job), class: "btn btn-sm" %></td>
               </tr>
@@ -404,7 +447,7 @@
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
                 <td><%= job.scheduled_date&.strftime("%b %d, %Y") %> at <%= job.scheduled_time&.strftime("%H:%M") || "TBD" %></td>
-                <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+                <td><%= render "status_dropdown", job: job %></td>
                 <td>
                   <%= link_to "Update Status", edit_job_path(job), class: "btn btn-sm" %>
                   <%= link_to "WhatsApp", whatsapp_job_path(job), class: "btn btn-sm btn-success", data: { confirm: "Open WhatsApp to send address to customer?" } %>

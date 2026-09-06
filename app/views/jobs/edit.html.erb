@@ -16,6 +16,12 @@
 
   <% unless current_user.accountant? %>
     <div style="margin-bottom: 1rem;">
+      <%= f.label :client_id, "Client" %><br>
+      <%= f.collection_select :client_id, Client.ordered, :id, :name, { include_blank: "Select a client (optional)" }, { onchange: "populateFromClient(this.value);" } %>
+      <p style="color: #666; font-size: 0.875rem;">Optional: Select a saved client to auto-fill customer name and address.</p>
+    </div>
+
+    <div style="margin-bottom: 1rem;">
       <%= f.label :customer_name, "Customer Name" %><br>
       <%= f.text_field :customer_name, required: true %>
     </div>
@@ -75,3 +81,15 @@
     <%= f.submit "Update Job", class: "btn" %>
   </div>
 <% end %>
+
+<script>
+  function populateFromClient(clientId) {
+    if (!clientId) return;
+    var clients = <%= raw Client.ordered.map { |c| [c.id, { name: c.name, address: c.address }] }.to_json %>;
+    var client = clients[clientId];
+    if (client) {
+      document.getElementById("job_customer_name").value = client.name;
+      document.getElementById("job_address").value = client.address;
+    }
+  }
+</script>

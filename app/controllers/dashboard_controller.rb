@@ -14,6 +14,7 @@ class DashboardController < ApplicationController
       @scheduled_jobs = @jobs.scheduled
       @in_progress_jobs = @jobs.in_progress
       @completed_jobs = @jobs.completed
+      @outstanding_jobs = @jobs.outstanding
 
       build_schedule_view
       @scheduled_jobs = jobs_for_schedule_view
@@ -23,14 +24,20 @@ class DashboardController < ApplicationController
       @scheduled_jobs = @jobs.scheduled
       @in_progress_jobs = @jobs.in_progress
       @completed_jobs = @jobs.completed
+      @outstanding_jobs = @jobs.outstanding
     when "scheduler"
       @pending_jobs = @jobs.pending
+      @scheduled_count = @jobs.scheduled.count
+      @in_progress_jobs = @jobs.in_progress
+      @completed_jobs = @jobs.completed
+      @outstanding_jobs = @jobs.outstanding
       build_schedule_view
       @scheduled_jobs = jobs_for_schedule_view
       @scheduled_tomorrow = @jobs.where(scheduled_date: Date.tomorrow)
     when "reporter"
       @all_jobs = @jobs.order(created_at: :desc)
       @today_jobs = @jobs.where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day)
+      @outstanding_jobs = @jobs.outstanding
     when "plumber"
       @my_jobs = @jobs.where(assigned_to: current_user)
       @pending_jobs = @my_jobs.pending
