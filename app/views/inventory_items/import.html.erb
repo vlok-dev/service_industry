@@ -1,0 +1,33 @@
+<p><%= link_to "Back to Inventory", inventory_items_path, class: "btn" %></p>
+
+<h1>Import Inventory from CSV</h1>
+
+<div style="background: #f9fafb; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; border: 1px solid var(--border);">
+  <p><strong>CSV Format:</strong></p>
+  <p><code>Code,Description,Stock Item Type,Total Stock Quantity,Cost Price,List Price,Replacement Percentage,Is Serializable,Is Quantity Tracked,Is Active,Created Date,Created By,Modified By,Modified Date</code></p>
+  <ul>
+    <li><strong>Code</strong> — Unique item code (required). Existing codes are updated.</li>
+    <li><strong>Description</strong> — Item name (required).</li>
+    <li><strong>Stock Item Type</strong> — e.g. Consumable, Resale, Tool.</li>
+    <li><strong>Total Stock Quantity</strong> — Numeric stock on hand.</li>
+    <li><strong>Cost Price</strong> / <strong>List Price</strong> — Decimal prices.</li>
+    <li><strong>Replacement Percentage</strong> — Numeric (e.g. 100.00).</li>
+    <li><strong>Is Serializable</strong>, <strong>Is Quantity Tracked</strong>, <strong>Is Active</strong> — Yes/No, True/False, 1/0.</li>
+    <li><strong>Created By</strong> / <strong>Modified By</strong> — Free text.</li>
+    <li><strong>Created Date</strong> / <strong>Modified Date</strong> — Ignored on import (Rails tracks automatically).</li>
+  </ul>
+  <p>Example:</p>
+  <pre style="background: white; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); overflow-x: auto;">
+Code,Description,Stock Item Type,Total Stock Quantity,Cost Price,List Price,Replacement Percentage,Is Serializable,Is Quantity Tracked,Is Active,Created Date,Created By,Modified By,Modified Date
+COP-15,15mm Copper Pipe,Consumable,100,45.00,65.00,100.00,No,Yes,Yes,2026-09-01,Admin,Admin,2026-09-07
+PVC-50,50mm PVC Pipe,Resale,200,12.50,18.75,50.00,No,Yes,Yes,2026-09-01,Admin,,
+  </pre>
+</div>
+
+<%= form_with url: import_create_inventory_items_path, method: :post, local: true, enctype: "multipart/form-data" do |f| %>
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :file, "CSV File" %><br>
+    <%= f.file_field :file, accept: ".csv,text/csv", required: true %>
+  </div>
+  <%= f.submit "Import Inventory", class: "btn btn-success" %>
+<% end %>

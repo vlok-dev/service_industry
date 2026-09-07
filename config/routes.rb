@@ -36,6 +36,8 @@ Rails.application.routes.draw do
   resources :inventory_items do
     collection do
       get :search
+      get :import
+      post :import_create
     end
   end
 

@@ -9,7 +9,7 @@ module Admin
       @users = User.all.order(:role, :name)
       if @search_query.present?
         sanitized = "%#{ActiveRecord::Base.sanitize_sql_like(@search_query)}%"
-        @users = @users.where("name ILIKE :q OR email ILIKE :q OR phone_number ILIKE :q", q: sanitized)
+        @users = @users.where("LOWER(name) LIKE LOWER(:q) OR LOWER(COALESCE(email,'')) LIKE LOWER(:q) OR COALESCE(phone_number,'') LIKE :q", q: sanitized)
       end
     end
 

@@ -1,4 +1,5 @@
-<p><%= link_to "New Item", new_inventory_item_path, class: "btn btn-success" %></p>
+<p><%= link_to "New Item", new_inventory_item_path, class: "btn btn-success" %>
+<%= link_to "Import CSV", import_inventory_items_path, class: "btn btn-secondary" %></p>
 
 <h1>Inventory</h1>
 
@@ -11,31 +12,45 @@
 <% end %>
 
 <% if @inventory_items.present? %>
-  <table>
-    <thead>
-      <tr>
-        <th>Code</th>
-        <th>Name</th>
-        <th>Unit Price (R)</th>
-        <th>Unit</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @inventory_items.each do |item| %>
+  <div style="overflow-x: auto;">
+    <table style="font-size: 0.85rem;">
+      <thead>
         <tr>
-          <td><%= item.code %></td>
-          <td><%= item.name %></td>
-          <td><%= number_with_precision(item.unit_price, precision: 2) if item.unit_price %></td>
-          <td><%= item.unit %></td>
-          <td>
-            <%= link_to "Edit", edit_inventory_item_path(item), class: "btn btn-sm" %>
-            <%= button_to "Delete", item, method: :delete, data: { confirm: "Delete this inventory item?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
-          </td>
+          <th>Code</th>
+          <th>Description</th>
+          <th>Stock Item Type</th>
+          <th>Total Stock Qty</th>
+          <th>Cost Price (R)</th>
+          <th>List Price (R)</th>
+          <th>Replacement %</th>
+          <th>Serializable</th>
+          <th>Qty Tracked</th>
+          <th>Active</th>
+          <th>Actions</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% @inventory_items.each do |item| %>
+          <tr>
+            <td><strong><%= item.code %></strong></td>
+            <td><%= item.name %></td>
+            <td><%= item.stock_item_type || "—" %></td>
+            <td><%= number_with_precision(item.total_stock_quantity, precision: 2, delimiter: ",") if item.total_stock_quantity.present? %></td>
+            <td><%= number_with_precision(item.cost_price, precision: 2) if item.cost_price.present? %></td>
+            <td><%= number_with_precision(item.list_price, precision: 2) if item.list_price.present? %></td>
+            <td><%= number_with_precision(item.replacement_percentage, precision: 2) if item.replacement_percentage.present? %>%</td>
+            <td><%= item.is_serializable ? "Yes" : "No" %></td>
+            <td><%= item.is_quantity_tracked ? "Yes" : "No" %></td>
+            <td><%= item.is_active ? "Yes" : "No" %></td>
+            <td>
+              <%= link_to "Edit", edit_inventory_item_path(item), class: "btn btn-sm" %>
+              <%= button_to "Delete", item, method: :delete, data: { confirm: "Delete this inventory item?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 <% else %>
   <p>No inventory items found.</p>
 <% end %>

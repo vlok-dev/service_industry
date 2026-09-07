@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_100500) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_07_150546) do
   create_table "claims", force: :cascade do |t|
     t.decimal "amount", precision: 12, scale: 2, null: false
     t.date "claim_date", null: false
@@ -45,9 +45,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_100500) do
 
   create_table "inventory_items", force: :cascade do |t|
     t.string "code", null: false
+    t.decimal "cost_price", precision: 10, scale: 2
     t.datetime "created_at", null: false
+    t.string "created_by"
     t.text "description"
+    t.boolean "is_active", default: true, null: false
+    t.boolean "is_quantity_tracked", default: true, null: false
+    t.boolean "is_serializable", default: false, null: false
+    t.decimal "list_price", precision: 10, scale: 2
+    t.string "modified_by"
     t.string "name", null: false
+    t.decimal "replacement_percentage", precision: 5, scale: 2
+    t.string "stock_item_type"
+    t.decimal "total_stock_quantity", precision: 12, scale: 2, default: "0.0"
     t.string "unit"
     t.decimal "unit_price", precision: 10, scale: 2
     t.datetime "updated_at", null: false
@@ -61,17 +71,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_100500) do
     t.integer "client_id"
     t.datetime "completed_at"
     t.string "contact_number"
-    t.text "postal_address"
+    t.string "contact_person"
     t.datetime "created_at", null: false
     t.string "customer_code"
     t.string "customer_name"
-    t.string "contact_person"
-    t.string "email"
     t.text "description"
+    t.string "email"
     t.string "invoice_number"
     t.boolean "is_project", default: false, null: false
     t.string "job_number"
     t.text "notes"
+    t.text "postal_address"
     t.integer "priority"
     t.date "scheduled_date"
     t.date "scheduled_end_date"

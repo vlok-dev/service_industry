@@ -3,7 +3,11 @@ class InventoryItem < ApplicationRecord
 
   validates :code, :name, presence: true
   validates :code, uniqueness: { case_sensitive: false }
-  validates :unit_price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :unit_price, :cost_price, :list_price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :replacement_percentage, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :total_stock_quantity, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+
+  scope :active, -> { where(is_active: true) }
 
   def self.search_by_code(query)
     return none if query.blank?
