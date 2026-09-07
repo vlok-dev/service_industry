@@ -27,13 +27,13 @@ lee_anne = User.find_or_create_by!(email: "leeanne@industroplumbers.co.za") do |
   u.phone_number = "+27829876543"
 end
 
-admin = User.find_or_create_by!(email: "admin@industroplumbers.co.za") do |u|
-  u.name = "Admin User"
-  u.password = "password123"
-  u.password_confirmation = "password123"
-  u.role = :admin
-  u.phone_number = "+27820000000"
-end
+admin = User.find_or_initialize_by(email: "admin@industroplumbers.co.za")
+admin.name = "Admin User"
+admin.password = "password123"
+admin.password_confirmation = "password123"
+admin.role = :admin
+admin.phone_number = "+27820000000"
+admin.save!
 
 accountant = User.find_or_create_by!(email: "accountant@industroplumbers.co.za") do |u|
   u.name = "Accountant User"
