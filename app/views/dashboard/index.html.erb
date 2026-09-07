@@ -28,7 +28,7 @@
               <th>Customer</th>
               <th>Problem</th>
               <th>Address</th>
-              <th>Contact</th>
+              <th>Contact Number</th>
               <th>Status</th>
               <th>Scheduled</th>
               <th>Assigned To</th>
@@ -46,7 +46,6 @@
                 <td><%= job.address.to_s.truncate(40) %></td>
                 <td>
                   <div style="font-size: 0.875rem;">
-                    <div><strong><%= job.customer_name %></strong></div>
                     <div style="color: var(--text-muted);"><%= job.contact_number || job.client&.phone_number || "—" %></div>
                     <% if job.client&.email.present? && job.contact_number.blank? %>
                       <div style="color: var(--text-muted);"><%= job.client.email %></div>

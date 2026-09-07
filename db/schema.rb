@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_073000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_07_093500) do
   create_table "claims", force: :cascade do |t|
     t.decimal "amount", precision: 12, scale: 2, null: false
     t.date "claim_date", null: false
@@ -55,6 +55,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_073000) do
     t.datetime "cancelled_at"
     t.integer "client_id"
     t.datetime "completed_at"
+    t.string "contact_number"
     t.datetime "created_at", null: false
     t.string "customer_name"
     t.text "description"
