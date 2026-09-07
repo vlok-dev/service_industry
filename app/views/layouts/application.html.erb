@@ -970,7 +970,7 @@
             </div>
             <%= link_to "Jobs", jobs_path %>
             <%= link_to "Dashboard", dashboard_path %>
-            <% if current_user.admin? || current_user.super_admin? %>
+            <% if current_user.admin? || current_user.super_admin? || current_user.reporter? %>
             <%= link_to "Suppliers", suppliers_path %>
             <%= link_to "Clients", clients_path %>
             <%= link_to "Inventory", inventory_items_path %>

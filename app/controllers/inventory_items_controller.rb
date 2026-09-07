@@ -1,7 +1,7 @@
 require "csv"
 
 class InventoryItemsController < ApplicationController
-  before_action :require_manager, except: %i[ index search import import_create ]
+  before_action :require_manager, except: %i[ index show search ]
   before_action :set_inventory_item, only: %i[ show edit update destroy ]
 
   def index
@@ -147,8 +147,7 @@ class InventoryItemsController < ApplicationController
   end
 
   def require_manager
-    return if current_user.admin? || current_user.super_admin?
-
+    return if current_user.admin? || current_user.super_admin? || current_user.reporter?
     redirect_back(fallback_location: root_path, alert: "You are not authorized to manage inventory.")
   end
 

@@ -1,5 +1,11 @@
-<p><%= link_to "New Item", new_inventory_item_path, class: "btn btn-success" %>
-<%= link_to "Import CSV", import_inventory_items_path, class: "btn btn-secondary" %></p>
+<p>
+  <% if current_user.admin? || current_user.super_admin? %>
+    <%= link_to "New Item", new_inventory_item_path, class: "btn btn-success" %>
+    <%= link_to "Import CSV", import_inventory_items_path, class: "btn btn-secondary" %>
+  <% else %>
+    <span style="font-size: 0.85rem; color: var(--text-muted);">Read-only inventory view</span>
+  <% end %>
+</p>
 
 <h1>Inventory</h1>
 
@@ -43,8 +49,10 @@
             <td><%= item.is_quantity_tracked ? "Yes" : "No" %></td>
             <td><%= item.is_active ? "Yes" : "No" %></td>
             <td>
-              <%= link_to "Edit", edit_inventory_item_path(item), class: "btn btn-sm" %>
-              <%= button_to "Delete", item, method: :delete, data: { confirm: "Delete this inventory item?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+              <% if current_user.admin? || current_user.super_admin? %>
+                <%= link_to "Edit", edit_inventory_item_path(item), class: "btn btn-sm" %>
+                <%= button_to "Delete", item, method: :delete, data: { confirm: "Delete this inventory item?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+              <% end %>
             </td>
           </tr>
         <% end %>
