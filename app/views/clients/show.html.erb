@@ -2,13 +2,14 @@
 
 <h1><%= @client.name %></h1>
 
-<div style="background: #f9fafb; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
-  <p><strong>Name:</strong> <%= @client.first_name || "—" %></p>
-  <p><strong>Surname:</strong> <%= @client.last_name || "—" %></p>
-  <p><strong>Company:</strong> <%= @client.company || "—" %></p>
-  <p><strong>Contact Number:</strong> <%= @client.phone_number || "—" %></p>
-  <p><strong>Email Address:</strong> <%= @client.email || "—" %></p>
-  <p><strong>Address:</strong> <%= simple_format(@client.address) if @client.address.present? %></p>
+<div style="background: #f9fafb; padding: 1.5rem; margin-bottom: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border-light);">
+  <p><strong>Customer Code:</strong> <%= @client.customer_code || "—" %></p>
+  <p><strong>Customer Name:</strong> <%= @client.company.present? ? @client.company : [ @client.first_name, @client.last_name ].reject(&:blank?).join(" ") %></p>
+  <p><strong>Primary Contact:</strong> <%= @client.contact_person || "—" %></p>
+  <p><strong>Primary Contact Email:</strong> <%= @client.email || "—" %></p>
+  <p><strong>Primary Contact Mobile:</strong> <%= @client.primary_contact_mobile || "—" %></p>
+  <p><strong>Primary Delivery Address:</strong> <%= simple_format(@client.delivery_address) if @client.delivery_address.present? %></p>
+  <p><strong>Primary Postal Address:</strong> <%= simple_format(@client.postal_address) if @client.postal_address.present? %></p>
 </div>
 
 <p>

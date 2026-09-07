@@ -25,30 +25,44 @@ class ClientsController < ApplicationController
     tempfile.rewind
     csv_text = tempfile.read
     rows = CSV.parse(csv_text, headers: true) || []
-    rows.each_with_index do |row, idx|
-      line_num = idx + 2
-      name = (row["Name"] || "").strip
-      surname = (row["Surname"] || "").strip
-      company = (row["Company"] || "").strip
-      contact_number = (row["Contact Number"] || "").strip
-      address = (row["Address"] || "").strip
-      email = (row["Email Address"] || "").strip
+       rows.each_with_index do |row, idx|
+       line_num = idx + 2
+       customer_code = (row["Customer Code"] || "").strip
+       customer_name = (row["Customer Name"] || "").strip
+       company = customer_name
+       primary_contact = (row["Primary Contact"] || "").strip
+       email = (row["Primary Contact Email"] || "").strip
+       mobile = (row["Primary Contact Mobile"] || "").strip
+       delivery_address = (row["Primary Delivery Address"] || "").strip
+       postal_address = (row["Primary Postal Address"] || "").strip
 
-      client_name = company.present? ? company : [ name, surname ].reject(&:blank?).join(" ")
-      if client_name.blank?
-        failed += 1
-        Rails.logger.warn "Skipping row #{line_num}: no name, surname, or company"
-        next
+       if customer_name.blank?
+         failed += 1
+         Rails.logger.warn "Skipping row #{line_num}: no customer name or company"
+         next
+       end
+
+       if primary_contact.present?
+        name_parts = primary_contact.strip.split
+        first_name = name_parts.first
+        last_name = name_parts.length > 1 ? name_parts[1..].join(" ") : ""
+      else
+        first_name = ""
+        last_name = ""
       end
 
-      client = Client.new(
-        first_name: name,
-        last_name: surname,
-        company: company,
-        phone_number: contact_number,
-        address: address,
-        email: email
-      )
+       client = Client.new(
+         customer_code: customer_code,
+         first_name: first_name,
+         last_name: last_name,
+         company: company,
+         contact_person: primary_contact.presence || [ first_name, last_name ].reject(&:blank?).join(" "),
+         email: email,
+         primary_contact_mobile: mobile,
+         delivery_address: delivery_address,
+         postal_address: postal_address,
+         phone_number: mobile
+       )
       if client.save
         imported += 1
       else
@@ -62,13 +76,13 @@ class ClientsController < ApplicationController
 
   def index
     @clients = Client.ordered
-    if params[:q].present?
-      term = "%#{Client.sanitize_sql_like(params[:q].to_s.strip)}%"
-      @clients = @clients.where(
-        "LOWER(name) LIKE LOWER(:q) OR LOWER(contact_person) LIKE LOWER(:q) OR LOWER(phone_number) LIKE LOWER(:q) OR LOWER(email) LIKE LOWER(:q)",
-        q: term
-      )
-    end
+       if params[:q].present?
+       term = "%#{Client.sanitize_sql_like(params[:q].to_s.strip)}%"
+       @clients = @clients.where(
+         "LOWER(name) LIKE LOWER(:q) OR LOWER(contact_person) LIKE LOWER(:q) OR LOWER(primary_contact_mobile) LIKE LOWER(:q) OR LOWER(email) LIKE LOWER(:q) OR LOWER(customer_code) LIKE LOWER(:q)",
+         q: term
+       )
+     end
   end
 
   def show
@@ -119,7 +133,7 @@ class ClientsController < ApplicationController
     @client = Client.find(params[:id])
   end
 
-  def client_params
-    params.require(:client).permit(:first_name, :last_name, :company, :contact_person, :phone_number, :email, :address)
+    def client_params
+    params.require(:client).permit(:customer_code, :first_name, :last_name, :company, :contact_person, :email, :primary_contact_mobile, :delivery_address, :postal_address, :phone_number)
   end
 end

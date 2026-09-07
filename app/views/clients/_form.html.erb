@@ -11,37 +11,51 @@
   <% end %>
 
   <div style="margin-bottom: 1rem;">
-    <%= f.label :first_name, "Name" %><br>
-    <%= f.text_field :first_name %>
-    <p style="color: #666; font-size: 0.875rem;">First name of the contact person. Optional if Company is provided.</p>
+    <%= f.label :customer_code, "Customer Code" %><br>
+    <%= f.text_field :customer_code, placeholder: "e.g. CUS-001" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :first_name, "Customer Name" %><br>
+    <%= f.text_field :first_name, placeholder: "First name (if individual)" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :last_name, "Surname" %><br>
-    <%= f.text_field :last_name %>
-    <p style="color: #666; font-size: 0.875rem;">Last name / surname of the contact person.</p>
+    <%= f.text_field :last_name, placeholder: "Last name (if individual)" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :company, "Company" %><br>
-    <%= f.text_field :company %>
-    <p style="color: #666; font-size: 0.875rem;">If this is a company, the company name will be used as the client name.</p>
+    <%= f.text_field :company, placeholder: "Company name (if business)" %>
+    <p style="color: #666; font-size: 0.875rem;">If this is a company, provide the company name. Otherwise use customer name fields above.</p>
   </div>
 
   <div style="margin-bottom: 1rem;">
-    <%= f.label :phone_number, "Contact Number" %><br>
-    <%= f.text_field :phone_number %>
+    <%= f.label :contact_person, "Primary Contact" %><br>
+    <%= f.text_field :contact_person, readonly: @client.company.present?, placeholder: "Person to contact" %>
+    <p style="color: #666; font-size: 0.875rem;">For company clients, this is auto-filled from name fields. For company clients, update first/last name to change contact.</p>
   </div>
 
   <div style="margin-bottom: 1rem;">
-    <%= f.label :address, "Address" %><br>
-    <%= f.text_area :address, required: true %>
+    <%= f.label :email, "Primary Contact Email" %><br>
+    <%= f.email_field :email, placeholder: "contact@company.com" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
-    <%= f.label :email, "Email Address" %><br>
-    <%= f.email_field :email %>
-    <p style="color: #666; font-size: 0.875rem;">Optional</p>
+    <%= f.label :primary_contact_mobile, "Primary Contact Mobile" %><br>
+    <%= f.text_field :primary_contact_mobile, placeholder: "+27 11 123 4567" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :delivery_address, "Primary Delivery Address" %><br>
+    <%= f.text_area :delivery_address, rows: 2 %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :postal_address, "Primary Postal Address" %><br>
+    <%= f.text_area :postal_address, rows: 2 %>
+    <p style="color: #666; font-size: 0.875rem;">Leave blank if same as delivery address.</p>
   </div>
 
   <%= f.submit class: "btn" %>

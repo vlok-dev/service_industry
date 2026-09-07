@@ -3,8 +3,8 @@
 
 <h1>Clients</h1>
 
-<%= form_with url: clients_path, method: :get, local: true, style: "margin-bottom: 1rem;" do |f| %>
-  <%= f.text_field :q, value: params[:q], placeholder: "Search clients...", style: "padding: 0.5rem; width: 300px;" %>
+<%= form_with url: clients_path, method: :get, local: true, style="margin-bottom: 1rem;" do |f| %>
+  <%= f.text_field :q, value: params[:q], placeholder: "Search clients...", style="padding: 0.5rem; width: 300px;" %>
   <%= f.submit "Search", class: "btn" %>
   <% if params[:q].present? %>
     <%= link_to "Clear", clients_path, class: "btn" %>
@@ -15,28 +15,28 @@
   <table>
     <thead>
       <tr>
+        <th>Code</th>
         <th>Name</th>
-        <th>Surname</th>
-        <th>Company</th>
-        <th>Contact Number</th>
+        <th>Contact</th>
+        <th>Mobile</th>
         <th>Email</th>
-        <th>Address</th>
+        <th>Delivery Address</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
       <% @clients.each do |client| %>
         <tr>
-          <td><%= client.first_name || "—" %></td>
-          <td><%= client.last_name || "—" %></td>
-          <td><%= client.company || "—" %></td>
-          <td><%= client.phone_number || "—" %></td>
+          <td><%= client.customer_code || "—" %></td>
+          <td><strong><%= client.name %></strong></td>
+          <td><%= client.contact_person || "—" %></td>
+          <td><%= client.primary_contact_mobile || "—" %></td>
           <td><%= client.email || "—" %></td>
-          <td><%= client.address || "—" %></td>
+          <td><%= (client.delivery_address || "—").truncate(40) %></td>
           <td>
             <%= link_to "View", client, class: "btn btn-sm" %>
             <%= link_to "Edit", edit_client_path(client), class: "btn btn-sm" %>
-            <%= button_to "Delete", client, method: :delete, data: { confirm: "Delete this client?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+            <%= button_to "Delete", client, method: :delete, data: { confirm: "Delete this client?" }, class: "btn btn-danger btn-sm", style="display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
           </td>
         </tr>
       <% end %>

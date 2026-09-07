@@ -4,19 +4,21 @@
 
 <div style="background: #f9fafb; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; border: 1px solid var(--border);">
   <p><strong>CSV Format:</strong></p>
-  <p><code>Name,Surname,Company,Contact Number,Address,Email Address</code></p>
+  <p><code>Customer Code,Customer Name,Primary Contact,Primary Contact Email,Primary Contact Mobile,Primary Delivery Address,Primary Postal Address</code></p>
   <ul>
-    <li><strong>Name</strong> and <strong>Surname</strong> — Optional if Company is provided</li>
-    <li><strong>Company</strong> — Used as client name if provided; otherwise Name + Surname is used</li>
-    <li><strong>Contact Number</strong> — Maps to phone number</li>
-    <li><strong>Address</strong> — Maps to client address</li>
-    <li><strong>Email Address</strong> — Optional</li>
+    <li><strong>Customer Code</strong> — Optional unique identifier (e.g. CUS-001)</li>
+    <li><strong>Customer Name</strong> — Company name (required)</li>
+    <li><strong>Primary Contact</strong> — Name of the contact person</li>
+    <li><strong>Primary Contact Email</strong> — Contact email (optional)</li>
+    <li><strong>Primary Contact Mobile</strong> — Contact phone number (optional)</li>
+    <li><strong>Primary Delivery Address</strong> — Full delivery address</li>
+    <li><strong>Primary Postal Address</strong> — Postal address (optional)</li>
   </ul>
   <p>Example:</p>
   <pre style="background: white; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); overflow-x: auto;">
-Name,Surname,Company,Contact Number,Address,Email Address
-John,Smith,,011 123 4567,"123 Main St, Johannesburg",john@example.com
-,,Acme Plumbing,011 987 6543,"456 Business Ave, Sandton",
+Customer Code,Customer Name,Primary Contact,Primary Contact Email,Primary Contact Mobile,Primary Delivery Address,Primary Postal Address
+CUS-001,Acme Plumbing,John Smith,john@acme.com,011 234 5678,"123 Main St, Johannesburg",
+CUS-002,Plumber Pro,Jane Doe,jane@plumberpro.com,011 987 6543,"456 Business Ave, Sandton","P.O. Box 123, Sandton"
   </pre>
 </div>
 

@@ -1,13 +1,12 @@
 class Client < ApplicationRecord
   has_many :jobs, dependent: :restrict_with_error
 
-  validates :name, :address, presence: true
+  validates :name, presence: true
   validates :email, format: { with: /\A[^@\s]+@[^@\s]+\z/, message: "must look like an email address" }, allow_blank: true
-  validates :phone_number, format: { with: /\A[0-9+\s\-().]+\z/, message: "can only contain numbers, spaces and + - () ." }, allow_blank: true
-  validate :must_have_name_or_company
+  validates :primary_contact_mobile, format: { with: /\A[0-9+\s\-().]+\z/, message: "can only contain numbers, spaces and + - () ." }, allow_blank: true
+  validate :must_have_company_or_name
 
   before_validation :set_client_name
-  before_validation :set_contact_person
 
   def self.ordered
     order(:name)
@@ -21,13 +20,10 @@ class Client < ApplicationRecord
     else
       self.name = [ first_name, last_name ].reject(&:blank?).join(" ")
     end
+    self.contact_person = [ first_name, last_name ].reject(&:blank?).join(" ") if company.present?
   end
 
-  def set_contact_person
-    self.contact_person = [ first_name, last_name ].reject(&:blank?).join(" ")
-  end
-
-  def must_have_name_or_company
+  def must_have_company_or_name
     if company.blank? && [ first_name, last_name ].all?(&:blank?)
       errors.add(:base, "Either Company or Name must be provided")
     end
