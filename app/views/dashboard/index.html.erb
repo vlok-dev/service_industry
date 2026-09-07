@@ -6,10 +6,10 @@
 <% if current_user.super_admin? %>
   <div class="card">
     <div class="card-header">
-      <h2>My Jobs</h2>
+      <h2>Job Pipeline</h2>
       <div style="display: flex; gap: 0.75rem; align-items: center;">
         <%= form_with url: dashboard_path, method: :get, local: true, style: "display: flex; gap: 0.5rem;" do |f| %>
-          <%= f.text_field :q, value: @search_query, placeholder: "Search jobs...", style: "padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; width: 280px;" %>
+          <%= f.text_field :q, value: @search_query, placeholder: "Search by job #, customer, address...", style: "padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; width: 280px;" %>
           <%= f.submit "Search", class: "btn btn-sm" %>
           <% if @search_query.present? %>
             <%= link_to "Clear", dashboard_path, class: "btn btn-sm btn-secondary" %>
@@ -24,8 +24,11 @@
           <thead>
             <tr>
               <th>Job #</th>
+              <th>Time</th>
               <th>Customer</th>
+              <th>Problem</th>
               <th>Address</th>
+              <th>Contact</th>
               <th>Status</th>
               <th>Scheduled</th>
               <th>Assigned To</th>
@@ -36,9 +39,22 @@
           <tbody>
             <% @my_jobs.each do |job| %>
               <tr>
-                <td><%= job.job_number || "N/A" %></td>
+                <td><span style="font-family: monospace; font-size: 0.8rem; color: var(--text-muted);"><%= job.job_number || "N/A" %></span></td>
+                <td><%= job.scheduled_time&.strftime("%H:%M") || "—" %></td>
                 <td><%= job.customer_name %></td>
-                <td><%= job.address.truncate(40) %></td>
+                <td><%= job.description.to_s.truncate(60) %></td>
+                <td><%= job.address.to_s.truncate(40) %></td>
+                <td>
+                  <div style="font-size: 0.875rem;">
+                    <div><strong><%= job.customer_name %></strong></div>
+                    <% if job.client&.phone_number.present? %>
+                      <div style="color: var(--text-muted);"><%= job.client.phone_number %></div>
+                    <% end %>
+                    <% if job.client&.email.present? %>
+                      <div style="color: var(--text-muted);"><%= job.client.email %></div>
+                    <% end %>
+                  </div>
+                </td>
                 <td><%= render "status_dropdown", job: job %></td>
                 <td><%= job.scheduled_date&.strftime("%b %d") || "—" %></td>
                 <td><%= job.assigned_to&.name || "Unassigned" %></td>

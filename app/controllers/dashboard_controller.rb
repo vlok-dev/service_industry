@@ -81,7 +81,7 @@ class DashboardController < ApplicationController
   def jobs_for_schedule_view
     case @scheduler_view
     when "day"
-      overlaps_period(@scheduler_date, @scheduler_date)
+      @jobs.where("scheduled_date = :date OR (scheduled_date <= :date AND scheduled_end_date >= :date)", date: @scheduler_date)
     when "week"
       week_start = @scheduler_date.beginning_of_week(:monday)
       week_end = @scheduler_date.end_of_week(:monday)

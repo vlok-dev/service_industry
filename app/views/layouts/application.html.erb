@@ -21,9 +21,11 @@
         --primary-dark: #1d4ed8;
         --bg: #f8fafc;
         --surface: #ffffff;
-        --text: #1e293b;
+        --text: #0f172a;
         --text-muted: #64748b;
         --border: #e2e8f0;
+        --border-light: #f1f5f9;
+        --primary-light: #eff6ff;
         --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
         --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
         --radius: 12px;
@@ -49,7 +51,7 @@
         justify-content: center;
         min-height: 100vh;
         padding: 2rem;
-        background: #B2D33E;
+        background: linear-gradient(135deg, #B2D33E 0%, #1B2C65 100%);
       }
 
       .login-card {
@@ -91,8 +93,7 @@
         position: sticky;
         top: 0;
         z-index: 100;
-        backdrop-filter: blur(8px);
-        background: rgba(255,255,255,0.9);
+        box-shadow: var(--shadow);
       }
 
       nav .brand {
@@ -158,9 +159,10 @@
       .card {
         background: var(--surface);
         border-radius: var(--radius);
-        border: 1px solid var(--border);
+        border: 1px solid var(--border-light);
         box-shadow: var(--shadow);
         overflow: hidden;
+        margin-bottom: 1.5rem;
       }
 
       .card-header {
@@ -292,7 +294,7 @@
       }
 
       tr:hover td {
-        background: var(--bg);
+        background: var(--primary-light);
       }
 
       /* Badges */
@@ -493,14 +495,16 @@
 
       .stat-card {
         background: var(--surface);
-        border: 1px solid var(--border);
+        border: 1px solid var(--border-light);
         border-radius: var(--radius);
-        padding: 1.25rem;
+        padding: 1.5rem;
         box-shadow: var(--shadow);
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
+        transition: transform 0.2s;
       }
+      .stat-card:hover { transform: translateY(-2px); }
 
       .stat-label {
         font-size: 0.75rem;
