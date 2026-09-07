@@ -35,24 +35,49 @@
   </div>
 
   <h3>Line Items</h3>
-  <table style="width: 100%; margin-bottom: 1rem; border-collapse: collapse;">
-    <thead>
-      <tr>
-        <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Code</th>
-        <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Material / Description</th>
-        <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Quantity</th>
-        <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Unit Price (R)</th>
-        <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Total (R)</th>
-        <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);"></th>
-      </tr>
-    </thead>
-    <tbody id="items">
-      <%= f.fields_for :items do |item_form| %>
-        <%= render "item_fields", f: item_form %>
-      <% end %>
-    </tbody>
-  </table>
-  <p><%= link_to "Add Item", "#", id: "add-item", class: "btn btn-sm" %></p>
+<table style="width: 100%; margin-bottom: 1rem; border-collapse: collapse;">
+  <thead>
+    <tr>
+      <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Code</th>
+      <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Material / Description</th>
+      <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Quantity</th>
+      <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Unit Price (R)</th>
+      <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);">Total (R)</th>
+      <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border);"></th>
+    </tr>
+  </thead>
+  <tbody id="items">
+    <%= f.fields_for :items do |item_form| %>
+      <%= render "item_fields", f: item_form %>
+    <% end %>
+  </tbody>
+</table>
+
+<%# Template row used by JS when user clicks "Add Item". No name attrs so it won't be submitted. %>
+<table style="display:none;"><tbody>
+  <tr class="item-row item-template" data-template="true">
+    <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">
+      <input type="hidden" data-inventory-id="" />
+      <input type="text" class="code-search" placeholder="Type to search codes..." autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" />
+      <ul class="code-results" style="display:none; max-height:160px; overflow-y:auto; margin:0; padding:0; border:1px solid var(--border); border-top:none; border-radius:0 0 6px 6px; list-style:none; background:var(--surface);"></ul>
+    </td>
+    <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">
+      <input type="text" class="item-description" readonly placeholder="Auto-filled from inventory" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; background:var(--bg);" />
+    </td>
+    <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">
+      <input type="number" min="1" step="1" class="qty" placeholder="Qty" style="width: 100px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" />
+    </td>
+    <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">
+      <input type="number" min="0" step="0.01" class="price" readonly placeholder="Auto-filled" style="width: 120px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; background:var(--bg);" />
+    </td>
+    <td class="line-total" style="padding: 0.75rem; border-bottom: 1px solid var(--border); font-weight: 600;">R 0.00</td>
+    <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">
+      <a href="#" class="remove-line btn btn-danger btn-sm" style="display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Remove</a>
+    </td>
+  </tr>
+</tbody></table>
+
+<p><%= link_to "Add Item", "#", id: "add-item", class: "btn btn-sm" %></p>
 
   <h3>Order Total</h3>
   <table style="width: 100%; margin-bottom: 1rem; border-collapse: collapse;">
@@ -81,6 +106,21 @@
 <% end %>
 
 <script>
+const ITEM_NESTED_PREFIX = "purchase_order[items_attributes]";
+
+function applyItemNames(row, index) {
+  const inputs = row.querySelectorAll('input[data-inventory-id], input.code-search, input.item-description, input.qty, input.price');
+  inputs.forEach((input) => {
+    let key = null;
+    if (input.hasAttribute('data-inventory-id')) key = 'inventory_item_id';
+    else if (input.classList.contains('code-search')) key = 'code';
+    else if (input.classList.contains('item-description')) key = 'description';
+    else if (input.classList.contains('qty')) key = 'quantity';
+    else if (input.classList.contains('price')) key = 'unit_price';
+    if (key) input.name = `${ITEM_NESTED_PREFIX}[${index}][${key}]`;
+  });
+}
+
 function recalc() {
   let subtotal = 0;
   document.querySelectorAll('#items .item-row').forEach(row => {
@@ -99,11 +139,11 @@ function recalc() {
 }
 
 function fillRow(row, item) {
-  const codeField = row.querySelector('.code-search');
+  const invId = row.querySelector('input[data-inventory-id]');
+  const code = row.querySelector('.code-search');
   const desc = row.querySelector('.item-description');
   const price = row.querySelector('.price');
-  const invId = row.querySelector('.inventory-id');
-  if (codeField) codeField.value = item.code;
+  if (code) code.value = item.code;
   if (desc) desc.value = item.name;
   if (price) price.value = item.unit_price;
   if (invId) invId.value = item.id;
@@ -142,7 +182,6 @@ document.addEventListener('input', function(e) {
   }, 250);
 });
 
-// close any open results list when clicking elsewhere
 document.addEventListener('click', function(e) {
   if (!e.target.classList.contains('code-search') && !e.target.closest('.code-results')) {
     document.querySelectorAll('.code-results').forEach(r => { r.innerHTML = ''; r.style.display = 'none'; });
@@ -158,16 +197,33 @@ document.addEventListener('click', function(e) {
   }
 });
 
+function nextIndex() {
+  const tbody = document.getElementById('items');
+  const used = new Set();
+  tbody.querySelectorAll('.item-row input.code-search').forEach(inp => {
+    const m = (inp.name || '').match(/\[(\d+)\]/);
+    if (m) used.add(parseInt(m[1], 10));
+  });
+  let i = 0;
+  while (used.has(i)) i++;
+  return i;
+}
+
 document.getElementById('add-item').addEventListener('click', function(e) {
   e.preventDefault();
+  const template = document.querySelector('.item-template');
+  if (!template) return;
   const tbody = document.getElementById('items');
-  const first = tbody.querySelector('.item-row');
-  if (!first) return;
-  const clone = first.cloneNode(true);
-  clone.querySelectorAll('input').forEach(i => i.value = '');
+  const clone = template.cloneNode(true);
+  clone.removeAttribute('data-template');
+  clone.classList.remove('item-template');
+  clone.querySelectorAll('input').forEach(i => { i.value = ''; });
   clone.querySelectorAll('.code-results').forEach(r => { r.innerHTML = ''; r.style.display = 'none'; });
   clone.querySelector('.line-total').textContent = 'R 0.00';
+  applyItemNames(clone, nextIndex());
   tbody.appendChild(clone);
+  clone.querySelectorAll('.qty, .price').forEach(input => input.addEventListener('input', recalc));
+  recalc();
 });
 
 document.querySelectorAll('.qty, .price').forEach(input => input.addEventListener('input', recalc));

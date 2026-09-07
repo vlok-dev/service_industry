@@ -1,69 +1,187 @@
-<h1>Jobs</h1>
+<%
+  counts = {
+    pending:    @jobs.where(status: :pending).count,
+    scheduled:  @jobs.where(status: :scheduled).count,
+    in_progress: @jobs.where(status: :in_progress).count,
+    completed:  @jobs.where(status: :completed).count,
+    cancelled:  @jobs.where(status: :cancelled).count
+  }
+  current_filter = params[:filter]
+%>
 
-<% if current_user.super_admin? %>
-  <p><%= link_to "Create New Job", new_job_path, class: "btn" %></p>
-<% end %>
-
-<%= form_with url: jobs_path, method: :get, local: true, style: "margin-bottom: 1rem;" do |f| %>
-  <%= f.text_field :q, value: @search_query, placeholder: "Search by Job Number, Address, or Invoice Number...", style: "padding: 0.5rem; width: 400px; max-width: 100%;" %>
-  <%= f.submit "Search", class: "btn" %>
-  <% if @search_query.present? %>
-    <%= link_to "Clear", jobs_path, class: "btn" %>
-  <% end %>
-  <% if @search_query.blank? && (current_user.accountant? || current_user.reporter? || current_user.super_admin? || current_user.scheduler?) %>
-    <% outstanding_count = Job.outstanding.count %>
-    <%= link_to "Outstanding (#{outstanding_count})", jobs_path(filter: "outstanding"), class: "btn btn-secondary" %>
-  <% end %>
-<% end %>
-
-<table>
-  <thead>
-    <tr>
-      <th>Job #</th>
-      <th>Customer</th>
-      <th>Address</th>
-      <th>Status</th>
-      <th>Priority</th>
-      <th>Scheduled Date</th>
-      <th>Assigned To</th>
-      <th>Invoice #</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @jobs.each do |job| %>
-      <tr>
-        <td><%= job.job_number || "N/A" %></td>
-        <td><%= job.customer_name %></td>
-        <td><%= job.address %></td>
-        <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
-        <td><%= job.priority.humanize %></td>
-        <td><%= job.scheduled_date&.strftime("%Y-%m-%d") || "Not scheduled" %></td>
-        <td><%= job.assigned_to&.name || "Unassigned" %></td>
-        <td><%= job.invoice_number || "—" %></td>
-        <td>
-          <%= link_to "View", job %>
-          <% if policy(job).edit? %>
-            <%= link_to "Edit", edit_job_path(job) %>
-          <% end %>
-          <% if policy(job).destroy? %>
-            <%= button_to "Delete", job, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
-          <% end %>
-          <% if current_user.scheduler? && job.pending? %>
-            <%= form_with url: schedule_job_path(job), method: :patch, local: true, style: "display: inline;" do |f| %>
-              <%= f.hidden_field :status, value: "scheduled" %>
-              <%= f.date_field :scheduled_date, value: Date.tomorrow, required: true %>
-              <%= f.time_field :scheduled_time, value: "08:00", required: true %>
-              <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, job.assigned_to_id), include_blank: "Select Plumber" %>
-              <%= f.submit "Schedule", class: "btn btn-success", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
-            <% end %>
-          <% end %>
-        </td>
-      </tr>
+<div class="action-bar">
+  <div>
+    <h1>Jobs</h1>
+    <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem;">
+      <%= pluralize(@jobs.count, "job") %> • <%= number_with_precision(counts[:completed] * 100.0 / [@jobs.count, 1].max, precision: 0) %>% completion rate
+    </p>
+  </div>
+  <div class="actions">
+    <% if current_user.super_admin? %>
+      <%= link_to new_job_path, class: "btn" do %>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        New Job
+      <% end %>
     <% end %>
-  </tbody>
-</table>
+  </div>
+</div>
 
-<% if @jobs.empty? && @search_query.present? %>
-  <p>No jobs found matching "<%= @search_query %>".</p>
+<% if current_user.scheduler? || current_user.super_admin? || current_user.reporter? || current_user.accountant? %>
+  <div class="kpi-strip">
+    <div class="kpi kpi-pending">
+      <div class="label">Pending</div>
+      <div class="value"><%= counts[:pending] %></div>
+      <div class="sub">Awaiting schedule</div>
+    </div>
+    <div class="kpi kpi-scheduled">
+      <div class="label">Scheduled</div>
+      <div class="value"><%= counts[:scheduled] %></div>
+      <div class="sub">Booked in</div>
+    </div>
+    <div class="kpi kpi-progress">
+      <div class="label">In Progress</div>
+      <div class="value"><%= counts[:in_progress] %></div>
+      <div class="sub">Active on site</div>
+    </div>
+    <div class="kpi kpi-completed">
+      <div class="label">Completed</div>
+      <div class="value"><%= counts[:completed] %></div>
+      <div class="sub">All done</div>
+    </div>
+    <% if counts[:cancelled] > 0 %>
+      <div class="kpi kpi-cancelled">
+        <div class="label">Cancelled</div>
+        <div class="value"><%= counts[:cancelled] %></div>
+        <div class="sub">Did not run</div>
+      </div>
+    <% end %>
+  </div>
 <% end %>
+
+<div class="search-bar">
+  <%= form_with url: jobs_path, method: :get, local: true, style: "display: contents;" do |f| %>
+    <%= f.text_field :q, value: @search_query, placeholder: "Search by job #, address, customer, invoice..." %>
+    <% if current_filter.present? %>
+      <%= f.hidden_field :filter, value: current_filter %>
+    <% end %>
+    <%= f.submit "Search", class: "btn" %>
+    <% if @search_query.present? || current_filter.present? %>
+      <%= link_to "Clear", jobs_path, class: "btn btn-secondary" %>
+    <% end %>
+  <% end %>
+</div>
+
+<div class="chip-row">
+  <%= link_to "All", jobs_path, class: "chip #{current_filter.blank? ? 'active' : ''}" %>
+  <%= link_to jobs_path(filter: "outstanding"), class: "chip #{current_filter == 'outstanding' ? 'active' : ''}" do %>
+    Outstanding
+    <span class="count"><%= Job.outstanding.count %></span>
+  <% end %>
+  <%= link_to jobs_path(filter: "pending"), class: "chip #{current_filter == 'pending' ? 'active' : ''}" do %>
+    Pending
+    <span class="count"><%= counts[:pending] %></span>
+  <% end %>
+  <%= link_to jobs_path(filter: "scheduled"), class: "chip #{current_filter == 'scheduled' ? 'active' : ''}" do %>
+    Scheduled
+    <span class="count"><%= counts[:scheduled] %></span>
+  <% end %>
+  <%= link_to jobs_path(filter: "in_progress"), class: "chip #{current_filter == 'in_progress' ? 'active' : ''}" do %>
+    In Progress
+    <span class="count"><%= counts[:in_progress] %></span>
+  <% end %>
+  <%= link_to jobs_path(filter: "completed"), class: "chip #{current_filter == 'completed' ? 'active' : ''}" do %>
+    Completed
+    <span class="count"><%= counts[:completed] %></span>
+  <% end %>
+</div>
+
+<div class="modern-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Job #</th>
+        <th>Customer</th>
+        <th>Address</th>
+        <th>Status</th>
+        <th>Priority</th>
+        <th>Scheduled</th>
+        <th>Assigned</th>
+        <th>Invoice</th>
+        <th style="text-align: right;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if @jobs.any? %>
+        <% @jobs.each do |job| %>
+          <tr>
+            <td>
+              <%= link_to (job.job_number || "N/A"), job, class: "job-number" %>
+            </td>
+            <td>
+              <div class="customer"><%= job.customer_name %></div>
+              <% if job.contact_number.present? %>
+                <div style="font-size: 0.75rem; color: var(--text-muted);"><%= job.contact_number %></div>
+              <% end %>
+            </td>
+            <td class="address"><%= job.address.truncate(50) %></td>
+            <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+            <td>
+              <span class="pill" style="background: <%= job.project? ? '#fce7f3' : '#fef3c7' %>; color: <%= job.project? ? '#9d174d' : '#92400e' %>;">
+                <%= job.priority.humanize %>
+              </span>
+            </td>
+            <td>
+              <% if job.scheduled_date.present? %>
+                <div style="font-weight: 600;"><%= job.scheduled_date.strftime("%b %d") %></div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);"><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></div>
+              <% else %>
+                <span style="color: var(--text-muted);">Not scheduled</span>
+              <% end %>
+            </td>
+            <td>
+              <% if job.assigned_to %>
+                <%= job.assigned_to.name %>
+              <% else %>
+                <span style="color: var(--text-muted);">Unassigned</span>
+              <% end %>
+            </td>
+            <td>
+              <span style="font-family: ui-monospace, monospace; font-size: 0.8rem;"><%= job.invoice_number || "—" %></span>
+            </td>
+            <td>
+              <div class="row-actions">
+                <%= link_to "View", job, class: "btn btn-sm" %>
+                <% if policy(job).edit? %>
+                  <%= link_to "Edit", edit_job_path(job), class: "btn btn-sm btn-secondary" %>
+                <% end %>
+                <% if policy(job).destroy? %>
+                  <%= button_to "Delete", job, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-sm btn-danger" %>
+                <% end %>
+              </div>
+              <% if current_user.scheduler? && job.pending? %>
+                <div style="margin-top: 0.5rem;">
+                  <%= form_with url: schedule_job_path(job), method: :patch, local: true, style: "display: flex; gap: 0.375rem; flex-wrap: wrap;" do |f| %>
+                    <%= f.hidden_field :status, value: "scheduled" %>
+                    <%= f.date_field :scheduled_date, value: Date.tomorrow, required: true, style: "padding: 0.3rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem;" %>
+                    <%= f.time_field :scheduled_time, value: "08:00", required: true, style: "padding: 0.3rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem;" %>
+                    <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, job.assigned_to_id), { include_blank: "Plumber" }, { style: "padding: 0.3rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem;" } %>
+                    <%= f.submit "Schedule", class: "btn btn-sm btn-success" %>
+                  <% end %>
+                </div>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      <% else %>
+        <tr><td colspan="9" class="empty-row">
+          <% if @search_query.present? %>
+            No jobs found matching "<%= @search_query %>".
+          <% else %>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <div style="margin-top: 0.5rem;">No jobs to show. <% if current_user.super_admin? %><%= link_to "Create the first one", new_job_path, style: "color: var(--primary); font-weight: 600;" %><% end %></div>
+          <% end %>
+        </td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

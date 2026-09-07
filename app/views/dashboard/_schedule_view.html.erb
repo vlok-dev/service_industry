@@ -1,20 +1,20 @@
-<div class="card" style="margin-top: 1.5rem;">
+<div class="card" id="schedule_view" style="margin-top: 1.5rem; scroll-margin-top: 1rem;">
   <div class="card-header">
     <h2 id="schedule-range-label"><%= @date_range_label %></h2>
     <div class="view-tabs">
-      <%= link_to "Day", dashboard_path(view: "day", date: @scheduler_date), class: "view-tab #{@scheduler_view == 'day' ? 'active' : ''}" %>
-      <%= link_to "Week", dashboard_path(view: "week", date: @scheduler_date), class: "view-tab #{@scheduler_view == 'week' ? 'active' : ''}" %>
-      <%= link_to "Month", dashboard_path(view: "month", date: @scheduler_date), class: "view-tab #{@scheduler_view == 'month' ? 'active' : ''}" %>
+      <%= link_to "Day", dashboard_path(view: "day", date: @scheduler_date, anchor: "schedule_view"), class: "view-tab #{@scheduler_view == 'day' ? 'active' : ''}" %>
+      <%= link_to "Week", dashboard_path(view: "week", date: @scheduler_date, anchor: "schedule_view"), class: "view-tab #{@scheduler_view == 'week' ? 'active' : ''}" %>
+      <%= link_to "Month", dashboard_path(view: "month", date: @scheduler_date, anchor: "schedule_view"), class: "view-tab #{@scheduler_view == 'month' ? 'active' : ''}" %>
     </div>
   </div>
   <div class="card-body" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
     <div class="date-navigation">
-      <%= link_to "&#9664; Prev".html_safe, dashboard_path(view: @scheduler_view, date: prev_date), class: "btn btn-sm btn-secondary" %>
-      <%= form_with url: dashboard_path, method: :get, local: true, style: "display: flex; align-items: center; gap: 0.5rem;" do |f| %>
+      <%= link_to "&#9664; Prev".html_safe, dashboard_path(view: @scheduler_view, date: prev_date, anchor: "schedule_view"), class: "btn btn-sm btn-secondary" %>
+      <%= form_with url: dashboard_path(anchor: "schedule_view"), method: :get, data: { turbo_frame: "_top" }, style: "display: flex; align-items: center; gap: 0.5rem;" do |f| %>
         <%= f.hidden_field :view, value: @scheduler_view %>
-        <%= f.date_field :date, value: @scheduler_date, onchange: "this.form.submit();", class: "date-picker" %>
+        <%= f.date_field :date, value: @scheduler_date, onchange: "this.form.requestSubmit();", class: "date-picker" %>
       <% end %>
-      <%= link_to "Next &#9654;".html_safe, dashboard_path(view: @scheduler_view, date: next_date), class: "btn btn-sm btn-secondary" %>
+      <%= link_to "Next &#9654;".html_safe, dashboard_path(view: @scheduler_view, date: next_date, anchor: "schedule_view"), class: "btn btn-sm btn-secondary" %>
     </div>
   </div>
   <div class="card-body no-padding">

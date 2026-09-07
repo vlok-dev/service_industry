@@ -1,97 +1,257 @@
-<p><%= link_to "Back To Jobs", jobs_path, class: "btn" %></p>
+<% status_pill_bg = case @job.status
+  when "completed" then "#d1fae5"
+  when "scheduled" then "#dbeafe"
+  when "in_progress" then "#fce7f3"
+  when "cancelled" then "#fee2e2"
+  else "#fef3c7"
+end
+status_pill_fg = case @job.status
+  when "completed" then "#065f46"
+  when "scheduled" then "#1e40af"
+  when "in_progress" then "#9d174d"
+  when "cancelled" then "#991b1b"
+  else "#92400e"
+end %>
 
-<h1>Job Details</h1>
-
-<p><strong>Customer:</strong> <%= @job.customer_name %></p>
-<p><strong>Address:</strong> <%= @job.address %></p>
-<p><strong>Description:</strong> <%= @job.description %></p>
-<p><strong>Status:</strong> <span class="badge badge-<%= @job.status %>"><%= @job.status.humanize %></span></p>
-<p><strong>Priority:</strong> <%= @job.priority.humanize %></p>
-<p><strong>Scheduled Date:</strong> <%= @job.scheduled_date&.strftime("%Y-%m-%d") || "Not scheduled" %></p>
-<p><strong>Scheduled Time:</strong> <%= @job.scheduled_time&.strftime("%I:%M %p")&.strip || "Not scheduled" %></p>
-<% if @job.scheduled_end_date.present? && @job.scheduled_end_date > @job.scheduled_date %>
-  <p><strong>Scheduled End Date:</strong> <%= @job.scheduled_end_date.strftime("%Y-%m-%d") %></p>
-<% end %>
-<% if policy(@job).add_extra_day? %>
-  <%= button_to "Add Extra Day", add_extra_day_job_path(@job), method: :patch, data: { confirm: "Extend the scheduled end date by one day?" }, class: "btn btn-secondary", style: "display: inline;" %>
-<% end %>
-<p><strong>Contact Number:</strong> <%= @job.contact_number || "—" %></p><p><strong>Assigned To:</strong> <%= @job.assigned_to&.name || "Unassigned" %></p>
-<p><strong>Notes:</strong> <%= @job.notes || "None" %></p>
-<p><strong>Logged By:</strong> <%= @job.user.name %></p>
-
-<% if policy(@job).edit? %>
-  <%= link_to "Edit", edit_job_path(@job), class: "btn" %>
-<% end %>
-
-<% if policy(@job).show? %>
-  <%= link_to "Send WhatsApp", whatsapp_job_path(@job), class: "btn", data: { confirm: "Open WhatsApp to send job details to plumber?" } %>
-<% end %>
-
-<% if !@job.completed? && policy(@job).close? %>
-  <%= button_to "Close Job", close_job_path(@job), method: :patch, data: { confirm: "Close this job and mark it as completed with invoice?" }, class: "btn btn-success" %>
-<% end %>
-
-<h3>Purchase Orders</h3>
-<% if @job.purchase_orders.any? %>
-  <table>
-    <thead>
-      <tr>
-        <th>PO #</th>
-        <th>Supplier</th>
-        <th>Order Date</th>
-        <th>Total</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @job.purchase_orders.includes(:items).each do |po| %>
-        <tr>
-          <td><%= po.po_number || "N/A" %></td>
-          <td><%= po.supplier_name %></td>
-          <td><%= po.order_date&.strftime("%Y-%m-%d") %></td>
-          <td>R<%= number_with_precision(po.subtotal, precision: 2) %></td>
-          <td><%= link_to "View", job_purchase_order_path(@job, po), class: "btn" %></td>
-        </tr>
+<div class="hero">
+  <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; position: relative; z-index: 1;">
+    <div>
+      <div style="font-size: 0.75rem; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 700;">
+        Job #<%= @job.job_number %>
+      </div>
+      <h1><%= @job.customer_name %></h1>
+      <p class="subtitle"><%= @job.description.to_s.truncate(120) %></p>
+    </div>
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <%= link_to "Back", jobs_path, class: "btn btn-sm", style: "background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: white; backdrop-filter: blur(4px);" %>
+      <% if policy(@job).edit? %>
+        <%= link_to "Edit", edit_job_path(@job), class: "btn btn-sm", style: "background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: white; backdrop-filter: blur(4px);" %>
       <% end %>
-    </tbody>
-  </table>
-<% else %>
-  <p>No purchase orders for this job.</p>
-<% end %>
+      <% if !@job.completed? && policy(@job).close? %>
+        <%= button_to "Close Job", close_job_path(@job), method: :patch, data: { confirm: "Close this job and mark it as completed with invoice?" }, class: "btn btn-sm btn-success" %>
+      <% end %>
+    </div>
+  </div>
+  <div class="hero-meta">
+    <span class="pill" style="background: <%= status_pill_bg %>; color: <%= status_pill_fg %>;">
+      <%= @job.status.humanize %>
+    </span>
+    <span class="pill"><%= @job.priority.humanize %> priority</span>
+    <% if @job.scheduled_date.present? %>
+      <span class="pill">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <%= @job.scheduled_date.strftime("%a %b %d, %Y") %>
+        <% if @job.scheduled_time %>at <%= @job.scheduled_time.strftime("%I:%M %p").strip %><% end %>
+      </span>
+    <% end %>
+    <% if @job.assigned_to %>
+      <span class="pill">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <%= @job.assigned_to.name %>
+      </span>
+    <% end %>
+    <% if @job.invoice_number.present? %>
+      <span class="pill">Invoice <%= @job.invoice_number %></span>
+    <% end %>
+  </div>
+</div>
 
-  <%= link_to "Add Purchase Order", new_job_purchase_order_path(@job), class: "btn btn-success" %>
+<div class="info-grid">
+  <div class="info-tile">
+    <div class="label">Customer</div>
+    <div class="value"><%= @job.customer_name %></div>
+  </div>
+  <div class="info-tile">
+    <div class="label">Contact</div>
+    <div class="value"><%= @job.contact_number.presence || @job.client&.phone_number || "—" %></div>
+    <% if @job.email.presence || @job.client&.email.present? %>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;"><%= @job.email.presence || @job.client&.email %></div>
+    <% end %>
+  </div>
+  <div class="info-tile">
+    <div class="label">Delivery Address</div>
+    <div class="value"><%= @job.address %></div>
+  </div>
+  <% if @job.postal_address.present? && @job.postal_address != @job.address %>
+    <div class="info-tile">
+      <div class="label">Postal Address</div>
+      <div class="value"><%= @job.postal_address %></div>
+    </div>
+  <% end %>
+  <div class="info-tile">
+    <div class="label">Assigned To</div>
+    <div class="value"><%= @job.assigned_to&.name || "—" %></div>
+    <% if @job.assigned_to&.phone_number.present? %>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;"><%= @job.assigned_to.phone_number %></div>
+    <% end %>
+  </div>
+  <div class="info-tile">
+    <div class="label">Scheduled</div>
+    <div class="value">
+      <% if @job.scheduled_date.present? %>
+        <%= @job.scheduled_date.strftime("%b %d, %Y") %>
+      <% else %>
+        <span class="muted">Not scheduled</span>
+      <% end %>
+    </div>
+    <% if @job.scheduled_time %>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;"><%= @job.scheduled_time.strftime("%I:%M %p").strip %></div>
+    <% end %>
+    <% if @job.scheduled_end_date.present? && @job.scheduled_end_date > @job.scheduled_date %>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Ends <%= @job.scheduled_end_date.strftime("%b %d, %Y") %></div>
+    <% end %>
+  </div>
+</div>
+
+<div class="section-card">
+  <header>
+    <span>Description &amp; Notes</span>
+  </header>
+  <div class="body">
+    <div style="margin-bottom: 1rem;">
+      <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.375rem;">Description</div>
+      <div style="white-space: pre-wrap;"><%= @job.description %></div>
+    </div>
+    <% if @job.notes.present? %>
+      <div>
+        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.375rem;">Notes</div>
+        <div style="white-space: pre-wrap; color: var(--text-muted);"><%= @job.notes %></div>
+      </div>
+    <% end %>
+    <% if policy(@job).add_extra_day? && @job.scheduled_date.present? %>
+      <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-light);">
+        <%= button_to "+ Add Extra Day", add_extra_day_job_path(@job), method: :patch, data: { confirm: "Extend the scheduled end date by one day?" }, class: "btn btn-sm btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="section-card">
+  <header>
+    <span>Activity</span>
+    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">Created <%= @job.created_at.strftime("%b %d, %Y") %></span>
+  </header>
+  <div class="body">
+    <ul class="timeline">
+      <li class="timeline-item success">
+        <div class="title">Job created</div>
+        <div class="meta"><%= @job.created_at.strftime("%b %d, %Y at %I:%M %p") %> by <%= @job.user&.name %></div>
+      </li>
+      <% if @job.scheduled_date.present? %>
+        <li class="timeline-item">
+          <div class="title">Scheduled</div>
+          <div class="meta"><%= @job.scheduled_date.strftime("%b %d, %Y") %><% if @job.scheduled_time %> at <%= @job.scheduled_time.strftime("%I:%M %p").strip %><% end %></div>
+        </li>
+      <% end %>
+      <% if @job.in_progress? || @job.completed? %>
+        <li class="timeline-item">
+          <div class="title">Started</div>
+          <div class="meta">Status moved to In Progress</div>
+        </li>
+      <% end %>
+      <% if @job.completed? %>
+        <li class="timeline-item success">
+          <div class="title">Completed</div>
+          <div class="meta"><%= @job.completed_at&.strftime("%b %d, %Y at %I:%M %p") %><% if @job.invoice_number.present? %> • Invoice <%= @job.invoice_number %><% end %></div>
+        </li>
+      <% end %>
+      <% if @job.cancelled? %>
+        <li class="timeline-item muted">
+          <div class="title">Cancelled</div>
+          <div class="meta"><%= @job.cancelled_at&.strftime("%b %d, %Y") %></div>
+        </li>
+      <% end %>
+      <li class="timeline-item muted">
+        <div class="title">Last updated</div>
+        <div class="meta"><%= @job.updated_at.strftime("%b %d, %Y at %I:%M %p") %></div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="section-card">
+  <header>
+    <span>Purchase Orders</span>
+    <% if @job.purchase_orders.any? %>
+      <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">
+        Total: R <%= number_with_precision(@job.purchase_orders.sum { |po| po.subtotal.to_f }, precision: 2) %>
+      </span>
+    <% end %>
+  </header>
+  <div class="body">
+    <% if @job.purchase_orders.any? %>
+      <div class="modern-table" style="border: none; box-shadow: none;">
+        <table>
+          <thead>
+            <tr>
+              <th>PO #</th>
+              <th>Supplier</th>
+              <th>Order Date</th>
+              <th>Total</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @job.purchase_orders.includes(:items).each do |po| %>
+              <tr>
+                <td><span class="job-number"><%= po.po_number || "N/A" %></span></td>
+                <td><strong><%= po.supplier_name %></strong></td>
+                <td><%= po.order_date&.strftime("%Y-%m-%d") %></td>
+                <td><strong>R <%= number_with_precision(po.subtotal, precision: 2) %></strong></td>
+                <td style="text-align: right;"><%= link_to "View", job_purchase_order_path(@job, po), class: "btn btn-sm" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">No purchase orders for this job yet.</div>
+    <% end %>
+    <div style="margin-top: 1rem;">
+      <%= link_to "+ Add Purchase Order", new_job_purchase_order_path(@job), class: "btn" %>
+      <% if policy(@job).show? && @job.assigned_to&.phone_number.present? %>
+        <%= link_to "Send via WhatsApp", whatsapp_job_path(@job), class: "btn btn-success", data: { confirm: "Open WhatsApp to send job details to plumber?" } %>
+      <% end %>
+    </div>
+  </div>
+</div>
 
 <% if @job.is_project? %>
-  <hr>
-  <h3>Claims (project)</h3>
-  <p>
-    <%= link_to "View All Claims", job_claims_path(@job), class: "btn" %>
-    <%= link_to "Add Claim", new_job_claim_path(@job), class: "btn btn-success" %>
-  </p>
-  <% if @job.claims.exists? %>
-    <% total_claimed = @job.claims.sum(:amount) %>
-    <p><strong>Total claimed:</strong> R <%= number_with_precision(total_claimed, precision: 2) %></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Amount (R)</th>
-          <th>Status</th>
-          <th>Reference</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @job.claims.order(claim_date: :desc).limit(5).each do |claim| %>
-          <tr>
-            <td><%= claim.claim_date&.strftime("%Y-%m-%d") %></td>
-            <td><%= number_with_precision(claim.amount, precision: 2) %></td>
-            <td><span class="badge badge-<%= claim.status %>"><%= claim.status.humanize %></span></td>
-            <td><%= claim.reference %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    <p>No claims submitted for this project yet.</p>
-  <% end %>
+  <div class="section-card">
+    <header>
+      <span>Claims (Project)</span>
+      <% if @job.claims.exists? %>
+        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">
+          Total claimed: R <%= number_with_precision(@job.claims.sum(:amount), precision: 2) %>
+        </span>
+      <% end %>
+    </header>
+    <div class="body">
+      <div style="margin-bottom: 1rem;">
+        <%= link_to "View All Claims", job_claims_path(@job), class: "btn" %>
+        <%= link_to "+ Add Claim", new_job_claim_path(@job), class: "btn btn-success" %>
+      </div>
+      <% if @job.claims.exists? %>
+        <div class="modern-table" style="border: none; box-shadow: none;">
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Amount</th><th>Status</th><th>Reference</th></tr>
+            </thead>
+            <tbody>
+              <% @job.claims.order(claim_date: :desc).limit(5).each do |claim| %>
+                <tr>
+                  <td><%= claim.claim_date&.strftime("%Y-%m-%d") %></td>
+                  <td><strong>R <%= number_with_precision(claim.amount, precision: 2) %></strong></td>
+                  <td><span class="badge badge-<%= claim.status %>"><%= claim.status.humanize %></span></td>
+                  <td><%= claim.reference %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="empty-state">No claims submitted for this project yet.</div>
+      <% end %>
+    </div>
+  </div>
 <% end %>
