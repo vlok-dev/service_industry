@@ -82,21 +82,21 @@
   </div>
 
   <div class="stats-grid">
-    <div class="stat-card">
-      <span class="stat-label">Pending</span>
+    <div class="stat-card stat-pending">
       <span class="stat-value"><%= @pending_jobs.count %></span>
+      <span class="stat-label">Pending</span>
     </div>
-    <div class="stat-card">
-      <span class="stat-label">Scheduled</span>
+    <div class="stat-card stat-scheduled">
       <span class="stat-value"><%= @scheduled_jobs.count %></span>
+      <span class="stat-label">Scheduled</span>
     </div>
-    <div class="stat-card">
-      <span class="stat-label">In Progress</span>
+    <div class="stat-card stat-in-progress">
       <span class="stat-value"><%= @in_progress_jobs.count %></span>
+      <span class="stat-label">In Progress</span>
     </div>
-    <div class="stat-card">
-      <span class="stat-label">Completed</span>
+    <div class="stat-card stat-completed">
       <span class="stat-value"><%= @completed_jobs.count %></span>
+      <span class="stat-label">Completed</span>
     </div>
   </div>
 
@@ -427,17 +427,17 @@
   </div>
 
   <div class="stats-grid">
-    <div class="stat-card">
-      <span class="stat-label">Pending</span>
+    <div class="stat-card stat-pending">
       <span class="stat-value"><%= @pending_jobs.count %></span>
+      <span class="stat-label">Pending</span>
     </div>
-    <div class="stat-card">
-      <span class="stat-label">In Progress</span>
+    <div class="stat-card stat-in-progress">
       <span class="stat-value"><%= @in_progress_jobs.count %></span>
+      <span class="stat-label">In Progress</span>
     </div>
-    <div class="stat-card">
-      <span class="stat-label">Completed</span>
+    <div class="stat-card stat-completed">
       <span class="stat-value"><%= @completed_jobs.count %></span>
+      <span class="stat-label">Completed</span>
     </div>
   </div>
 

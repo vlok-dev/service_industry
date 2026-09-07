@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_093500) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_07_100500) do
   create_table "claims", force: :cascade do |t|
     t.decimal "amount", precision: 12, scale: 2, null: false
     t.date "claim_date", null: false
@@ -29,12 +29,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_093500) do
     t.string "company"
     t.string "contact_person"
     t.datetime "created_at", null: false
+    t.string "customer_code"
+    t.text "delivery_address"
     t.string "email"
     t.string "first_name"
     t.string "last_name"
     t.string "name", null: false
     t.string "phone_number"
+    t.text "postal_address"
+    t.string "primary_contact_mobile"
     t.datetime "updated_at", null: false
+    t.index ["customer_code"], name: "index_clients_on_customer_code"
     t.index ["name"], name: "index_clients_on_name"
   end
 

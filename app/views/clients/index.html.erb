@@ -3,8 +3,8 @@
 
 <h1>Clients</h1>
 
-<%= form_with url: clients_path, method: :get, local: true, style="margin-bottom: 1rem;" do |f| %>
-  <%= f.text_field :q, value: params[:q], placeholder: "Search clients...", style="padding: 0.5rem; width: 300px;" %>
+<%= form_with url: clients_path, method: :get, local: true, style: "margin-bottom: 1rem;" do |f| %>
+  <%= f.text_field :q, value: params[:q], placeholder: "Search clients...", style: "padding: 0.5rem; width: 300px;" %>
   <%= f.submit "Search", class: "btn" %>
   <% if params[:q].present? %>
     <%= link_to "Clear", clients_path, class: "btn" %>
@@ -36,7 +36,7 @@
           <td>
             <%= link_to "View", client, class: "btn btn-sm" %>
             <%= link_to "Edit", edit_client_path(client), class: "btn btn-sm" %>
-            <%= button_to "Delete", client, method: :delete, data: { confirm: "Delete this client?" }, class: "btn btn-danger btn-sm", style="display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+            <%= button_to "Delete", client, method: :delete, data: { confirm: "Delete this client?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
           </td>
         </tr>
       <% end %>
