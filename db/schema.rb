@@ -61,8 +61,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_100500) do
     t.integer "client_id"
     t.datetime "completed_at"
     t.string "contact_number"
+    t.text "postal_address"
     t.datetime "created_at", null: false
+    t.string "customer_code"
     t.string "customer_name"
+    t.string "contact_person"
+    t.string "email"
     t.text "description"
     t.string "invoice_number"
     t.boolean "is_project", default: false, null: false

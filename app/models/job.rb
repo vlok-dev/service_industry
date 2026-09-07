@@ -92,7 +92,13 @@ class Job < ApplicationRecord
   end
 
   def populate_from_client
-    self.customer_name = client.name if client.present? && customer_name.blank?
-    self.address = client.address if client.present? && address.blank?
+    return unless client.present?
+    self.customer_code = client.customer_code if customer_code.blank?
+    self.customer_name = client.name if customer_name.blank?
+    self.contact_person = client.contact_person if contact_person.blank?
+    self.email = client.email if email.blank?
+    self.contact_number = (client.primary_contact_mobile.presence || client.phone_number) if contact_number.blank?
+    self.address = (client.delivery_address.presence || client.address) if address.blank?
+    self.postal_address = (client.postal_address.presence || client.delivery_address) if postal_address.blank?
   end
 end

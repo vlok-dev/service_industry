@@ -25,6 +25,7 @@ class ClientsController < ApplicationController
     tempfile.rewind
     csv_text = tempfile.read
     rows = CSV.parse(csv_text, headers: true) || []
+    rows = rows.map { |r| r.to_h.transform_keys { |k| k.to_s.delete("\xEF\xBB\xBF").strip } }
        rows.each_with_index do |row, idx|
        line_num = idx + 2
        customer_code = (row["Customer Code"] || "").strip

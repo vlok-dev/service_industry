@@ -16,38 +16,61 @@
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :client_id, "Client" %><br>
-    <%= f.collection_select :client_id, Client.ordered, :id, :name, { include_blank: "Select a client (optional)" }, { onchange: "populateFromClient(this.value);" } %>
-    <p style="color: #666; font-size: 0.875rem;">Optional: Select a saved client to auto-fill customer name and address.</p>
+    <%= f.collection_select :client_id, Client.ordered, :id, ->(c) { "#{c.customer_code.presence || '—'} — #{c.name}" }, { include_blank: "Select a client (optional)" }, { onchange: "populateFromClient(this.value);" } %>
+    <p style="color: #666; font-size: 0.875rem;">Optional: Select a saved client to auto-fill customer details.</p>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :customer_code, "Customer Code" %><br>
+    <%= f.text_field :customer_code, readonly: true, placeholder: "Auto-filled when client selected" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :customer_name, "Customer Name" %><br>
-    <%= f.text_field :customer_name, required: true %>
+    <%= f.text_field :customer_name, readonly: true, required: true %>
   </div>
 
   <div style="margin-bottom: 1rem;">
-    <%= f.label :address %><br>
-    <%= f.text_area :address, required: true %>
+    <%= f.label :contact_person, "Primary Contact" %><br>
+    <%= f.text_field :contact_person, readonly: true, placeholder: "Auto-filled when client selected" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
-    <%= f.label :contact_number, "Contact Number" %><br>
-    <%= f.text_field :contact_number, placeholder: "Phone number to reach the client" %>
+    <%= f.label :email, "Primary Contact Email" %><br>
+    <%= f.email_field :email, readonly: true, placeholder: "Auto-filled when client selected" %>
   </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :contact_number, "Primary Contact Mobile" %><br>
+    <%= f.text_field :contact_number, readonly: true, placeholder: "Auto-filled when client selected" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :address, "Primary Delivery Address" %><br>
+    <%= f.text_area :address, readonly: true, rows: 2, required: true %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :postal_address, "Primary Postal Address" %><br>
+    <%= f.text_area :postal_address, readonly: true, rows: 2, placeholder: "Auto-filled when client selected" %>
+    <p style="color: #666; font-size: 0.875rem;">Same as delivery if blank on client.</p>
+  </div>
+
+  <hr>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :description %><br>
-    <%= f.text_area :description, required: true %>
+    <%= f.text_area :description, required: true, rows: 3, placeholder: "Describe the work to be done" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :status %><br>
-    <%= f.select :status, Job.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: true }, { required: true } %>
+    <%= f.select :status, Job.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: false }, { required: true } %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :priority %><br>
-    <%= f.select :priority, Job.priorities.keys.map { |p| [p.humanize, p] }, { include_blank: true }, { required: true } %>
+    <%= f.select :priority, Job.priorities.keys.map { |p| [p.humanize, p] }, { include_blank: false }, { required: true } %>
   </div>
 
   <div style="margin-bottom: 1rem;">
@@ -58,6 +81,28 @@
   <div style="margin-bottom: 1rem;">
     <%= f.label :notes %><br>
     <%= f.text_area :notes %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :scheduled_date, "Scheduled Date" %><br>
+    <%= f.date_field :scheduled_date %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :scheduled_time, "Scheduled Time" %><br>
+    <%= f.time_field :scheduled_time %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :scheduled_end_date, "Scheduled End Date" %><br>
+    <%= f.date_field :scheduled_end_date %>
+    <p style="color: #666; font-size: 0.875rem;">Optional. Required for multi-day projects.</p>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :is_project, "Project?" %><br>
+    <%= f.check_box :is_project %>
+    <p style="color: #666; font-size: 0.875rem;">Mark as a project to run over multiple days and attach claims.</p>
   </div>
 
   <div style="margin-bottom: 1rem;">
@@ -72,25 +117,38 @@
   </div>
 
   <div style="margin-bottom: 1rem;">
-    <%= f.label :is_project, "Project?" %><br>
-    <%= f.check_box :is_project %>
-    <p style="color: #666; font-size: 0.875rem;">Mark as a project to run over multiple days and attach claims.</p>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
     <%= f.submit "Create Job", class: "btn" %>
   </div>
 
   <script>
-    function populateFromClient(clientId) {
-      if (!clientId) return;
-      var clients = <%= raw Client.ordered.map { |c| [c.id, { name: c.name, address: c.delivery_address, phone_number: c.primary_contact_mobile }] }.to_json %>;
-      var client = clients[clientId];
-      if (client) {
-        document.getElementById("job_customer_name").value = client.name;
-        document.getElementById("job_address").value = client.address;
-        document.getElementById("job_contact_number").value = client.phone_number || "";
+    var clientsData = <%= raw Client.ordered.map { |c| [
+      c.id,
+      {
+        customer_code: c.customer_code,
+        name: c.name,
+        contact_person: c.contact_person,
+        email: c.email,
+        phone_number: c.primary_contact_mobile || c.phone_number,
+        delivery_address: c.delivery_address,
+        postal_address: c.postal_address || c.delivery_address
       }
+    ] }.to_h.to_json %>;
+
+    function populateFromClient(clientId) {
+      var c = clientsData[clientId];
+      var fields = {
+        "job_customer_code": c && c.customer_code,
+        "job_customer_name": c && c.name,
+        "job_contact_person": c && c.contact_person,
+        "job_email": c && c.email,
+        "job_contact_number": c && c.phone_number,
+        "job_address": c && c.delivery_address,
+        "job_postal_address": c && c.postal_address
+      };
+      Object.keys(fields).forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.value = fields[id] || "";
+      });
     }
   </script>
 
