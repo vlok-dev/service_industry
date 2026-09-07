@@ -65,12 +65,12 @@
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :status %><br>
-    <%= f.select :status, Job.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: false }, { required: true } %>
+    <%= f.select :status, Job.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: false } %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :priority %><br>
-    <%= f.select :priority, Job.priorities.keys.map { |p| [p.humanize, p] }, { include_blank: false }, { required: true } %>
+    <%= f.select :priority, Job.priorities.keys.map { |p| [p.humanize, p] }, { include_blank: false } %>
   </div>
 
   <div style="margin-bottom: 1rem;">
