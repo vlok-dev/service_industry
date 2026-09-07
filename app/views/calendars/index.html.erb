@@ -36,7 +36,7 @@
       <% if @jobs.any? %>
         <% @jobs.order(:scheduled_time).each do |job| %>
           <tr>
-            <td><%= job.scheduled_time&.strftime("%H:%M") || "—" %></td>
+            <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
             <td><%= job.customer_name %></td>
             <td><%= job.address %></td>
             <td><%= job.assigned_to&.name || "Unassigned" %></td>
@@ -58,7 +58,7 @@
       <ul>
         <% day_jobs.order(:scheduled_time).each do |job| %>
           <li>
-            <strong><%= job.scheduled_time&.strftime("%H:%M") || "—" %></strong> —
+            <strong><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></strong> —
             <%= link_to "#{job.customer_name} - #{job.address.truncate(40)}", job %>
             (<%= job.assigned_to&.name || "Unassigned" %>)
             — <span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span>
@@ -92,7 +92,7 @@
               <% day_jobs = @jobs_by_date[day] || [] %>
               <% day_jobs.first(3).each do |job| %>
                 <div style="font-size: 0.75rem; background: #dbeafe; padding: 2px 4px; margin-top: 2px; border-radius: 3px;">
-                  <%= job.scheduled_time&.strftime("%H:%M") %> <%= link_to job.customer_name.truncate(15), job %>
+                  <%= job.scheduled_time&.strftime("%I:%M %p")&.strip %> <%= link_to job.customer_name.truncate(15), job %>
                 </div>
               <% end %>
               <% if day_jobs.size > 3 %>

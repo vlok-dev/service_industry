@@ -40,17 +40,15 @@
             <% @my_jobs.each do |job| %>
               <tr>
                 <td><span style="font-family: monospace; font-size: 0.8rem; color: var(--text-muted);"><%= job.job_number || "N/A" %></span></td>
-                <td><%= job.scheduled_time&.strftime("%H:%M") || "—" %></td>
+                <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.description.to_s.truncate(60) %></td>
                 <td><%= job.address.to_s.truncate(40) %></td>
                 <td>
                   <div style="font-size: 0.875rem;">
                     <div><strong><%= job.customer_name %></strong></div>
-                    <% if job.client&.phone_number.present? %>
-                      <div style="color: var(--text-muted);"><%= job.client.phone_number %></div>
-                    <% end %>
-                    <% if job.client&.email.present? %>
+                    <div style="color: var(--text-muted);"><%= job.contact_number || job.client&.phone_number || "—" %></div>
+                    <% if job.client&.email.present? && job.contact_number.blank? %>
                       <div style="color: var(--text-muted);"><%= job.client.email %></div>
                     <% end %>
                   </div>
@@ -176,7 +174,7 @@
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
                 <td><%= render "status_dropdown", job: job %></td>
-                <td><%= job.scheduled_date&.strftime("%b %d, %Y") %> at <%= job.scheduled_time&.strftime("%H:%M") || "TBD" %></td>
+                <td><%= job.scheduled_date&.strftime("%b %d, %Y") %> at <%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
                 <td><%= job.assigned_to&.name || "Unassigned" %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
@@ -249,7 +247,7 @@
                 <td><%= job.job_number || "N/A" %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
-                <td><%= job.completed_at&.strftime("%b %d, %Y %H:%M") || "N/A" %></td>
+                <td><%= job.completed_at&.strftime("%b %d, %Y %I:%M %p") || "N/A" %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td><%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %></td>
               </tr>
@@ -366,7 +364,7 @@
             <% @today_jobs.each do |job| %>
               <tr>
                 <td><%= link_to (job.job_number || "N/A"), job_path(job), style: "color: var(--primary); text-decoration: none; font-weight: 500;", title: "View job and purchase orders" %></td>
-                <td><%= job.created_at.strftime("%H:%M") %></td>
+                <td><%= job.created_at.strftime("%I:%M %p")&.strip %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(35) %></td>
                 <td><%= job.description.truncate(50) %></td>
@@ -462,7 +460,7 @@
               <tr>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
-                <td><%= job.scheduled_date&.strftime("%b %d, %Y") %> at <%= job.scheduled_time&.strftime("%H:%M") || "TBD" %></td>
+                <td><%= job.scheduled_date&.strftime("%b %d, %Y") %> at <%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
                 <td><%= render "status_dropdown", job: job %></td>
                 <td>
                   <%= link_to "Update Status", edit_job_path(job), class: "btn btn-sm" %>

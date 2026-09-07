@@ -31,6 +31,11 @@
   </div>
 
   <div style="margin-bottom: 1rem;">
+    <%= f.label :contact_number, "Contact Number" %><br>
+    <%= f.text_field :contact_number, placeholder: "Phone number to reach the client" %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
     <%= f.label :description %><br>
     <%= f.text_area :description, required: true %>
   </div>
@@ -79,11 +84,12 @@
   <script>
     function populateFromClient(clientId) {
       if (!clientId) return;
-      var clients = <%= raw Client.ordered.map { |c| [c.id, { name: c.name, address: c.address }] }.to_json %>;
+      var clients = <%= raw Client.ordered.map { |c| [c.id, { name: c.name, address: c.address, phone_number: c.phone_number }] }.to_json %>;
       var client = clients[clientId];
       if (client) {
         document.getElementById("job_customer_name").value = client.name;
         document.getElementById("job_address").value = client.address;
+        document.getElementById("job_contact_number").value = client.phone_number || "";
       }
     }
   </script>

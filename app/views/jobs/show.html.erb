@@ -8,14 +8,14 @@
 <p><strong>Status:</strong> <span class="badge badge-<%= @job.status %>"><%= @job.status.humanize %></span></p>
 <p><strong>Priority:</strong> <%= @job.priority.humanize %></p>
 <p><strong>Scheduled Date:</strong> <%= @job.scheduled_date&.strftime("%Y-%m-%d") || "Not scheduled" %></p>
-<p><strong>Scheduled Time:</strong> <%= @job.scheduled_time&.strftime("%H:%M") || "Not scheduled" %></p>
+<p><strong>Scheduled Time:</strong> <%= @job.scheduled_time&.strftime("%I:%M %p")&.strip || "Not scheduled" %></p>
 <% if @job.scheduled_end_date.present? && @job.scheduled_end_date > @job.scheduled_date %>
   <p><strong>Scheduled End Date:</strong> <%= @job.scheduled_end_date.strftime("%Y-%m-%d") %></p>
 <% end %>
 <% if policy(@job).add_extra_day? %>
   <%= button_to "Add Extra Day", add_extra_day_job_path(@job), method: :patch, data: { confirm: "Extend the scheduled end date by one day?" }, class: "btn btn-secondary", style: "display: inline;" %>
 <% end %>
-<p><strong>Assigned To:</strong> <%= @job.assigned_to&.name || "Unassigned" %></p>
+<p><strong>Contact Number:</strong> <%= @job.contact_number || "—" %></p><p><strong>Assigned To:</strong> <%= @job.assigned_to&.name || "Unassigned" %></p>
 <p><strong>Notes:</strong> <%= @job.notes || "None" %></p>
 <p><strong>Logged By:</strong> <%= @job.user.name %></p>
 

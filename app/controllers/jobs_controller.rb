@@ -118,7 +118,7 @@ class JobsController < ApplicationController
     permitted = if current_user.accountant?
       [ :invoice_number ]
     else
-      [ :customer_name, :address, :description, :status, :priority, :assigned_to_id, :notes, :scheduled_date, :scheduled_time, :scheduled_end_date, :job_number, :invoice_number, :is_project, :client_id ]
+      [ :customer_name, :address, :description, :status, :priority, :assigned_to_id, :notes, :scheduled_date, :scheduled_time, :scheduled_end_date, :job_number, :invoice_number, :is_project, :client_id, :contact_number ]
     end
     params.require(:job).permit(permitted)
   end
