@@ -1,7 +1,7 @@
 require "csv"
 
 class ClientsController < ApplicationController
-  before_action :require_manager, except: %i[ index show ]
+  before_action :require_manager, except: %i[ index show delete_all ]
   before_action :set_client, only: %i[ show edit update destroy ]
 
   def import
@@ -120,6 +120,11 @@ class ClientsController < ApplicationController
     end
     @client.destroy
     redirect_to clients_path, notice: "Client was deleted."
+  end
+
+  def delete_all
+    Client.left_joins(:jobs).where(jobs: { id: nil }).destroy_all
+    redirect_to clients_path, notice: "All clients with no jobs were deleted."
   end
 
   private

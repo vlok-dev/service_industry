@@ -30,6 +30,7 @@ Rails.application.routes.draw do
     collection do
       get :import
       post :import_create
+      delete :delete_all
     end
   end
   resources :inventory_items do

@@ -1,6 +1,10 @@
 <p><%= link_to "New Client", new_client_path, class: "btn btn-success" %></p>
 <p><%= link_to "Import CSV", import_clients_path, class: "btn btn-secondary" %></p>
 
+<% if current_user&.admin? || current_user&.super_admin? %>
+  <%= button_to "Delete All Clients (without jobs)", delete_all_clients_path, method: :delete, data: { confirm: "Delete ALL clients that have no jobs? This cannot be undone." }, class: "btn btn-danger", style: "display: inline-block;" %>
+<% end %>
+
 <h1>Clients</h1>
 
 <%= form_with url: clients_path, method: :get, local: true, style: "margin-bottom: 1rem;" do |f| %>
