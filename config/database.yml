@@ -15,6 +15,4 @@ production:
   adapter: postgresql
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  url: <%= ENV['DATABASE_URL'] %>
-  sslmode: verify-full
-  sslrootcert: <%= Rails.root.join('config/certs/ca.pem') %>
+  url: <%= ENV['DATABASE_URL']&.gsub(/?.*$/, '') %>?sslmode=require
