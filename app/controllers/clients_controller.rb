@@ -24,8 +24,10 @@ class ClientsController < ApplicationController
     tempfile = file.tempfile
     tempfile.rewind
     csv_text = tempfile.read
+    csv_text = csv_text.force_encoding("UTF-8")
+    csv_text = csv_text.sub(/\A\xEF\xBB\xBF/, "")
     rows = CSV.parse(csv_text, headers: true) || []
-    rows = rows.map { |r| r.to_h.transform_keys { |k| k.to_s.delete("\xEF\xBB\xBF").strip } }
+    rows = rows.map { |r| r.to_h.transform_keys { |k| k.to_s.strip } }
        rows.each_with_index do |row, idx|
        line_num = idx + 2
        customer_code = (row["Customer Code"] || "").strip
