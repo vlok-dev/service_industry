@@ -42,7 +42,11 @@
               <td><%= render "job_type_dropdown", job: job %></td>
               <td>
                 <span id="whatsapp-cell-<%= job.id %>">
-                  <%= link_to "Send WhatsApp", "#", class: "btn btn-sm whatsapp-confirm-btn", data: { job_id: job.id } %>
+                  <% if job.whatsapp_sent_at %>
+                    Sent WhatsApp on <%= (job.whatsapp_sent_at + 2.hours).strftime('%d %b %Y') %> at <%= (job.whatsapp_sent_at + 2.hours).strftime('%I:%M %p') %>
+                  <% else %>
+                    <%= link_to "Send WhatsApp", "#", class: "btn btn-sm whatsapp-confirm-btn", data: { job_id: job.id } %>
+                  <% end %>
                 </span>
               </td>
             </tr>

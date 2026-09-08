@@ -215,7 +215,9 @@ end %>
       <%= link_to "+ Add Purchase Order", new_job_purchase_order_path(@job), class: "btn" %>
       <% if policy(@job).show? && @job.assigned_to&.phone_number.present? %>
         <span id="whatsapp-cell-<%= @job.id %>">
-          <% if current_user.scheduler? || current_user.super_admin? %>
+          <% if @job.whatsapp_sent_at %>
+            Sent WhatsApp on <%= (@job.whatsapp_sent_at + 2.hours).strftime('%d %b %Y') %> at <%= (@job.whatsapp_sent_at + 2.hours).strftime('%I:%M %p') %>
+          <% elsif current_user.scheduler? || current_user.super_admin? %>
             <%= link_to "Send via WhatsApp", "#", class: "btn btn-success whatsapp-confirm-btn", data: { job_id: @job.id } %>
           <% else %>
             <%= link_to "Send via WhatsApp", whatsapp_job_path(@job), class: "btn btn-success", data: { confirm: "Open WhatsApp to send job details to plumber?" } %>

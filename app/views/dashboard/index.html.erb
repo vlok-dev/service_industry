@@ -587,7 +587,11 @@
                 <td>
                   <div class="actions-icon">
                     <%= link_to "Update Status", edit_job_path(job), class: "btn btn-sm" %>
-                    <%= link_to "WhatsApp", whatsapp_job_path(job), class: "btn btn-sm btn-success", data: { confirm: "Open WhatsApp to send address to customer?" } %>
+                    <% if job.whatsapp_sent_at %>
+                      <span style="font-size: 0.8rem; color: var(--text-muted);">Sent WhatsApp on <%= (job.whatsapp_sent_at + 2.hours).strftime('%d %b %Y') %> at <%= (job.whatsapp_sent_at + 2.hours).strftime('%I:%M %p') %></span>
+                    <% else %>
+                      <%= link_to "WhatsApp", whatsapp_job_path(job), class: "btn btn-sm btn-success", data: { confirm: "Open WhatsApp to send address to customer?" } %>
+                    <% end %>
                   </div>
                 </td>
               </tr>
