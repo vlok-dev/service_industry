@@ -212,7 +212,9 @@
               <th>Customer</th>
               <th>Address</th>
               <th>Status</th>
-              <th>Scheduled</th>
+              <th>Start Date</th>
+              <th>Time</th>
+              <th>Type</th>
               <th>Assigned To</th>
               <th>Invoice #</th>
               <th>Action</th>
@@ -225,7 +227,9 @@
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
                 <td><%= render "status_dropdown", job: job %></td>
-                <td><%= job.scheduled_date&.strftime("%b %d, %Y") %> at <%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
+                <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
+                <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
+                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
                 <td><%= job.assigned_to&.name || "Unassigned" %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
@@ -255,6 +259,9 @@
               <th>Customer</th>
               <th>Address</th>
               <th>Status</th>
+              <th>Start Date</th>
+              <th>Time</th>
+              <th>Type</th>
               <th>Assigned To</th>
               <th>Invoice #</th>
               <th>Action</th>
@@ -267,6 +274,9 @@
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
                 <td><%= render "status_dropdown", job: job %></td>
+                <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
+                <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
+                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
                 <td><%= job.assigned_to&.name || "Unassigned" %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
@@ -295,7 +305,10 @@
               <th>Job #</th>
               <th>Customer</th>
               <th>Address</th>
+              <th>Start Date</th>
+              <th>Time</th>
               <th>Completed</th>
+              <th>Type</th>
               <th>Invoice #</th>
               <th>Action</th>
             </tr>
@@ -306,7 +319,10 @@
                 <td><%= job.job_number || "N/A" %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
+                <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
+                <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
                 <td><%= job.completed_at&.strftime("%b %d, %Y %I:%M %p") || "N/A" %></td>
+                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
                   <div class="actions-icon">
