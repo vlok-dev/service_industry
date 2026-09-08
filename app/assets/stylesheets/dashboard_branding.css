@@ -205,6 +205,12 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
+.schedule-row td {
+  padding: 0.75rem !important;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
 /* Nav brand */
 nav .brand {
   color: var(--industro-navy);
