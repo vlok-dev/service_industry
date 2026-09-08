@@ -16,43 +16,47 @@
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :client_id, "Client" %><br>
-    <%= f.collection_select :client_id, Client.ordered, :id, ->(c) { "#{c.customer_code.presence || '—'} — #{c.name}" }, { include_blank: "Select a client (optional)" }, { onchange: "populateFromClient(this.value);" } %>
-    <p style="color: #666; font-size: 0.875rem;">Optional: Select a saved client to auto-fill customer details.</p>
+    <div class="client-search-wrapper">
+      <input type="hidden" name="job[client_id]" id="job_client_id" value="<%= @job.client_id %>">
+      <input type="text" id="client_search" class="client-search-input" placeholder="Search clients..." autocomplete="off">
+      <div id="client_dropdown" class="client-dropdown"></div>
+    </div>
+    <p style="color: #666; font-size: 0.875rem; margin-top: 0.25rem;">Optional: Search for a client to auto-fill customer details.</p>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :customer_code, "Customer Code" %><br>
-    <%= f.text_field :customer_code, readonly: true, placeholder: "Auto-filled when client selected" %>
+    <%= f.text_field :customer_code, placeholder: "Auto-filled when client selected" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :customer_name, "Customer Name" %><br>
-    <%= f.text_field :customer_name, readonly: true, required: true %>
+    <%= f.text_field :customer_name, required: true %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :contact_person, "Primary Contact" %><br>
-    <%= f.text_field :contact_person, readonly: true, placeholder: "Auto-filled when client selected" %>
+    <%= f.text_field :contact_person, placeholder: "Auto-filled when client selected" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :email, "Primary Contact Email" %><br>
-    <%= f.email_field :email, readonly: true, placeholder: "Auto-filled when client selected" %>
+    <%= f.email_field :email, placeholder: "Auto-filled when client selected" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :contact_number, "Primary Contact Mobile" %><br>
-    <%= f.text_field :contact_number, readonly: true, placeholder: "Auto-filled when client selected" %>
+    <%= f.text_field :contact_number, placeholder: "Auto-filled when client selected" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :address, "Primary Delivery Address" %><br>
-    <%= f.text_area :address, readonly: true, rows: 2, required: true %>
+    <%= f.text_area :address, rows: 2, required: true %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :postal_address, "Primary Postal Address" %><br>
-    <%= f.text_area :postal_address, readonly: true, rows: 2, placeholder: "Auto-filled when client selected" %>
+    <%= f.text_area :postal_address, rows: 2, placeholder: "Auto-filled when client selected" %>
     <p style="color: #666; font-size: 0.875rem;">Same as delivery if blank on client.</p>
   </div>
 
@@ -150,6 +154,93 @@
         if (el) el.value = fields[id] || "";
       });
     }
+
+    function initClientSearch() {
+      var searchInput = document.getElementById('client_search');
+      var dropdown = document.getElementById('client_dropdown');
+      var hiddenInput = document.getElementById('job_client_id');
+      if (!searchInput || !dropdown || !hiddenInput) return;
+
+      var selectedId = hiddenInput.value;
+
+      function renderClients(filterText) {
+        var term = (filterText || '').toLowerCase();
+        var html = '';
+        var count = 0;
+        Object.keys(clientsData).forEach(function(id) {
+          var c = clientsData[id];
+          var label = (c.customer_code ? c.customer_code + ' — ' : '') + c.name;
+          if (term && label.toLowerCase().indexOf(term) === -1) return;
+          count++;
+          var selectedClass = (String(id) === String(selectedId)) ? ' active' : '';
+          html += '<div class="client-option' + selectedClass + '" data-id="' + id + '"><span class="client-code">' + (c.customer_code || '—') + '</span><span class="client-name">' + (c.name || '').replace(/</g, '&lt;') + '</span></div>';
+        });
+        if (!count) {
+          html = '<div class="client-no-results">No clients found</div>';
+        }
+        dropdown.innerHTML = html;
+        dropdown.classList.add('open');
+
+        dropdown.querySelectorAll('.client-option').forEach(function(el) {
+          el.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            var id = el.getAttribute('data-id');
+            hiddenInput.value = id;
+            searchInput.value = el.querySelector('.client-name').textContent;
+            dropdown.classList.remove('open');
+            if (id) populateFromClient(id);
+          });
+        });
+      }
+
+      searchInput.addEventListener('input', function() {
+        renderClients(searchInput.value);
+      });
+
+      searchInput.addEventListener('focus', function() {
+        renderClients(searchInput.value);
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.remove('open');
+        }
+      });
+
+      searchInput.addEventListener('keydown', function(e) {
+        var active = dropdown.querySelector('.client-option.active');
+        var options = Array.prototype.slice.call(dropdown.querySelectorAll('.client-option'));
+        var index = options.indexOf(active);
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          var next = options[index + 1];
+          if (next) {
+            options.forEach(function(o) { o.classList.remove('active'); });
+            next.classList.add('active');
+          }
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          var prev = options[index - 1];
+          if (prev) {
+            options.forEach(function(o) { o.classList.remove('active'); });
+            prev.classList.add('active');
+          }
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (active) {
+            var id = active.getAttribute('data-id');
+            hiddenInput.value = id;
+            searchInput.value = active.querySelector('.client-name').textContent;
+            dropdown.classList.remove('open');
+            if (id) populateFromClient(id);
+          }
+        } else if (e.key === 'Escape') {
+          dropdown.classList.remove('open');
+        }
+      });
+    }
+
+    initClientSearch();
   </script>
 
 <% end %>

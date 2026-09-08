@@ -31,7 +31,7 @@ class CalendarsController < ApplicationController
                when "week" then date - 1.week
                else date - 1.month
                end
-    redirect_to calendars_path(view: params[:view], date: new_date)
+    redirect_to calendar_path(view: params[:view], date: new_date)
   end
 
   def next_date
@@ -41,6 +41,6 @@ class CalendarsController < ApplicationController
                when "week" then date + 1.week
                else date + 1.month
                end
-    redirect_to calendars_path(view: params[:view], date: new_date)
+    redirect_to calendar_path(view: params[:view], date: new_date)
   end
 end

@@ -23,9 +23,11 @@ end %>
       <p class="subtitle"><%= @job.description.to_s.truncate(120) %></p>
     </div>
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-      <%= link_to "Back", jobs_path, class: "btn btn-sm", style: "background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: white; backdrop-filter: blur(4px);" %>
+      <%= link_to "Back", jobs_path, class: "btn btn-sm" %>
       <% if policy(@job).edit? %>
-        <%= link_to "Edit", edit_job_path(@job), class: "btn btn-sm", style: "background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: white; backdrop-filter: blur(4px);" %>
+        <%= link_to edit_job_path(@job), class: "btn-icon", title: "Edit" do %>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        <% end %>
       <% end %>
       <% if !@job.completed? && policy(@job).close? %>
         <%= button_to "Close Job", close_job_path(@job), method: :patch, data: { confirm: "Close this job and mark it as completed with invoice?" }, class: "btn btn-sm btn-success" %>
@@ -198,7 +200,9 @@ end %>
                 <td><strong><%= po.supplier_name %></strong></td>
                 <td><%= po.order_date&.strftime("%Y-%m-%d") %></td>
                 <td><strong>R <%= number_with_precision(po.subtotal, precision: 2) %></strong></td>
-                <td style="text-align: right;"><%= link_to "View", job_purchase_order_path(@job, po), class: "btn btn-sm" %></td>
+                <td style="text-align: right;"><%= link_to job_purchase_order_path(@job, po), class: "btn-icon btn-icon-primary", title: "View" do %>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <% end %></td>
               </tr>
             <% end %>
           </tbody>
