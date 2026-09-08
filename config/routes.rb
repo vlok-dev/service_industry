@@ -16,7 +16,9 @@ Rails.application.routes.draw do
       patch :add_extra_day
       patch :close
       patch :update_status
+      patch :update_job_type
       get :whatsapp
+      post :confirm_whatsapp
     end
     collection do
       get :bulk_whatsapp

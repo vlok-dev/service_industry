@@ -950,6 +950,61 @@
         border-color: var(--primary);
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
+
+      /* WhatsApp confirmation modal */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+      }
+
+      .modal-dialog {
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        max-width: 420px;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      .modal-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .modal-header h3 {
+        margin: 0;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+
+      .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+      }
     </style>
     <%= stylesheet_link_tag "dashboard_branding", "data-turbo-track": "reload" %>
   </head>
@@ -1087,7 +1142,75 @@
             sidebar.classList.remove('mobile-open');
           }
         });
+
+        // WhatsApp confirmation modal
+        var whatsappModal = document.getElementById('whatsapp-confirm-modal');
+        var whatsappCancelBtn = document.getElementById('whatsapp-confirm-cancel');
+        var whatsappYesBtn = document.getElementById('whatsapp-confirm-yes');
+
+        if (whatsappCancelBtn) {
+          whatsappCancelBtn.addEventListener('click', function() {
+            whatsappModal.classList.remove('active');
+          });
+        }
+
+        if (whatsappYesBtn) {
+          whatsappYesBtn.addEventListener('click', function() {
+            var jobId = whatsappModal.getAttribute('data-job-id');
+            if (!jobId) return;
+
+            var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            fetch('/jobs/' + jobId + '/confirm_whatsapp', {
+              method: 'POST',
+              headers: {
+                'X-CSRF-Token': csrfToken,
+                'Accept': 'application/json'
+              }
+            })
+            .then(function(response) {
+              if (!response.ok) throw new Error('Network response was not ok');
+              return response.json();
+            })
+            .then(function(data) {
+              var cell = document.getElementById('whatsapp-cell-' + jobId);
+              if (cell && data.timestamp && data.whatsapp_url) {
+                cell.innerHTML = 'Sent WhatsApp on ' + data.timestamp + ' at ' + data.time;
+                window.open(data.whatsapp_url, '_blank');
+              }
+              whatsappModal.classList.remove('active');
+            })
+            .catch(function(error) {
+              console.error('Error:', error);
+              alert('Failed to confirm WhatsApp send. Please try again.');
+              whatsappModal.classList.remove('active');
+            });
+          });
+        }
+
+        document.querySelectorAll('.whatsapp-confirm-btn').forEach(function(btn) {
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            whatsappModal.setAttribute('data-job-id', btn.getAttribute('data-job-id'));
+            whatsappModal.classList.add('active');
+          });
+        });
       });
     </script>
+
+    <div class="modal-overlay" id="whatsapp-confirm-modal">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Send WhatsApp</h3>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to send this job via WhatsApp?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="whatsapp-confirm-cancel">Cancel</button>
+          <button type="button" class="btn btn-success" id="whatsapp-confirm-yes">Yes, I'm sure</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

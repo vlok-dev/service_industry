@@ -1,5 +1,5 @@
 class JobsController < ApplicationController
-  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp add_extra_day close update_status ]
+  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp confirm_whatsapp update_job_type add_extra_day close update_status ]
 
   def index
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
@@ -71,6 +71,17 @@ class JobsController < ApplicationController
     end
   end
 
+  def update_job_type
+    authorize @job, :update_job_type?
+
+    @job.is_project = ActiveRecord::Type::Boolean.new.cast(params[:is_project])
+    if @job.save
+      redirect_back(fallback_location: dashboard_path, notice: "Job type was updated.")
+    else
+      redirect_back(fallback_location: dashboard_path, alert: @job.errors.full_messages.join(", "))
+    end
+  end
+
   def close
     authorize @job, :close?
 
@@ -96,6 +107,24 @@ class JobsController < ApplicationController
       redirect_to "https://wa.me/#{phone.gsub(/[^0-9]/, '')}?text=#{CGI.escape(message)}", allow_other_host: true
     else
       redirect_to @job, alert: "No phone number available for the assigned plumber."
+    end
+  end
+
+  def confirm_whatsapp
+    authorize @job, :show?
+    @job.update(whatsapp_sent_at: Time.current.in_time_zone('Africa/Johannesburg'))
+
+    phone = @job.assigned_to&.phone_number
+    if phone.present?
+      message = "New Job Assigned:\nCustomer: #{@job.customer_name}\nAddress: #{@job.address}\nDescription: #{@job.description}\nScheduled: #{@job.scheduled_date&.strftime('%d %B %Y')} at #{@job.scheduled_time&.strftime('%I:%M %p') || 'TBD'}\nPriority: #{@job.priority.humanize}\nStatus: #{@job.status.humanize}"
+      whatsapp_url = "https://wa.me/#{phone.gsub(/[^0-9]/, '')}?text=#{CGI.escape(message)}"
+      render json: {
+        timestamp: (@job.whatsapp_sent_at + 2.hours).strftime('%d %b %Y'),
+        time: (@job.whatsapp_sent_at + 2.hours).strftime('%I:%M %p'),
+        whatsapp_url: whatsapp_url
+      }
+    else
+      render json: { error: "No phone number available" }, status: :unprocessable_entity
     end
   end
 

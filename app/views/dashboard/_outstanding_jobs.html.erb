@@ -9,7 +9,7 @@
             <th>Customer</th>
             <th>Address</th>
             <th>Status</th>
-            <th>Start Date</th>
+            <th>Date</th>
             <th>Time</th>
             <th>Job Type</th>
             <th>Created</th>
@@ -27,7 +27,7 @@
               <td><%= render "status_dropdown", job: job %></td>
               <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
               <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
-              <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
+              <td><%= render "job_type_dropdown", job: job %></td>
               <td><%= job.created_at.strftime("%b %d, %Y") %></td>
               <td><%= job.assigned_to&.name || "Unassigned" %></td>
               <td><%= job.invoice_number || "—" %></td>

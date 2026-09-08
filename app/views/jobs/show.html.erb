@@ -214,7 +214,13 @@ end %>
     <div style="margin-top: 1rem;">
       <%= link_to "+ Add Purchase Order", new_job_purchase_order_path(@job), class: "btn" %>
       <% if policy(@job).show? && @job.assigned_to&.phone_number.present? %>
-        <%= link_to "Send via WhatsApp", whatsapp_job_path(@job), class: "btn btn-success", data: { confirm: "Open WhatsApp to send job details to plumber?" } %>
+        <span id="whatsapp-cell-<%= @job.id %>">
+          <% if current_user.scheduler? || current_user.super_admin? %>
+            <%= link_to "Send via WhatsApp", "#", class: "btn btn-success whatsapp-confirm-btn", data: { job_id: @job.id } %>
+          <% else %>
+            <%= link_to "Send via WhatsApp", whatsapp_job_path(@job), class: "btn btn-success", data: { confirm: "Open WhatsApp to send job details to plumber?" } %>
+          <% end %>
+        </span>
       <% end %>
     </div>
   </div>

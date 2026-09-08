@@ -1,0 +1,7 @@
+<% if policy(job).update_job_type? %>
+  <%= form_with url: update_job_type_job_path(job), method: :patch, local: true, data: { turbo: false }, style: "display: inline;" do |f| %>
+    <%= f.select :is_project, [["Maintenance", false], ["Project", true]], { include_blank: false, selected: job.is_project }, { onchange: "this.form.submit();", style: "padding: 0.25rem 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; background: white; cursor: pointer;" } %>
+  <% end %>
+<% else %>
+  <span class="badge badge-<%= job.is_project? ? 'scheduled' : 'pending' %>"><%= job.is_project? ? "Project" : "Maintenance" %></span>
+<% end %>

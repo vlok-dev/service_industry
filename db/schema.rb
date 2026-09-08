@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_150546) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_08_170000) do
   create_table "claims", force: :cascade do |t|
     t.decimal "amount", precision: 12, scale: 2, null: false
     t.date "claim_date", null: false
@@ -89,6 +89,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_150546) do
     t.integer "status"
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.datetime "whatsapp_sent_at"
     t.index ["assigned_to_id"], name: "index_jobs_on_assigned_to_id"
     t.index ["client_id"], name: "index_jobs_on_client_id"
     t.index ["is_project"], name: "index_jobs_on_is_project"

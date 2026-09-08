@@ -59,7 +59,7 @@
           <thead>
             <tr>
               <th>Job #</th>
-              <th>Start Date</th>
+              <th>Date</th>
               <th>Time</th>
               <th>Customer</th>
               <th>Problem</th>
@@ -90,7 +90,7 @@
                   </div>
                 </td>
                 <td><%= render "status_dropdown", job: job %></td>
-                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
+                <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= job.assigned_to&.name || "Unassigned" %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
@@ -182,7 +182,7 @@
                 <td><%= job.address.truncate(40) %></td>
                 <td><%= render "status_dropdown", job: job %></td>
                 <td><%= job.priority.humanize %></td>
-                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
+                <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= job.user.name %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
@@ -212,7 +212,7 @@
               <th>Customer</th>
               <th>Address</th>
               <th>Status</th>
-              <th>Start Date</th>
+              <th>Date</th>
               <th>Time</th>
               <th>Job Type</th>
               <th>Assigned To</th>
@@ -229,7 +229,7 @@
                 <td><%= render "status_dropdown", job: job %></td>
                 <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
                 <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
-                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
+                <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= job.assigned_to&.name || "Unassigned" %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
@@ -259,7 +259,7 @@
               <th>Customer</th>
               <th>Address</th>
               <th>Status</th>
-              <th>Start Date</th>
+              <th>Date</th>
               <th>Time</th>
               <th>Job Type</th>
               <th>Assigned To</th>
@@ -276,7 +276,7 @@
                 <td><%= render "status_dropdown", job: job %></td>
                 <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
                 <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
-                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
+                <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= job.assigned_to&.name || "Unassigned" %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
@@ -305,7 +305,7 @@
               <th>Job #</th>
               <th>Customer</th>
               <th>Address</th>
-              <th>Start Date</th>
+              <th>Date</th>
               <th>Time</th>
               <th>Completed</th>
               <th>Job Type</th>
@@ -322,7 +322,7 @@
                 <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
                 <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
                 <td><%= job.completed_at&.strftime("%b %d, %Y %I:%M %p") || "N/A" %></td>
-                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
+                <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
                   <div class="actions-icon">
@@ -378,7 +378,7 @@
               <th>Status</th>
               <th>Priority</th>
               <th>Job Type</th>
-              <th>Start Date</th>
+              <th>Date</th>
               <th>Time</th>
               <th>Actions</th>
             </tr>
@@ -391,7 +391,7 @@
                 <td><%= job.description.truncate(60) %></td>
                 <td><%= render "status_dropdown", job: job %></td>
                 <td><%= job.priority.humanize %></td>
-                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
+                <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
                 <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
                 <td>
@@ -461,14 +461,14 @@
           <thead>
             <tr>
               <th>Job #</th>
-              <th>Start Date</th>
+              <th>Date</th>
               <th>Time</th>
               <th>Customer</th>
               <th>Address</th>
               <th>Description</th>
-              <th>Status</th>
-              <th>Type</th>
-              <th>Action</th>
+               <th>Status</th>
+               <th>Job Type</th>
+               <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -481,7 +481,7 @@
                 <td><%= job.address.truncate(35) %></td>
                 <td><%= job.description.truncate(50) %></td>
                 <td><%= render "status_dropdown", job: job %></td>
-                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
+                <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= link_to "Add PO", new_job_purchase_order_path(job), class: "btn btn-sm" %></td>
               </tr>
             <% end %>
@@ -506,13 +506,13 @@
           <thead>
             <tr>
               <th>Job #</th>
-              <th>Start Date</th>
+              <th>Date</th>
               <th>Date</th>
               <th>Customer</th>
               <th>Address</th>
-              <th>Status</th>
-              <th>Type</th>
-              <th>Action</th>
+               <th>Status</th>
+               <th>Job Type</th>
+               <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -524,7 +524,7 @@
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
                 <td><%= render "status_dropdown", job: job %></td>
-                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
+                <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= link_to "Add PO", new_job_purchase_order_path(job), class: "btn btn-sm" %></td>
               </tr>
             <% end %>
@@ -568,7 +568,7 @@
             <tr>
               <th>Customer</th>
               <th>Address</th>
-              <th>Start Date</th>
+              <th>Date</th>
               <th>Time</th>
               <th>Type</th>
               <th>Status</th>
@@ -582,7 +582,7 @@
                 <td><%= job.address.truncate(40) %></td>
                 <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
                 <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
-                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
+                <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= render "status_dropdown", job: job %></td>
                 <td>
                   <div class="actions-icon">
