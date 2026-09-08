@@ -59,13 +59,14 @@
           <thead>
             <tr>
               <th>Job #</th>
+              <th>Start Date</th>
               <th>Time</th>
               <th>Customer</th>
               <th>Problem</th>
               <th>Address</th>
               <th>Contact Number</th>
               <th>Status</th>
-              <th>Scheduled</th>
+              <th>Type</th>
               <th>Assigned To</th>
               <th>Invoice</th>
               <th>Actions</th>
@@ -75,6 +76,7 @@
             <% @my_jobs.each do |job| %>
               <tr>
                 <td><span style="font-family: monospace; font-size: 0.8rem; color: var(--text-muted);"><%= job.job_number || "N/A" %></span></td>
+                <td><%= job.scheduled_date&.strftime("%b %d") || "—" %></td>
                 <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.description.to_s.truncate(60) %></td>
@@ -88,7 +90,7 @@
                   </div>
                 </td>
                 <td><%= render "status_dropdown", job: job %></td>
-                <td><%= job.scheduled_date&.strftime("%b %d") || "—" %></td>
+                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
                 <td><%= job.assigned_to&.name || "Unassigned" %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
@@ -166,6 +168,7 @@
               <th>Address</th>
               <th>Status</th>
               <th>Priority</th>
+              <th>Type</th>
               <th>Created By</th>
               <th>Invoice #</th>
               <th>Action</th>
@@ -179,6 +182,7 @@
                 <td><%= job.address.truncate(40) %></td>
                 <td><%= render "status_dropdown", job: job %></td>
                 <td><%= job.priority.humanize %></td>
+                <td><%= job.is_project? ? "Project" : "Maintenance" %></td>
                 <td><%= job.user.name %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
