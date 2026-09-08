@@ -1,20 +1,23 @@
-<!DOCTYPE html>
+<!-- BEGIN app/views/layouts/application.html.erb
+--><!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Industro Plumbers" %></title>
+    <title>Industro Plumbers</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Industro Plumbers">
     <meta name="mobile-web-app-capable" content="yes">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+    <meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="albOzjIuwLhs2FjDD3pKAH_AePVuKvIWzyyH-ECe6NwocqBEsR8nw3bRh3rhKoy61Iw5tbmoYqiof7B7TmrhRA" />
+    
 
-    <%= yield :head %>
+    
 
     <link rel="icon" href="/IndustroPlumbers.png" type="image/png">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <link rel="stylesheet" href="/assets/application-c94b29d2.css" data-turbo-track="reload" />
+<link rel="stylesheet" href="/assets/dashboard_branding-74233239.css" data-turbo-track="reload" />
     <style>
       :root {
         --primary: #2563eb;
@@ -951,58 +954,53 @@
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
     </style>
-    <%= stylesheet_link_tag "dashboard_branding", "data-turbo-track": "reload" %>
   </head>
 
   <body>
-    <% if content_for?(:full_page) %>
-      <%= yield :full_page %>
-    <% else %>
-      <nav>
-        <%= link_to root_path, class: "brand" do %>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-          Industro Plumbers
-        <% end %>
-        <% if user_signed_in? %>
-          <div class="nav-links">
-            <div class="user-info">
-              <span class="name"><%= current_user.name %></span>
-              <span class="role"><%= current_user.role&.humanize || "User" %></span>
-            </div>
-            <%= link_to "Jobs", jobs_path %>
-            <%= link_to "Dashboard", dashboard_path %>
-            <% if current_user.admin? || current_user.super_admin? || current_user.reporter? %>
-            <%= link_to "Suppliers", suppliers_path %>
-            <%= link_to "Clients", clients_path %>
-            <%= link_to "Inventory", inventory_items_path %>
-            <% end %>
-            <% if current_user.scheduler? %>
-              <%= link_to "Calendar", calendar_path %>
-            <% end %>
-            <% if current_user.admin? || current_user.super_admin? %>
-              <%= link_to "Admin", admin_root_path %>
-            <% end %>
-            <%= button_to "Logout", destroy_user_session_path, method: :delete, style: "background: none; border: none; color: var(--text-muted); cursor: pointer; text-decoration: underline; display: inline; padding: 0; font-size: 0.875rem; font-family: inherit;" %>
-          </div>
-        <% else %>
-          <div class="nav-links">
-            <%= link_to "Login", new_user_session_path %>
-          </div>
-        <% end %>
-      </nav>
-
-      <div class="container">
-        <% if notice %>
-          <div class="notice"><%= notice %></div>
-        <% end %>
-        <% if alert %>
-          <div class="alert"><%= alert %></div>
-        <% end %>
-
-        <%= yield %>
+        <div class="login-page">
+    <div class="login-card">
+      <div class="login-header">
+        <h1>Industro Plumbers</h1>
+        <p>Sign in to your account</p>
       </div>
-    <% end %>
+      <form class="new_user" id="new_user" action="/users/sign_in" accept-charset="UTF-8" method="post"><input type="hidden" name="authenticity_token" value="t8vpDZVAJ8LXO7OljlhoysME5hN3IhdlJyTsePhVWSL_4uFm4kANLtwmv5ExjV4XtRcNYWd39Q6f1dfw6_ihmg" />
+        <div class="field">
+          <label for="user_email">Email</label>
+          <input autofocus="autofocus" autocomplete="email" placeholder="you@company.com" type="email" name="user[email]" id="user_email" />
+        </div>
+        <div class="field">
+          <label for="user_password">Password</label>
+          <input autocomplete="current-password" placeholder="Password" type="password" name="user[password]" id="user_password" />
+        </div>
+        <div class="field remember-me" style="background: #D0E48B; padding: 0.75rem; border-radius: 6px; margin-top: 0.5rem;">
+          <input type="checkbox" name="stay_logged_in" id="stay_logged_in" value="1" style="width: 18px; height: 18px; margin-right: 0.5rem;" />
+          <label style="font-weight: 600; color: #fff;" for="stay_logged_in">Stay Logged In</label>
+        </div>
+        <div class="actions">
+          <input type="submit" name="commit" value="Sign in" class="btn-login" data-disable-with="Sign in" />
+        </div>
+</form>      <!-- BEGIN app/views/devise/shared/_links.html.erb
+-->
 
-    <%= javascript_importmap_tags %>
+  <p><a href="/users/password/new">Forgot your password?</a></p>
+
+
+
+<!-- END app/views/devise/shared/_links.html.erb -->
+    </div>
+  </div>
+
+
+    <script type="importmap" data-turbo-track="reload">{
+  "imports": {
+    "application": "/assets/application-535056cb.js",
+    "turbo": "https://cdn.jsdelivr.net/npm/@hotwired/turbo@2.0.23/dist/turbo.min.js",
+    "controllers": "/assets/controllers/index-e8dc057d.js"
+  }
+}</script>
+<link rel="modulepreload" href="/assets/application-535056cb.js">
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@hotwired/turbo@2.0.23/dist/turbo.min.js">
+<link rel="modulepreload" href="/assets/controllers/index-e8dc057d.js">
+<script type="module">import "application"</script>
   </body>
-</html>
+</html><!-- END app/views/layouts/application.html.erb -->

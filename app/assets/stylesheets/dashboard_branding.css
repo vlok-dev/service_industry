@@ -1,0 +1,122 @@
+/* Dashboard branding: Industro Plumbers colors and logo */
+:root {
+  --industro-navy: #1b2c65;
+  --industro-lime: #b2d33e;
+  --industro-gradient: linear-gradient(135deg, #1b2c65 0%, #b2d33e 100%);
+  --industro-gradient-hero: linear-gradient(135deg, #1b2c65 0%, #b2d33e 100%);
+}
+
+/* Logo hero block on dashboard */
+.hero-logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+.hero-logo img {
+  width: 200px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(27, 44, 101, 0.35);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 4px;
+}
+.hero-logo .brand-name {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 0, 0, 0.2);
+}
+.hero-logo .brand-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* Welcome greeting */
+.hero .welcome-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  margin-top: 0.25rem;
+  position: relative;
+  z-index: 1;
+}
+.hero .welcome-sub {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-top: 0.15rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* KPI cards use the same green accent */
+.kpi.kpi-pending::before { background: linear-gradient(180deg, #b2d33e, #84cc16); }
+.kpi.kpi-scheduled::before { background: linear-gradient(180deg, #b2d33e, #84cc16); }
+.kpi.kpi-progress::before { background: linear-gradient(180deg, #b2d33e, #84cc16); }
+.kpi.kpi-completed::before { background: linear-gradient(180deg, #b2d33e, #84cc16); }
+
+/* Buttons */
+.btn {
+  background: var(--industro-navy);
+  color: white;
+}
+.btn:hover {
+  background: var(--industro-lime);
+  color: #1b2c65;
+}
+.btn-success {
+  background: var(--industro-lime);
+  color: #1b2c65;
+}
+.btn-success:hover {
+  background: #84cc16;
+  color: #1b2c65;
+}
+
+/* Nav brand */
+nav .brand {
+  color: var(--industro-navy);
+}
+
+/* Stat cards (accountant/plumber) - same green for all */
+.stat-card.stat-pending::before { background: #b2d33e; }
+.stat-card.stat-scheduled::before { background: #b2d33e; }
+.stat-card.stat-in-progress::before { background: #b2d33e; }
+.stat-card.stat-completed::before { background: #b2d33e; }
+.stat-card.stat-default::before { background: #b2d33e; }
+
+/* Schedule view tabs */
+.view-tab.active {
+  background: var(--industro-navy);
+  color: white;
+  box-shadow: var(--shadow);
+}
+.view-tab:hover {
+  color: var(--industro-navy);
+}
+
+/* Job show hero */
+.hero {
+  background: var(--industro-gradient-hero);
+}
+
+/* Filter chips */
+.chip.active {
+  background: var(--industro-navy);
+  color: white;
+  border-color: var(--industro-navy);
+}
+
+/* Status dropdown pills */
+.badge-pending { background: #fef3c7; color: #92400e; }
+.badge-scheduled { background: #dbeafe; color: #1e40af; }
+.badge-in-progress { background: #fce7f3; color: #9d174d; }
+.badge-completed { background: #d1fae5; color: #065f46; }
+.badge-cancelled { background: #fee2e2; color: #991b1b; }
