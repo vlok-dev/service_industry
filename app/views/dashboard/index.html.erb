@@ -593,3 +593,29 @@
     </div>
   <% end %>
 <% end %>
+
+<% if current_user.scheduler? %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.btn-schedule-toggle').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var jobId = btn.getAttribute('data-job-id');
+          var row = document.getElementById('schedule-row-' + jobId);
+          if (row) {
+            row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+          }
+        });
+      });
+
+      document.querySelectorAll('.btn-cancel-schedule').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var jobId = btn.getAttribute('data-job-id');
+          var row = document.getElementById('schedule-row-' + jobId);
+          if (row) {
+            row.style.display = 'none';
+          }
+        });
+      });
+    });
+  </script>
+<% end %>
