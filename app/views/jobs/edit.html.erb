@@ -66,6 +66,22 @@
       <%= f.label :job_number, "Job Number" %><br>
       <%= f.text_field :job_number %>
     </div>
+
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :scheduled_date, "Scheduled Date" %><br>
+      <%= f.date_field :scheduled_date %>
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :scheduled_time, "Scheduled Time" %><br>
+      <%= f.time_field :scheduled_time %>
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :scheduled_end_date, "Scheduled End Date" %><br>
+      <%= f.date_field :scheduled_end_date %>
+      <p style="color: #666; font-size: 0.875rem;">Optional. Required for multi-day projects.</p>
+    </div>
   <% end %>
 
   <div style="margin-bottom: 1rem;">

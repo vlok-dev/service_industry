@@ -96,6 +96,41 @@
   color: #1b2c65;
 }
 
+.btn-schedule-toggle {
+  background: var(--industro-lime);
+  color: #1b2c65;
+  border: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-schedule-toggle:hover {
+  background: #84cc16;
+  transform: translateY(-1px);
+}
+
+.schedule-form {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+}
+.schedule-form input[type="date"],
+.schedule-form input[type="time"],
+.schedule-form select {
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* Icon buttons */
 .btn-icon {
   padding: 0.5rem;
@@ -131,20 +166,43 @@
   background: #fee2e2;
   color: #b91c1c;
 }
-.btn-icon.btn-icon-primary {
-  color: #1b2c65;
-  border-color: #dbeafe;
-  background: #eff6ff;
+.btn-icon.btn-icon-success {
+  color: #059669;
+  border-color: #d1fae5;
+  background: #ecfdf5;
 }
-.btn-icon.btn-icon-primary:hover {
-  background: #dbeafe;
-  color: #1e40af;
+.btn-icon.btn-icon-success:hover {
+  background: #d1fae5;
+  color: #047857;
 }
 .actions-icon {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
   align-items: center;
+}
+
+.schedule-form {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+.schedule-form input[type="date"],
+.schedule-form input[type="time"],
+.schedule-form select {
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.schedule-row td {
+  padding: 0.75rem !important;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 /* Nav brand */

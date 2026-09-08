@@ -25,19 +25,21 @@
               <td><%= job.created_at.strftime("%b %d, %Y") %></td>
               <td><%= job.assigned_to&.name || "Unassigned" %></td>
               <td><%= job.invoice_number || "—" %></td>
-              <td>
-                <div class="actions-icon">
-                  <%= link_to job, class: "btn-icon btn-icon-primary", title: "View" do %>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                  <% end %>
-                  <% if !job.completed? && policy(job).close? %>
-                    <%= button_to close_job_path(job), method: :patch, data: { confirm: "Close this job and mark it as completed with invoice?" }, class: "btn btn-sm btn-success" %>
-                  <% end %>
-                  <% if current_user.reporter? && !job.costed? %>
-                    <%= link_to "Cost (Add PO)", new_job_purchase_order_path(job), class: "btn btn-sm" %>
-                  <% end %>
-                </div>
-              </td>
+                <td>
+                  <div class="actions-icon">
+                    <%= link_to job, class: "btn-icon btn-icon-primary", title: "View" do %>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <% end %>
+                    <% if !job.completed? && policy(job).close? %>
+                      <%= button_to close_job_path(job), method: :patch, data: { confirm: "Close this job and mark it as completed with invoice?" }, class: "btn-icon btn-icon-success", title: "Close Job" do %>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      <% end %>
+                    <% end %>
+                    <% if current_user.reporter? && !job.costed? %>
+                      <%= link_to "Cost (Add PO)", new_job_purchase_order_path(job), class: "btn btn-sm" %>
+                    <% end %>
+                  </div>
+                </td>
             </tr>
           <% end %>
         </tbody>
