@@ -29,7 +29,7 @@
               <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
               <td><%= render "job_type_dropdown", job: job %></td>
               <td><%= job.created_at.strftime("%b %d, %Y") %></td>
-              <td><%= job.assigned_to&.name || "Unassigned" %></td>
+              <td><%= render "assigned_to_dropdown", job: job %></td>
               <td><%= job.invoice_number || "—" %></td>
                 <td>
                   <div class="actions-icon">

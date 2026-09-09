@@ -91,10 +91,15 @@
                 </td>
                 <td><%= render "status_dropdown", job: job %></td>
                 <td><%= render "job_type_dropdown", job: job %></td>
-                <td><%= job.assigned_to&.name || "Unassigned" %></td>
+                <td><%= render "assigned_to_dropdown", job: job %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
                   <div class="actions-icon">
+                    <% if job.pending? %>
+                      <button type="button" class="btn btn-sm btn-schedule-toggle" data-job-id="<%= job.id %>">
+                        Schedule
+                      </button>
+                    <% end %>
                     <%= link_to job, class: "btn-icon btn-icon-primary", title: "View" do %>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     <% end %>
@@ -107,6 +112,26 @@
                   </div>
                 </td>
               </tr>
+              <% if job.pending? %>
+                <tr id="schedule-row-<%= job.id %>" class="schedule-row" style="display: none;">
+                  <td colspan="12">
+                    <div class="schedule-form">
+                      <%= form_with url: schedule_job_path(job), method: :patch, local: true do |f| %>
+                        <%= f.hidden_field :status, value: "scheduled" %>
+                        <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+                          <%= f.date_field :scheduled_date, value: job.scheduled_date || Date.today, required: true, style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" %>
+                          <%= f.time_field :scheduled_time, value: (job.scheduled_time&.strftime("%H:%M") || ""), style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" %>
+                          <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, job.assigned_to_id), { include_blank: "Plumber" }, { style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" } %>
+                          <div style="display: flex; gap: 0.5rem;">
+                            <%= f.submit "Save", class: "btn btn-sm btn-success" %>
+                            <button type="button" class="btn btn-sm btn-secondary btn-cancel-schedule" data-job-id="<%= job.id %>">Cancel</button>
+                          </div>
+                        </div>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
             <% end %>
           </tbody>
         </table>
@@ -230,7 +255,7 @@
                 <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
                 <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
                 <td><%= render "job_type_dropdown", job: job %></td>
-                <td><%= job.assigned_to&.name || "Unassigned" %></td>
+                <td><%= render "assigned_to_dropdown", job: job %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
                   <div class="actions-icon">
@@ -277,7 +302,7 @@
                 <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
                 <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
                 <td><%= render "job_type_dropdown", job: job %></td>
-                <td><%= job.assigned_to&.name || "Unassigned" %></td>
+                <td><%= render "assigned_to_dropdown", job: job %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
                   <div class="actions-icon">
@@ -421,16 +446,41 @@
                 </td>
                 <td><%= render "status_dropdown", job: job %></td>
                 <td><%= render "job_type_dropdown", job: job %></td>
-                <td><%= job.assigned_to&.name || "Unassigned" %></td>
+                <td><%= render "assigned_to_dropdown", job: job %></td>
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
                   <div class="actions-icon">
+                    <% if job.pending? %>
+                      <button type="button" class="btn btn-sm btn-schedule-toggle" data-job-id="<%= job.id %>">
+                        Schedule
+                      </button>
+                    <% end %>
                     <%= link_to job, class: "btn-icon btn-icon-primary", title: "View" do %>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     <% end %>
                   </div>
                 </td>
               </tr>
+              <% if job.pending? %>
+                <tr id="schedule-row-<%= job.id %>" class="schedule-row" style="display: none;">
+                  <td colspan="12">
+                    <div class="schedule-form">
+                      <%= form_with url: schedule_job_path(job), method: :patch, local: true do |f| %>
+                        <%= f.hidden_field :status, value: "scheduled" %>
+                        <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+                          <%= f.date_field :scheduled_date, value: job.scheduled_date || Date.today, required: true, style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" %>
+                          <%= f.time_field :scheduled_time, value: (job.scheduled_time&.strftime("%H:%M") || ""), style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" %>
+                          <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, job.assigned_to_id), { include_blank: "Plumber" }, { style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" } %>
+                          <div style="display: flex; gap: 0.5rem;">
+                            <%= f.submit "Save", class: "btn btn-sm btn-success" %>
+                            <button type="button" class="btn btn-sm btn-secondary btn-cancel-schedule" data-job-id="<%= job.id %>">Cancel</button>
+                          </div>
+                        </div>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
             <% end %>
           </tbody>
         </table>
@@ -614,3 +664,27 @@
     </div>
   <% end %>
 <% end %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.btn-schedule-toggle').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var jobId = btn.getAttribute('data-job-id');
+          var row = document.getElementById('schedule-row-' + jobId);
+          if (row) {
+            row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+          }
+        });
+      });
+
+      document.querySelectorAll('.btn-cancel-schedule').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var jobId = btn.getAttribute('data-job-id');
+          var row = document.getElementById('schedule-row-' + jobId);
+          if (row) {
+            row.style.display = 'none';
+          }
+        });
+      });
+    });
+  </script>

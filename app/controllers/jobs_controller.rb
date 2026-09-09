@@ -1,5 +1,5 @@
 class JobsController < ApplicationController
-  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp confirm_whatsapp update_job_type add_extra_day close update_status ]
+  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp confirm_whatsapp update_job_type update_assigned_to add_extra_day close update_status ]
 
   def index
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
@@ -77,6 +77,17 @@ class JobsController < ApplicationController
     @job.is_project = ActiveRecord::Type::Boolean.new.cast(params[:is_project])
     if @job.save
       redirect_back(fallback_location: dashboard_path, notice: "Job type was updated.")
+    else
+      redirect_back(fallback_location: dashboard_path, alert: @job.errors.full_messages.join(", "))
+    end
+  end
+
+  def update_assigned_to
+    authorize @job, :update_assigned_to?
+
+    @job.assigned_to_id = params[:assigned_to_id].present? ? params[:assigned_to_id] : nil
+    if @job.save
+      redirect_back(fallback_location: dashboard_path, notice: "Assigned plumber was updated.")
     else
       redirect_back(fallback_location: dashboard_path, alert: @job.errors.full_messages.join(", "))
     end

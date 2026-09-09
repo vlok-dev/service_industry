@@ -48,7 +48,11 @@ class JobPolicy < ApplicationPolicy
   end
 
   def update_job_type?
-    record_owner_or_admin? || assigned_plumber? || user.accountant?
+    record_owner_or_admin? || assigned_plumber? || user.accountant? || user.scheduler?
+  end
+
+  def update_assigned_to?
+    record_owner_or_admin? || user.accountant? || user.scheduler?
   end
 
   private

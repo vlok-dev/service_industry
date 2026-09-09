@@ -1,0 +1,7 @@
+<% if policy(job).update_assigned_to? %>
+  <%= form_with url: update_assigned_to_job_path(job), method: :patch, local: true, data: { turbo: false }, style: "display: inline;" do |f| %>
+    <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, job.assigned_to_id), { include_blank: "Unassigned" }, { onchange: "this.form.submit();", style: "padding: 0.25rem 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; background: white; cursor: pointer;" } %>
+  <% end %>
+<% else %>
+  <span style="font-size: 0.8rem;"><%= job.assigned_to&.name || "Unassigned" %></span>
+<% end %>

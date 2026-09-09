@@ -17,6 +17,7 @@ Rails.application.routes.draw do
       patch :close
       patch :update_status
       patch :update_job_type
+      patch :update_assigned_to
       get :whatsapp
       post :confirm_whatsapp
     end
