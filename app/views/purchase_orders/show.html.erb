@@ -6,6 +6,7 @@
   <p><strong>Job:</strong> <%= link_to @job.job_number, job_path(@job) %> — <%= @job.customer_name %></p>
   <p><strong>Supplier:</strong> <%= @purchase_order.supplier_display_name %></p>
   <p><strong>Order Date:</strong> <%= @purchase_order.order_date&.strftime("%d %B %Y") || "N/A" %></p>
+  <p><strong>Delivery Date:</strong> <%= @purchase_order.expected_delivery&.strftime("%d %B %Y") || "N/A" %></p>
   <p><strong>Created By:</strong> <%= @purchase_order.created_by&.name || "N/A" %></p>
 </div>
 

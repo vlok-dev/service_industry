@@ -189,6 +189,7 @@ end %>
               <th>PO #</th>
               <th>Supplier</th>
               <th>Order Date</th>
+              <th>Delivery Date</th>
               <th>Total</th>
               <th style="text-align: left;">Action</th>
             </tr>
@@ -199,6 +200,7 @@ end %>
                 <td><span class="job-number"><%= po.po_number || "N/A" %></span></td>
                 <td><strong><%= po.supplier_name %></strong></td>
                 <td><%= po.order_date&.strftime("%d %B %Y") %></td>
+                <td><%= po.expected_delivery&.strftime("%d %B %Y") || "—" %></td>
                 <td><strong>R <%= number_with_precision(po.total_including_vat, precision: 2) %></strong></td>
                 <td style="text-align: right;"><%= link_to job_purchase_order_path(@job, po), class: "btn-icon btn-icon-primary", title: "View" do %>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
