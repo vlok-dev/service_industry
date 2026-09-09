@@ -31,6 +31,7 @@ class DashboardController < ApplicationController
       @in_progress_jobs = @jobs.in_progress
       @completed_jobs = @jobs.completed
       @outstanding_jobs = @jobs.outstanding
+      @my_jobs = filter_jobs_for(@jobs)
       build_schedule_view
       @scheduled_jobs = jobs_for_schedule_view
       @scheduled_tomorrow = @jobs.where(scheduled_date: Date.tomorrow)

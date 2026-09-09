@@ -159,7 +159,7 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
 
   # --- Item 2: Scheduler dashboard has same stat cards as accountant ---
 
-  test "scheduler dashboard shows stat cards for pending scheduled in progress completed" do
+  test "scheduler dashboard shows same kpi strip as super_admin" do
     sign_in @scheduler
 
     create_job!(customer_name: "Pending Job", status: :pending, scheduled_time: Time.zone.parse("09:00"))
@@ -171,12 +171,16 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     body = response.body
-    assert_includes body, "stats-grid"
-    assert_includes body, "stat-card"
+    assert_includes body, "kpi-strip"
+    assert_includes body, "kpi-pending"
+    assert_includes body, "kpi-scheduled"
+    assert_includes body, "kpi-progress"
+    assert_includes body, "kpi-completed"
     assert_includes body, "Pending"
     assert_includes body, "Scheduled"
     assert_includes body, "In Progress"
     assert_includes body, "Completed"
+    assert_includes body, "Job Pipeline"
   end
 
   test "accountant dashboard shows stat cards" do
