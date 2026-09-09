@@ -66,6 +66,9 @@ class Job < ApplicationRecord
       .where(scheduled_date: scheduled_date, scheduled_time: scheduled_time)
       .where.not(status: :cancelled)
     conflicts = conflicts.where.not(id: id) if persisted?
+    if assigned_to_id.present?
+      conflicts = conflicts.where(assigned_to_id: assigned_to_id)
+    end
     if conflicts.exists?
       errors.add(:scheduled_time, "is already taken. Another job is already scheduled for #{scheduled_date.strftime('%Y-%m-%d')} at #{scheduled_time.strftime('%H:%M')}.")
     end

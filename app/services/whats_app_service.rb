@@ -14,6 +14,7 @@ class WhatsAppService
       "Customer: #{job.customer_name}",
       "Address: #{job.address}",
       "Description: #{job.description}",
+      "Tomorrow at #{job.scheduled_time.strftime('%I:%M %p')}",
     ]
     lines.join("\n\n")
   end
