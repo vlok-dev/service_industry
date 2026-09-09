@@ -21,6 +21,28 @@ class PurchaseOrdersController < ApplicationController
     end
   end
 
+  def quick_create
+    @purchase_order = @job.purchase_orders.new(
+      supplier_name: params[:supplier_name],
+      order_date: params[:order_date],
+      created_by: current_user
+    )
+
+    if params[:description].present? && params[:quantity].present? && params[:unit_price].present?
+      @purchase_order.items.build(
+        description: params[:description],
+        quantity: params[:quantity].to_i,
+        unit_price: params[:unit_price].to_f
+      )
+    end
+
+    if @purchase_order.save
+      redirect_back(fallback_location: dashboard_path, notice: "Quick PO #{@purchase_order.po_number} created.")
+    else
+      redirect_back(fallback_location: dashboard_path, alert: @purchase_order.errors.full_messages.join(", "))
+    end
+  end
+
   def edit
   end
 
