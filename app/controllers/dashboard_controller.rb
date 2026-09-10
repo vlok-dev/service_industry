@@ -2,12 +2,13 @@ class DashboardController < ApplicationController
   def index
     @jobs = policy_scope(Job)
     @search_query = params[:q].to_s.strip
+    @dashboard_tab = params[:tab].presence_in(%w[jobs planner]) || cookies[:dashboard_tab].presence || "jobs"
+    cookies[:dashboard_tab] = { value: @dashboard_tab, expires: 1.year.from_now }
 
     if @search_query.present?
       @jobs = @jobs.search(@search_query)
     end
-
-    case current_user.role
+case current_user.role
     when "super_admin"
       @my_jobs = filter_jobs_for(@jobs.where(user: current_user))
       @pending_jobs = @jobs.pending
@@ -15,6 +16,7 @@ class DashboardController < ApplicationController
       @in_progress_jobs = @jobs.in_progress
       @completed_jobs = @jobs.completed
       @outstanding_jobs = @jobs.outstanding
+      @planner_entries = policy_scope(PlannerEntry).upcoming.includes(:assigned_to).order(:entry_date, :entry_time).limit(10)
 
       build_schedule_view
       @scheduled_jobs = jobs_for_schedule_view
@@ -32,6 +34,8 @@ class DashboardController < ApplicationController
       @completed_jobs = @jobs.completed
       @outstanding_jobs = @jobs.outstanding
       @my_jobs = filter_jobs_for(@jobs)
+      @planner_entries = policy_scope(PlannerEntry).upcoming.includes(:assigned_to).order(:entry_date, :entry_time).limit(10)
+
       build_schedule_view
       @scheduled_jobs = jobs_for_schedule_view
       @scheduled_tomorrow = @jobs.where(scheduled_date: Date.tomorrow)

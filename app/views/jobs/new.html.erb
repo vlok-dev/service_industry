@@ -1,8 +1,14 @@
-<p><%= link_to "Back to Jobs", jobs_path, class: "btn" %></p>
+<div class="action-bar">
+  <div>
+    <h1>New Job</h1>
+    <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem;">Create a new job entry</p>
+  </div>
+  <div class="actions">
+    <%= link_to "Back to Jobs", jobs_path, class: "btn btn-secondary" %>
+  </div>
+</div>
 
-<h1>New Job</h1>
-
-<%= form_with model: @job, local: true do |f| %>
+<%= form_with model: @job, local: true, style: "display: contents;" do |f| %>
   <% if @job.errors.any? %>
     <div class="alert">
       <h2><%= pluralize(@job.errors.count, "error") %> prohibited this job from being saved:</h2>
@@ -14,115 +20,143 @@
     </div>
   <% end %>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :client_id, "Client" %><br>
-    <div class="client-search-wrapper">
-      <input type="hidden" name="job[client_id]" id="job_client_id" value="<%= @job.client_id %>">
-      <input type="text" id="client_search" class="client-search-input" placeholder="Search clients..." autocomplete="off">
-      <div id="client_dropdown" class="client-dropdown"></div>
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Customer Details</h2>
     </div>
-    <p style="color: #666; font-size: 0.875rem; margin-top: 0.25rem;">Optional: Search for a client to auto-fill customer details.</p>
+    <div class="card-body">
+      <div class="field">
+        <%= f.label :client_id, "Client" %>
+        <div class="client-search-wrapper">
+          <input type="hidden" name="job[client_id]" id="job_client_id" value="<%= @job.client_id %>">
+          <input type="text" id="client_search" class="client-search-input" placeholder="Search clients to auto-fill..." autocomplete="off">
+          <div id="client_dropdown" class="client-dropdown"></div>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem;">Optional: Selecting a client auto-fills the fields below.</p>
+      </div>
+
+      <div class="field">
+        <%= f.label :customer_code, "Customer Code" %>
+        <%= f.text_field :customer_code, placeholder: "Auto-filled when client selected" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :customer_name, "Customer Name" %>
+        <%= f.text_field :customer_name, required: true, placeholder: "Enter customer name" %>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div class="field">
+          <%= f.label :contact_person, "Primary Contact" %>
+          <%= f.text_field :contact_person, placeholder: "Auto-filled when client selected" %>
+        </div>
+        <div class="field">
+          <%= f.label :email, "Primary Contact Email" %>
+          <%= f.email_field :email, placeholder: "Auto-filled when client selected" %>
+        </div>
+        <div class="field">
+          <%= f.label :contact_number, "Primary Contact Mobile" %>
+          <%= f.text_field :contact_number, placeholder: "Auto-filled when client selected" %>
+        </div>
+      </div>
+
+      <div class="field">
+        <%= f.label :address, "Primary Delivery Address" %>
+        <%= f.text_area :address, rows: 2, required: true, placeholder: "Enter delivery address" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :postal_address, "Primary Postal Address" %>
+        <%= f.text_area :postal_address, rows: 2, placeholder: "Auto-filled when client selected" %>
+        <p style="color: var(--text-muted); font-size: 0.8rem;">Same as delivery if blank on client.</p>
+      </div>
+    </div>
   </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :customer_code, "Customer Code" %><br>
-    <%= f.text_field :customer_code, placeholder: "Auto-filled when client selected" %>
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Job Details</h2>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <%= f.label :description %>
+        <%= f.text_area :description, required: true, rows: 3, placeholder: "Describe the work to be done" %>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div class="field">
+          <%= f.label :status %>
+          <%= f.select :status, Job.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: false } %>
+        </div>
+        <div class="field">
+          <%= f.label :priority %>
+          <%= f.select :priority, Job.priorities.keys.map { |p| [p.humanize, p] }, { include_blank: false } %>
+        </div>
+        <div class="field">
+          <%= f.label :assigned_to_id, "Assign Plumber" %>
+          <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, f.object.assigned_to_id), { include_blank: "Select Plumber (optional)" } %>
+        </div>
+      </div>
+
+      <div class="field">
+        <%= f.label :notes %>
+        <%= f.text_area :notes, rows: 2, placeholder: "Optional notes" %>
+      </div>
+    </div>
   </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :customer_name, "Customer Name" %><br>
-    <%= f.text_field :customer_name, required: true %>
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Scheduling</h2>
+    </div>
+    <div class="card-body">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+        <div class="field">
+          <%= f.label :scheduled_date, "Scheduled Date" %>
+          <%= f.date_field :scheduled_date %>
+        </div>
+        <div class="field">
+          <%= f.label :scheduled_time, "Scheduled Time" %>
+          <%= f.time_field :scheduled_time %>
+        </div>
+        <div class="field">
+          <%= f.label :scheduled_end_date, "Scheduled End Date" %>
+          <%= f.date_field :scheduled_end_date %>
+        </div>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.5rem;">End date required for multi-day projects.</p>
+    </div>
   </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :contact_person, "Primary Contact" %><br>
-    <%= f.text_field :contact_person, placeholder: "Auto-filled when client selected" %>
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Additional Settings</h2>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <%= f.label :is_project, "Project?" %>
+        <%= f.check_box :is_project %>
+        <span style="font-size: 0.875rem; color: var(--text-muted);">Mark as a project to run over multiple days and attach claims.</span>
+      </div>
+
+      <div class="field">
+        <%= f.label :job_number, "Job Number" %>
+        <%= f.text_field :job_number, placeholder: "Auto-generated (e.g. JOB-00001) - leave blank for default" %>
+        <p style="color: var(--text-muted); font-size: 0.8rem;">Optional: Set a custom job number, or leave blank to auto-generate.</p>
+      </div>
+
+      <div class="field">
+        <%= f.label :invoice_number, "Invoice Number (when completed)" %>
+        <%= f.text_field :invoice_number, placeholder: "Leave blank to auto-generate on completion" %>
+      </div>
+    </div>
   </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :email, "Primary Contact Email" %><br>
-    <%= f.email_field :email, placeholder: "Auto-filled when client selected" %>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :contact_number, "Primary Contact Mobile" %><br>
-    <%= f.text_field :contact_number, placeholder: "Auto-filled when client selected" %>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :address, "Primary Delivery Address" %><br>
-    <%= f.text_area :address, rows: 2, required: true %>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :postal_address, "Primary Postal Address" %><br>
-    <%= f.text_area :postal_address, rows: 2, placeholder: "Auto-filled when client selected" %>
-    <p style="color: #666; font-size: 0.875rem;">Same as delivery if blank on client.</p>
-  </div>
-
-  <hr>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :description %><br>
-    <%= f.text_area :description, required: true, rows: 3, placeholder: "Describe the work to be done" %>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :status %><br>
-    <%= f.select :status, Job.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: false } %>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :priority %><br>
-    <%= f.select :priority, Job.priorities.keys.map { |p| [p.humanize, p] }, { include_blank: false } %>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :assigned_to_id, "Assign Plumber" %><br>
-    <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, f.object.assigned_to_id), { include_blank: "Select Plumber (optional)" } %>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :notes %><br>
-    <%= f.text_area :notes %>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :scheduled_date, "Scheduled Date" %><br>
-    <%= f.date_field :scheduled_date %>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :scheduled_time, "Scheduled Time" %><br>
-    <%= f.time_field :scheduled_time %>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :scheduled_end_date, "Scheduled End Date" %><br>
-    <%= f.date_field :scheduled_end_date %>
-    <p style="color: #666; font-size: 0.875rem;">Optional. Required for multi-day projects.</p>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :is_project, "Project?" %><br>
-    <%= f.check_box :is_project %>
-    <p style="color: #666; font-size: 0.875rem;">Mark as a project to run over multiple days and attach claims.</p>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :job_number, "Job Number" %><br>
-    <%= f.text_field :job_number, placeholder: "Auto-generated (e.g. JOB-00001) - leave blank for default" %>
-    <p style="color: #666; font-size: 0.875rem;">Optional: Set a custom job number, or leave blank to auto-generate.</p>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :invoice_number, "Invoice Number (when completed)" %><br>
-    <%= f.text_field :invoice_number, placeholder: "Leave blank to auto-generate on completion" %>
-  </div>
-
-  <div style="margin-bottom: 1rem;">
+  <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+    <%= link_to "Cancel", jobs_path, class: "btn btn-secondary" %>
     <%= f.submit "Create Job", class: "btn" %>
   </div>
+<% end %>
 
   <script>
     var clientsData = <%= raw Client.ordered.map { |c| [
@@ -242,5 +276,3 @@
 
     initClientSearch();
   </script>
-
-<% end %>

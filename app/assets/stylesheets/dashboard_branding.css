@@ -205,10 +205,58 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.schedule-row td {
-  padding: 0.75rem !important;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+/* Form fields */
+.field {
+  margin-bottom: 1rem;
+}
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.375rem;
+}
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="number"],
+.field input[type="tel"],
+.field input[type="date"],
+.field input[type="time"],
+.field input[type="url"],
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-family: inherit;
+  background: white;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Job number link in tables */
+.job-number {
+  color: var(--primary);
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.job-number:hover {
+  text-decoration: underline;
 }
 
 /* Nav brand */
@@ -224,7 +272,35 @@ nav .brand {
 .stat-card.stat-default::before { background: #b2d33e; }
 
 /* Schedule view tabs */
-.view-tab.active {
+  .tab-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: var(--industro-navy);
+    color: white;
+    border-color: var(--industro-navy);
+  }
+  .tab:hover:not(.active) {
+    background: var(--bg);
+    color: var(--text);
+  }
+  .view-tab.active {
   background: var(--industro-navy);
   color: white;
   box-shadow: var(--shadow);
@@ -548,6 +624,72 @@ nav .brand {
   z-index: 1001;
   pointer-events: none;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Planner cards — non-job entries */
+.planner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.planner-card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.planner-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.planner-icon {
+  font-size: 1.125rem;
+}
+.planner-category {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.planner-card-body {
+  flex: 1;
+}
+.planner-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 0.375rem;
+}
+.planner-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 0.5rem;
+}
+.planner-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.planner-notes {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0;
+  font-style: italic;
+}
+.planner-card-footer {
+  display: flex;
+  gap: 0.375rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-light);
 }
 
 .sidebar-footer {

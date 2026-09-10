@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_08_170000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_10_182500) do
   create_table "claims", force: :cascade do |t|
     t.decimal "amount", precision: 12, scale: 2, null: false
     t.date "claim_date", null: false
@@ -96,6 +96,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_08_170000) do
     t.index ["user_id"], name: "index_jobs_on_user_id"
   end
 
+  create_table "planner_entries", force: :cascade do |t|
+    t.integer "assigned_to_id"
+    t.string "category", default: "other"
+    t.datetime "created_at", null: false
+    t.integer "created_by_id", null: false
+    t.text "description"
+    t.date "entry_date", null: false
+    t.time "entry_time"
+    t.text "notes"
+    t.string "status", default: "to_do"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assigned_to_id"], name: "index_planner_entries_on_assigned_to_id"
+    t.index ["category"], name: "index_planner_entries_on_category"
+    t.index ["created_by_id"], name: "index_planner_entries_on_created_by_id"
+    t.index ["entry_date"], name: "index_planner_entries_on_entry_date"
+    t.index ["status"], name: "index_planner_entries_on_status"
+  end
+
   create_table "posts", force: :cascade do |t|
     t.text "author"
     t.text "body"
@@ -179,6 +198,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_08_170000) do
   add_foreign_key "jobs", "clients"
   add_foreign_key "jobs", "users"
   add_foreign_key "jobs", "users", column: "assigned_to_id"
+  add_foreign_key "planner_entries", "users", column: "assigned_to_id"
+  add_foreign_key "planner_entries", "users", column: "created_by_id"
   add_foreign_key "purchase_order_items", "inventory_items"
   add_foreign_key "purchase_order_items", "purchase_orders"
   add_foreign_key "purchase_orders", "jobs"

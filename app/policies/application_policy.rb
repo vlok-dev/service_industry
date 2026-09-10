@@ -41,7 +41,7 @@ class ApplicationPolicy
     end
 
     def resolve
-      if user&.admin_or_super_admin?
+      if user && (user.admin? || user.super_admin?)
         scope.all
       else
         raise NotImplementedError, "You must implement #resolve in #{self.class}"
@@ -61,5 +61,13 @@ class ApplicationPolicy
 
   def accountant?
     user&.accountant?
+  end
+
+  def scheduler?
+    user&.scheduler?
+  end
+
+  def record_owner_or_admin?
+    user&.super_admin? || user&.admin? || record.user_id == user.id
   end
 end

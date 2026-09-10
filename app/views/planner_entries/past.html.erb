@@ -1,0 +1,69 @@
+<div class="action-bar">
+  <div>
+    <h1>Planner — Past</h1>
+    <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem;">Non-job entries that have already passed</p>
+  </div>
+  <div class="actions">
+    <%= link_to "Back to Dashboard", dashboard_path, class: "btn btn-secondary" %>
+    <%= link_to "New Entry", new_planner_entry_path, class: "btn" %>
+  </div>
+</div>
+
+<%= form_with url: planner_entries_path, method: :get, local: true, style: "display: flex; gap: 0.5rem; margin-bottom: 1.5rem;" do |f| %>
+  <%= f.text_field :q, value: params[:q], placeholder: "Search planner entries...", style: "padding: 0.625rem 0.875rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; flex: 1; max-width: 400px;" %>
+  <%= f.submit "Search", class: "btn btn-sm" %>
+  <% if params[:q].present? %>
+    <%= link_to "Clear", planner_entries_path, class: "btn btn-sm btn-secondary" %>
+  <% end %>
+<% end %>
+
+<% if @planner_entries.present? %>
+  <div class="planner-grid">
+    <% @planner_entries.each do |entry| %>
+      <div class="planner-card" style="border-left: 4px solid <%= entry.category_color %>;">
+        <div class="planner-card-header">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span class="planner-icon"><%= entry.category_icon %></span>
+            <span class="planner-category"><%= entry.category.to_s.humanize %></span>
+          </div>
+          <span class="badge badge-<%= entry.status %>"><%= entry.status.to_s.humanize %></span>
+        </div>
+        <div class="planner-card-body">
+          <h3 class="planner-title"><%= entry.title %></h3>
+          <% if entry.description.present? %>
+            <p class="planner-desc"><%= entry.description %></p>
+          <% end %>
+          <div class="planner-meta">
+            <span>📅 <%= entry.entry_date.strftime("%d %b %Y") %></span>
+            <% if entry.entry_time.present? %>
+              <span>⏰ <%= entry.entry_time.strftime("%I:%M %p") %></span>
+            <% end %>
+            <% if entry.assigned_to %>
+              <span>👤 <%= entry.assigned_to.name %></span>
+            <% end %>
+          </div>
+          <% if entry.notes.present? %>
+            <p class="planner-notes">📝 <%= entry.notes %></p>
+          <% end %>
+        </div>
+        <div class="planner-card-footer">
+          <%= link_to edit_planner_entry_path(entry), class: "btn-icon", title: "Edit" do %>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          <% end %>
+          <%= link_to planner_entry_path(entry), class: "btn-icon btn-icon-primary", title: "View" do %>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          <% end %>
+          <%= button_to planner_entry_path(entry), method: :delete, data: { confirm: "Are you sure?" }, class: "btn-icon btn-icon-danger", title: "Delete" do %>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="empty-state">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3; margin-bottom: 0.5rem;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+    <div>No past planner entries found.</div>
+    <div style="margin-top: 0.5rem;"><%= link_to "Create the first one", new_planner_entry_path, style: "color: var(--primary); font-weight: 600;" %></div>
+  </div>
+<% end %>

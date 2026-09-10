@@ -1,0 +1,88 @@
+<div class="action-bar">
+  <div>
+    <h1><%= @planner_entry.persisted? ? "Edit Planner Entry" : "New Planner Entry" %></h1>
+    <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem;">Non-job entry — medicals, car services, meetings, admin, training</p>
+  </div>
+  <div class="actions">
+    <%= link_to "Back to Planner", planner_entries_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<%= form_with model: @planner_entry, local: true do |f| %>
+  <% if @planner_entry.errors.any? %>
+    <div class="alert">
+      <h2><%= pluralize(@planner_entry.errors.count, "error") %> prohibited this entry from being saved:</h2>
+      <ul>
+        <% @planner_entry.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Entry Details</h2>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <%= f.label :title, "Title" %>
+        <%= f.text_field :title, required: true, placeholder: "e.g. Dr. Smith appointment, Toyota service, Team standup" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :category %>
+        <%= f.select :category, options_for_select(PlannerEntry.categories.keys.map { |c| [c.humanize, c] }, f.object.category) %>
+      </div>
+
+      <div class="field">
+        <%= f.label :description %>
+        <%= f.text_area :description, rows: 3, placeholder: "Optional details" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :notes %>
+        <%= f.text_area :notes, rows: 2, placeholder: "Optional notes" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Schedule</h2>
+    </div>
+    <div class="card-body">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+        <div class="field">
+          <%= f.label :entry_date, "Date" %>
+          <%= f.date_field :entry_date, required: true %>
+        </div>
+        <div class="field">
+          <%= f.label :entry_time, "Time" %>
+          <%= f.time_field :entry_time %>
+        </div>
+        <div class="field">
+          <%= f.label :assigned_to_id, "Assigned To" %>
+          <%= f.select :assigned_to_id, options_from_collection_for_select(User.all, :id, :name, f.object.assigned_to_id), { include_blank: "Unassigned" } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Status</h2>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <%= f.label :status %>
+        <%= f.select :status, PlannerEntry.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: false } %>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+    <%= link_to "Cancel", planner_entries_path, class: "btn btn-secondary" %>
+    <%= f.submit class: "btn" %>
+  </div>
+<% end %>

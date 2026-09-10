@@ -28,6 +28,13 @@ Rails.application.routes.draw do
     resources :claims
   end
 
+  resources :planner_entries do
+    collection do
+      get :upcoming
+      get :past
+    end
+  end
+
   resources :suppliers
   resources :clients do
     collection do
