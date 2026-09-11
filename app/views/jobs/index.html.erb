@@ -164,7 +164,7 @@
                   <% end %>
                 <% end %>
               </div>
-              <% if current_user.scheduler? && job.pending? %>
+              <% if current_user.scheduler? && !current_user.super_admin? && job.pending? %>
                 <div style="margin-top: 0.5rem;">
                   <%= form_with url: schedule_job_path(job), method: :patch, local: true, style: "display: flex; gap: 0.375rem; flex-wrap: wrap;" do |f| %>
                     <%= f.hidden_field :status, value: "scheduled" %>

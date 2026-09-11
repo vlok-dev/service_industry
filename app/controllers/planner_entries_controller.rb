@@ -1,5 +1,5 @@
 class PlannerEntriesController < ApplicationController
-  before_action :set_planner_entry, only: %i[ show edit update destroy ]
+  before_action :set_planner_entry, only: %i[ show edit update destroy whatsapp ]
 
   def index
     @planner_entries = policy_scope(PlannerEntry).includes(:assigned_to, :created_by)
@@ -52,6 +52,19 @@ class PlannerEntriesController < ApplicationController
     authorize @planner_entry
     @planner_entry.destroy
     redirect_to planner_entries_path, notice: "Planner entry was deleted."
+  end
+
+  def whatsapp
+    authorize @planner_entry, :show?
+
+    phone = @planner_entry.assigned_to&.phone_number
+    if phone.present?
+      category_name = @planner_entry.category.to_s.humanize
+      message = "For Your Attention\n\n#{category_name}\n\nDate: #{@planner_entry.entry_date.strftime('%d %B %Y')}\n\nTime: #{@planner_entry.entry_time.strftime('%I:%M %p') if @planner_entry.entry_time}\n\nTitle: #{@planner_entry.title}\n\n#{@planner_entry.description if @planner_entry.description.present?}"
+      redirect_to "https://wa.me/#{phone.gsub(/[^0-9]/, '')}?text=#{CGI.escape(message)}", allow_other_host: true
+    else
+      redirect_to planner_entries_path, alert: "No phone number available for the assigned user."
+    end
   end
 
   private

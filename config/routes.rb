@@ -19,6 +19,7 @@ Rails.application.routes.draw do
       patch :update_job_type
       patch :update_assigned_to
       get :whatsapp
+      get :schedule_whatsapp
       post :confirm_whatsapp
     end
     collection do
@@ -32,6 +33,9 @@ Rails.application.routes.draw do
     collection do
       get :upcoming
       get :past
+    end
+    member do
+      get :whatsapp
     end
   end
 

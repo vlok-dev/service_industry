@@ -121,6 +121,19 @@ class JobsController < ApplicationController
     end
   end
 
+  def schedule_whatsapp
+    authorize @job, :show?
+
+    phone = @job.assigned_to&.phone_number
+    if phone.present?
+      service_type = @job.project? ? "Project" : "Car Service"
+      message = "For Your Attention\n\n#{service_type}\n\nDate: #{@job.scheduled_date&.strftime('%d %B %Y')}\n\nTime: #{@job.scheduled_time&.strftime('%I:%M %p')}\n\nCustomer: #{@job.customer_name}\n\nAddress: #{@job.address}\n\nDescription: #{@job.description}"
+      redirect_to "https://wa.me/#{phone.gsub(/[^0-9]/, '')}?text=#{CGI.escape(message)}", allow_other_host: true
+    else
+      redirect_to dashboard_path, alert: "No phone number available for the assigned plumber."
+    end
+  end
+
   def confirm_whatsapp
     authorize @job, :show?
     @job.update(whatsapp_sent_at: Time.current.in_time_zone('Africa/Johannesburg'))
