@@ -10,7 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_10_182500) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_14_190700) do
+  create_table "addresses", force: :cascade do |t|
+    t.references :client, null: false, foreign_key: true
+    t.string "label", default: "Other"
+    t.text "address"
+    t.boolean "is_default", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "claims", force: :cascade do |t|
     t.decimal "amount", precision: 12, scale: 2, null: false
     t.date "claim_date", null: false

@@ -12,6 +12,24 @@
   <p><strong>Primary Postal Address:</strong> <%= simple_format(@client.postal_address) if @client.postal_address.present? %></p>
 </div>
 
+<% if @client.addresses.present? %>
+    <div style="margin-bottom: 1.5rem;">
+      <div class="section-title">Addresses</div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <% @client.addresses.order(id: :asc).each do |address| %>
+          <div style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; background: var(--surface); box-shadow: var(--shadow);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.15rem 0.5rem; border-radius: 4px; color: <%= address.label == "Delivery" ? "white" : "#1b2c65" %>; background: <%= address.label == "Delivery" ? "#1b2c65" : "#b2d33e" %>;">
+                <%= address.label %>
+              </span>
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text); white-space: pre-wrap;"><%= address.address %></div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
 <p>
   <%= link_to "Edit", edit_client_path(@client), class: "btn" %>
   <%= button_to "Delete", @client, method: :delete, data: { confirm: "Delete this client?" }, class: "btn btn-danger", style: "display: inline;" %>

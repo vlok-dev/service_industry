@@ -78,7 +78,7 @@ class ClientsController < ApplicationController
   end
 
   def index
-    @clients = Client.ordered
+    @clients = Client.ordered.includes(:addresses)
        if params[:q].present?
        term = "%#{Client.sanitize_sql_like(params[:q].to_s.strip)}%"
        @clients = @clients.where(
@@ -142,6 +142,10 @@ class ClientsController < ApplicationController
   end
 
     def client_params
-    params.require(:client).permit(:customer_code, :first_name, :last_name, :company, :contact_person, :email, :primary_contact_mobile, :delivery_address, :postal_address, :phone_number)
-  end
+      params.require(:client).permit(
+        :customer_code, :first_name, :last_name, :company, :contact_person, :email,
+        :primary_contact_mobile, :delivery_address, :postal_address, :phone_number,
+        addresses_attributes: [:id, :label, :address, :is_default, :_destroy]
+      )
+    end
 end

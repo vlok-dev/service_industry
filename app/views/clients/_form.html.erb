@@ -58,5 +58,117 @@
     <p style="color: #666; font-size: 0.875rem;">Leave blank if same as delivery address.</p>
   </div>
 
+  <div style="margin-bottom: 1rem;">
+    <h3 style="margin-bottom: 0.5rem;">Addresses</h3>
+    <p style="color: #666; font-size: 0.875rem; margin-top: 0;">Add additional addresses for this client. You can pick one when creating a job.</p>
+    <div id="client_addresses">
+      <%= f.fields_for :addresses do |address_form| %>
+        <div class="address-row" style="border-left: 4px solid <%= address_form.object&.label == "Delivery" ? "#1b2c65" : "#b2d33e" %>; border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem; background: var(--bg);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.2rem 0.6rem; border-radius: 4px; color: <%= address_form.object&.label == "Delivery" ? "white" : "#1b2c65" %>; background: <%= address_form.object&.label == "Delivery" ? "#1b2c65" : "#b2d33e" %>;">
+              <%= address_form.object&.label || "Delivery" %>
+            </span>
+            <% if address_form.object.persisted? %>
+              <%= address_form.hidden_field :_destroy, class: "address-destroy" %>
+              <button type="button" class="btn btn-sm btn-danger remove-address">Remove</button>
+            <% else %>
+              <button type="button" class="btn btn-sm btn-secondary remove-address">Remove</button>
+            <% end %>
+          </div>
+          <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.5rem; align-items: end;">
+            <div>
+              <%= address_form.label :label, style: "font-size: 0.75rem; font-weight: 600;" %>
+              <%= address_form.select :label, ["Delivery", "Postal"], { include_blank: false }, { class: "address-label-select", style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; width: 100%;" } %>
+            </div>
+            <div>
+              <%= address_form.label :address, style: "font-size: 0.75rem; font-weight: 600;" %>
+              <%= address_form.text_area :address, rows: 2, style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; width: 100%; box-sizing: border-box;" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <button type="button" id="add-address" class="btn btn-sm" style="margin-top: 0.5rem;">Add Address</button>
+  </div>
+
   <%= f.submit class: "btn" %>
 <% end %>
+
+<script>
+  var addressTemplate = `
+    <div class="address-row" style="border-left: 4px solid #1b2c65; border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem; background: var(--bg);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <span class="address-label-badge" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.2rem 0.6rem; border-radius: 4px; color: white; background: #1b2c65;">Delivery</span>
+        <button type="button" class="btn btn-sm btn-secondary remove-address">Remove</button>
+      </div>
+      <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.5rem; align-items: end;">
+        <div>
+          <label style="font-size: 0.75rem; font-weight: 600;">Label</label>
+          <select name="client[addresses_attributes][NEW_INDEX][label]" class="address-label-select" style="padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; width: 100%;">
+            <option value="Delivery">Delivery</option>
+            <option value="Postal">Postal</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 0.75rem; font-weight: 600;">Address</label>
+          <textarea name="client[addresses_attributes][NEW_INDEX][address]" rows="2" style="padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; width: 100%; box-sizing: border-box;"></textarea>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.addEventListener('change', function(e) {
+    if (!e.target || !e.target.classList.contains('address-label-select')) return;
+    var select = e.target;
+    var row = select.closest('.address-row');
+    var badge = row?.querySelector('.address-label-badge');
+    if (badge) {
+      var value = select.value;
+      badge.textContent = value;
+      badge.style.color = value === "Delivery" ? "white" : "#1b2c65";
+      badge.style.background = value === "Delivery" ? "#1b2c65" : "#b2d33e";
+    }
+    var rowDiv = row?.querySelector('.address-row, div[style*="border-left"]');
+    if (rowDiv) {
+      rowDiv.style.borderLeftColor = select.value === "Delivery" ? "#1b2c65" : "#b2d33e";
+    }
+  });
+
+  function nextAddressIndex() {
+    var container = document.getElementById('client_addresses');
+    var used = new Set();
+    container.querySelectorAll('textarea[name*="[address]"]').forEach(function(el) {
+      var m = (el.name || '').match(/\[(\d+)\]/);
+      if (m) used.add(parseInt(m[1], 10));
+    });
+    var i = 0;
+    while (used.has(i)) i++;
+    return i;
+  }
+
+  document.getElementById('add-address')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    var container = document.getElementById('client_addresses');
+    var row = document.createElement('div');
+    row.innerHTML = addressTemplate.replace(/NEW_INDEX/g, nextAddressIndex());
+    var addressRow = row.firstElementChild;
+    container.appendChild(addressRow);
+    addressRow.querySelector('.remove-address').addEventListener('click', function() {
+      addressRow.remove();
+    });
+  });
+
+  document.querySelectorAll('.remove-address').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var row = btn.closest('.address-row');
+      var destroyInput = row?.querySelector('.address-destroy');
+      if (destroyInput) {
+        destroyInput.value = '1';
+        row.style.display = 'none';
+      } else {
+        row?.remove();
+      }
+    });
+  });
+</script>

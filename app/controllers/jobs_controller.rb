@@ -6,6 +6,7 @@ class JobsController < ApplicationController
     @jobs = filter_jobs if params[:filter].present?
     @jobs = @jobs.search(params[:q]) if params[:q].present?
     @search_query = params[:q]
+    @jobs = sort_job_list(@jobs)
   end
 
   def show

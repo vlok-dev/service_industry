@@ -32,6 +32,14 @@
           <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem;">Optional: Select a saved client to auto-fill customer name and address.</p>
         </div>
 
+        <div class="field" id="edit_client_address_wrapper" style="display: none;">
+          <%= f.label :address, "Select Client Address" %>
+          <select id="edit_client_address_select" name="edit_client_address_select" class="form-control" style="width: 100%; padding: 0.5rem;">
+            <option value="">— Select an address —</option>
+          </select>
+          <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem;">Choose from this client's saved addresses.</p>
+        </div>
+
         <div class="field">
           <%= f.label :customer_name, "Customer Name" %>
           <%= f.text_field :customer_name, required: true, placeholder: "Enter customer name" %>
@@ -149,12 +157,43 @@
 <script>
   function populateFromClient(clientId) {
     if (!clientId) return;
-    var clients = <%= raw Client.ordered.map { |c| [c.id, { name: c.name, address: c.delivery_address, phone_number: c.primary_contact_mobile }] }.to_json %>;
+    var clients = <%= raw Client.ordered.includes(:addresses).map { |c| [c.id, { name: c.name, address: c.delivery_address, phone_number: c.primary_contact_mobile, addresses: c.addresses.order(id: :asc).map { |a| { id: a.id, label: a.label, address: a.address, is_default: a.is_default } } }] }.to_json %>;
     var client = clients[clientId];
     if (client) {
       document.getElementById("job_customer_name").value = client.name;
       document.getElementById("job_address").value = client.address;
       document.getElementById("job_contact_number").value = client.phone_number || "";
+      var addressSelect = document.getElementById("edit_client_address_select");
+      var addressWrapper = document.getElementById("edit_client_address_wrapper");
+      if (addressWrapper) addressWrapper.style.display = (client.addresses && client.addresses.length > 0) ? "" : "none";
+      if (addressSelect && client.addresses) {
+        addressSelect.innerHTML = '<option value="">— Select an address —</option>';
+        client.addresses.forEach(function(a) {
+          var label = a.label + ": " + a.address;
+          var opt = document.createElement('option');
+          opt.value = a.address;
+          opt.textContent = label;
+          if (a.is_default) opt.selected = true;
+          addressSelect.appendChild(opt);
+        });
+        addressSelect.style.display = '';
+        var defaultOpt = addressSelect.querySelector('option[selected="selected"]');
+        if (defaultOpt && client.addresses.length > 0) {
+          addressSelect.value = defaultOpt.value;
+          document.getElementById("job_address").value = defaultOpt.value;
+        }
+      } else if (addressSelect) {
+        addressSelect.innerHTML = '<option value="">No addresses</option>';
+        addressSelect.style.display = '';
+      }
     }
+  }
+
+  var editAddressSelectEl = document.getElementById("edit_client_address_select");
+  if (editAddressSelectEl) {
+    editAddressSelectEl.addEventListener("change", function() {
+      var addrEl = document.getElementById("job_address");
+      if (addrEl && this.value) addrEl.value = this.value;
+    });
   }
 </script>

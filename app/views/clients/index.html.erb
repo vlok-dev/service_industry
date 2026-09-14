@@ -21,6 +21,7 @@
         <th>Mobile</th>
         <th>Email</th>
         <th>Delivery Address</th>
+        <th>Addresses</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -33,6 +34,16 @@
           <td><%= client.primary_contact_mobile || "—" %></td>
           <td><%= client.email || "—" %></td>
           <td><%= (client.delivery_address || "—").truncate(40) %></td>
+          <td>
+            <% if client.addresses.any? %>
+              <span style="font-size: 0.8rem;"><%= client.addresses.count %> address<%= "es" if client.addresses.count > 1 %>:</span>
+              <% client.addresses.order(id: :asc).each do |address| %>
+                <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">• <%= address.label %>: <%= address.address.truncate(30) %></span>
+              <% end %>
+            <% else %>
+              <span style="color: var(--text-muted); font-size: 0.8rem;">—</span>
+            <% end %>
+          </td>
           <td>
             <%= link_to "View", client, class: "btn btn-sm" %>
             <%= link_to "Edit", edit_client_path(client), class: "btn btn-sm" %>

@@ -49,6 +49,18 @@ case current_user.role
       @in_progress_jobs = @my_jobs.in_progress
       @completed_jobs = @my_jobs.completed
     end
+
+    @my_jobs = sort_job_list(@my_jobs) if @my_jobs
+    @pending_jobs = sort_job_list(@pending_jobs) if @pending_jobs
+    @in_progress_jobs = sort_job_list(@in_progress_jobs) if @in_progress_jobs
+    @completed_jobs = sort_job_list(@completed_jobs) if @completed_jobs
+    @outstanding_jobs = sort_job_list(@outstanding_jobs) if @outstanding_jobs
+    @all_jobs = sort_job_list(@all_jobs) if @all_jobs
+    @today_jobs = sort_job_list(@today_jobs) if @today_jobs
+    if @scheduled_jobs
+      @scheduled_jobs = sort_job_list(@scheduled_jobs)
+      @scheduled_jobs = @scheduled_jobs.order(scheduled_date: :asc, scheduled_time: :asc) unless params[:sort].present?
+    end
   end
 
   helper_method :prev_date, :next_date

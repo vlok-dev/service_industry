@@ -927,3 +927,27 @@ nav .brand {
   font-size: 0.875rem;
   color: var(--text-muted);
 }
+
+/* Sortable table headers */
+.sortable-header {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.sortable-header:hover {
+  color: var(--primary);
+}
+.sortable-header .sort-icon {
+  width: 12px;
+  height: 12px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+.sort-asc,
+.sort-desc {
+  color: var(--primary);
+}
+.sort-none {
+  color: var(--text-muted);
+}

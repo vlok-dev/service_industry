@@ -1,5 +1,7 @@
 class Client < ApplicationRecord
   has_many :jobs, dependent: :restrict_with_error
+  has_many :addresses, dependent: :destroy
+  accepts_nested_attributes_for :addresses, allow_destroy: true
 
   validates :name, presence: true
   validates :email, format: { with: /\A[^@\s]+@[^@\s]+\z/, message: "must look like an email address" }, allow_blank: true

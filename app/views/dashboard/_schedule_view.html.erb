@@ -23,19 +23,19 @@
       <table>
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Customer</th>
-            <th>Address</th>
-            <th>Plumber</th>
-            <th>Job Type</th>
+            <th><%= sortable_header "Date", "scheduled_date" %></th>
+            <th><%= sortable_header "Time", "scheduled_time" %></th>
+            <th><%= sortable_header "Customer", "customer_name" %></th>
+            <th><%= sortable_header "Address", "address" %></th>
+            <th><%= sortable_header "Plumber", "assigned_to" %></th>
+            <th><%= sortable_header "Job Type", "is_project" %></th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <% @scheduled_jobs.order(:scheduled_date, :scheduled_time).each do |job| %>
+          <% @scheduled_jobs.each do |job| %>
             <tr>
-              <td data-label="Date"><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
+              <td data-label="Date"><%= date_columns_display(job.scheduled_date) %></td>
               <td data-label="Time"><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
               <td data-label="Customer"><%= job.customer_name %></td>
               <td data-label="Address"><%= job.address.truncate(40) %></td>

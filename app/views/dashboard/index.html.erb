@@ -70,16 +70,16 @@
         <table>
           <thead>
             <tr>
-              <th>Job #</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Customer</th>
-              <th>Problem</th>
-              <th>Address</th>
-              <th>Status</th>
-              <th>Job Type</th>
-              <th>Assigned To</th>
-              <th>Invoice</th>
+              <th><%= sortable_header "Job #", "job_number" %></th>
+              <th><%= sortable_header "Date", "scheduled_date" %></th>
+              <th><%= sortable_header "Time", "scheduled_time" %></th>
+              <th><%= sortable_header "Customer", "customer_name" %></th>
+              <th><%= sortable_header "Problem", "description" %></th>
+              <th><%= sortable_header "Address", "address" %></th>
+              <th><%= sortable_header "Status", "status" %></th>
+              <th><%= sortable_header "Job Type", "is_project" %></th>
+              <th><%= sortable_header "Assigned To", "assigned_to" %></th>
+              <th><%= sortable_header "Invoice", "invoice_number" %></th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -87,7 +87,7 @@
             <% @my_jobs.each do |job| %>
               <tr>
                 <td><%= link_to (job.job_number || "N/A"), job, class: "job-number", title: "View job" %></td>
-                <td><%= job.scheduled_date&.strftime("%b %d") || "—" %></td>
+                <td><%= date_columns_display(job.scheduled_date) %></td>
                 <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.description.to_s.truncate(60) %></td>
@@ -198,14 +198,14 @@
         <table>
           <thead>
             <tr>
-              <th>Job #</th>
-              <th>Customer</th>
-              <th>Address</th>
-              <th>Status</th>
-              <th>Priority</th>
-              <th>Job Type</th>
-              <th>Created By</th>
-              <th>Invoice #</th>
+              <th><%= sortable_header "Job #", "job_number" %></th>
+              <th><%= sortable_header "Customer", "customer_name" %></th>
+              <th><%= sortable_header "Address", "address" %></th>
+              <th><%= sortable_header "Status", "status" %></th>
+              <th><%= sortable_header "Priority", "priority" %></th>
+              <th><%= sortable_header "Job Type", "is_project" %></th>
+              <th><%= sortable_header "Created By", "created_by" %></th>
+              <th><%= sortable_header "Invoice #", "invoice_number" %></th>
               <th>Action</th>
             </tr>
           </thead>
@@ -262,7 +262,7 @@
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
                 <td><%= render "status_dropdown", job: job %></td>
-                <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
+                <td><%= date_columns_display(job.scheduled_date) %></td>
                 <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
                 <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= render "assigned_to_dropdown", job: job %></td>
@@ -309,7 +309,7 @@
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
                 <td><%= render "status_dropdown", job: job %></td>
-                <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
+                <td><%= date_columns_display(job.scheduled_date) %></td>
                 <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
                 <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= render "assigned_to_dropdown", job: job %></td>
@@ -337,14 +337,14 @@
         <table>
           <thead>
             <tr>
-              <th>Job #</th>
-              <th>Customer</th>
-              <th>Address</th>
-              <th>Date</th>
-              <th>Time</th>
+              <th><%= sortable_header "Job #", "job_number" %></th>
+              <th><%= sortable_header "Customer", "customer_name" %></th>
+              <th><%= sortable_header "Address", "address" %></th>
+              <th><%= sortable_header "Date", "scheduled_date" %></th>
+              <th><%= sortable_header "Time", "scheduled_time" %></th>
               <th>Completed</th>
-              <th>Job Type</th>
-              <th>Invoice #</th>
+              <th><%= sortable_header "Job Type", "is_project" %></th>
+              <th><%= sortable_header "Invoice #", "invoice_number" %></th>
               <th>Action</th>
             </tr>
           </thead>
@@ -354,7 +354,7 @@
                 <td><%= job.job_number || "N/A" %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
-                <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
+                <td><%= date_columns_display(job.scheduled_date) %></td>
                 <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
                 <td><%= job.completed_at&.strftime("%b %d, %Y %I:%M %p") || "N/A" %></td>
                 <td><%= render "job_type_dropdown", job: job %></td>
@@ -435,16 +435,16 @@
         <table>
           <thead>
             <tr>
-              <th>Job #</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Customer</th>
-              <th>Problem</th>
-              <th>Address</th>
-              <th>Status</th>
-              <th>Job Type</th>
-              <th>Assigned To</th>
-              <th>Invoice</th>
+              <th><%= sortable_header "Job #", "job_number" %></th>
+              <th><%= sortable_header "Date", "scheduled_date" %></th>
+              <th><%= sortable_header "Time", "scheduled_time" %></th>
+              <th><%= sortable_header "Customer", "customer_name" %></th>
+              <th><%= sortable_header "Problem", "description" %></th>
+              <th><%= sortable_header "Address", "address" %></th>
+              <th><%= sortable_header "Status", "status" %></th>
+              <th><%= sortable_header "Job Type", "is_project" %></th>
+              <th><%= sortable_header "Assigned To", "assigned_to" %></th>
+              <th><%= sortable_header "Invoice", "invoice_number" %></th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -452,7 +452,7 @@
             <% @my_jobs.each do |job| %>
               <tr>
                 <td><%= link_to (job.job_number || "N/A"), job, class: "job-number", title: "View job" %></td>
-                <td><%= job.scheduled_date&.strftime("%b %d") || "—" %></td>
+                <td><%= date_columns_display(job.scheduled_date) %></td>
                 <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.description.to_s.truncate(60) %></td>
@@ -535,22 +535,22 @@
         <table>
           <thead>
             <tr>
-              <th>Job #</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Customer</th>
-              <th>Address</th>
-              <th>Description</th>
-               <th>Status</th>
-               <th>Job Type</th>
-               <th>Action</th>
+              <th><%= sortable_header "Job #", "job_number" %></th>
+              <th><%= sortable_header "Date", "scheduled_date" %></th>
+              <th><%= sortable_header "Time", "created_at" %></th>
+              <th><%= sortable_header "Customer", "customer_name" %></th>
+              <th><%= sortable_header "Address", "address" %></th>
+              <th><%= sortable_header "Description", "description" %></th>
+              <th><%= sortable_header "Status", "status" %></th>
+              <th><%= sortable_header "Job Type", "is_project" %></th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             <% @today_jobs.each do |job| %>
               <tr>
                 <td><%= link_to (job.job_number || "N/A"), job_path(job), style: "color: var(--primary); text-decoration: none; font-weight: 600;", title: "View job and purchase orders" %></td>
-                <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
+                <td><%= date_columns_display(job.scheduled_date) %></td>
                 <td><%= job.created_at.strftime("%I:%M %p")&.strip %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(35) %></td>
@@ -580,21 +580,21 @@
         <table>
           <thead>
             <tr>
-              <th>Job #</th>
-              <th>Date</th>
-              <th>Date</th>
-              <th>Customer</th>
-              <th>Address</th>
-               <th>Status</th>
-               <th>Job Type</th>
-               <th>Action</th>
+              <th><%= sortable_header "Job #", "job_number" %></th>
+              <th><%= sortable_header "Date", "scheduled_date" %></th>
+              <th><%= sortable_header "Created", "created_at" %></th>
+              <th><%= sortable_header "Customer", "customer_name" %></th>
+              <th><%= sortable_header "Address", "address" %></th>
+              <th><%= sortable_header "Status", "status" %></th>
+              <th><%= sortable_header "Job Type", "is_project" %></th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             <% @all_jobs.each do |job| %>
               <tr>
                 <td><%= link_to (job.job_number || "N/A"), job_path(job), style: "color: var(--primary); text-decoration: none; font-weight: 600;", title: "View job and purchase orders" %></td>
-                <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
+                <td><%= date_columns_display(job.scheduled_date) %></td>
                 <td><%= job.created_at.strftime("%Y-%m-%d") %></td>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
@@ -641,12 +641,12 @@
         <table>
           <thead>
             <tr>
-              <th>Customer</th>
-              <th>Address</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Type</th>
-              <th>Status</th>
+              <th><%= sortable_header "Customer", "customer_name" %></th>
+              <th><%= sortable_header "Address", "address" %></th>
+              <th><%= sortable_header "Date", "scheduled_date" %></th>
+              <th><%= sortable_header "Time", "scheduled_time" %></th>
+              <th><%= sortable_header "Type", "is_project" %></th>
+              <th><%= sortable_header "Status", "status" %></th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -655,7 +655,7 @@
               <tr>
                 <td><%= job.customer_name %></td>
                 <td><%= job.address.truncate(40) %></td>
-                <td><%= job.scheduled_date&.strftime("%b %d, %Y") || "—" %></td>
+                <td><%= date_columns_display(job.scheduled_date) %></td>
                 <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
                 <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= render "status_dropdown", job: job %></td>

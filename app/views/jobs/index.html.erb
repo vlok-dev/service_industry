@@ -99,14 +99,14 @@
   <table>
     <thead>
       <tr>
-        <th>Job #</th>
-        <th>Customer</th>
-        <th>Address</th>
-        <th>Status</th>
-        <th>Priority</th>
-        <th>Scheduled</th>
-        <th>Assigned</th>
-        <th>Invoice</th>
+        <th><%= sortable_header "Job #", "job_number" %></th>
+        <th><%= sortable_header "Date", "scheduled_date" %></th>
+        <th><%= sortable_header "Customer", "customer_name" %></th>
+        <th><%= sortable_header "Address", "address" %></th>
+        <th><%= sortable_header "Status", "status" %></th>
+        <th><%= sortable_header "Priority", "priority" %></th>
+        <th><%= sortable_header "Assigned", "assigned_to" %></th>
+        <th><%= sortable_header "Invoice", "invoice_number" %></th>
         <th style="text-align: left;">Actions</th>
       </tr>
     </thead>
@@ -117,6 +117,7 @@
             <td>
               <%= link_to (job.job_number || "N/A"), job, class: "job-number" %>
             </td>
+            <td><%= date_columns_display(job.scheduled_date) %></td>
             <td>
               <div class="customer"><%= job.customer_name %></div>
               <% if job.contact_number.present? %>
@@ -129,14 +130,6 @@
               <span class="pill" style="background: <%= job.project? ? '#fce7f3' : '#fef3c7' %>; color: <%= job.project? ? '#9d174d' : '#92400e' %>;">
                 <%= job.priority.humanize %>
               </span>
-            </td>
-            <td>
-              <% if job.scheduled_date.present? %>
-                <div style="font-weight: 600;"><%= job.scheduled_date.strftime("%b %d") %></div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);"><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></div>
-              <% else %>
-                <span style="color: var(--text-muted);">Not scheduled</span>
-              <% end %>
             </td>
             <td>
               <% if job.assigned_to %>

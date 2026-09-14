@@ -35,6 +35,14 @@
         <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem;">Optional: Selecting a client auto-fills the fields below.</p>
       </div>
 
+      <div class="field" id="client_address_wrapper" style="display: none;">
+        <%= f.label :address, "Select Client Address" %>
+        <select id="client_address_select" name="client_address_select" class="form-control" style="width: 100%; padding: 0.5rem;">
+          <option value="">— Select an address —</option>
+        </select>
+        <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem;">Choose from this client's saved addresses. The first match auto-fills the delivery address below.</p>
+      </div>
+
       <div class="field">
         <%= f.label :customer_code, "Customer Code" %>
         <%= f.text_field :customer_code, placeholder: "Auto-filled when client selected" %>
@@ -159,7 +167,7 @@
 <% end %>
 
   <script>
-    var clientsData = <%= raw Client.ordered.map { |c| [
+    var clientsData = <%= raw Client.ordered.includes(:addresses).map { |c| [
       c.id,
       {
         customer_code: c.customer_code,
@@ -168,7 +176,8 @@
         email: c.email,
         phone_number: c.primary_contact_mobile || c.phone_number,
         delivery_address: c.delivery_address,
-        postal_address: c.postal_address || c.delivery_address
+        postal_address: c.postal_address || c.delivery_address,
+        addresses: c.addresses.order(id: :asc).map { |a| { id: a.id, label: a.label, address: a.address, is_default: a.is_default } }
       }
     ] }.to_h.to_json %>;
 
@@ -186,6 +195,42 @@
       Object.keys(fields).forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.value = fields[id] || "";
+      });
+
+      var addressSelect = document.getElementById('client_address_select');
+      var addressWrapper = document.getElementById('client_address_wrapper');
+      if (addressWrapper) addressWrapper.style.display = (c && c.addresses.length > 0) ? '' : 'none';
+      if (addressSelect && c && c.addresses) {
+        addressSelect.innerHTML = '<option value="">— Select an address —</option>';
+        c.addresses.forEach(function(a) {
+          var label = a.label + ": " + a.address;
+          var opt = document.createElement('option');
+          opt.value = a.address;
+          opt.textContent = label;
+          if (a.is_default) opt.selected = true;
+          addressSelect.appendChild(opt);
+        });
+        addressSelect.style.display = '';
+        var firstOpt = addressSelect.querySelector('option[value=""]');
+        if (firstOpt) firstOpt.style.display = 'none';
+        var defaultOpt = addressSelect.querySelector('option[selected="selected"]');
+        if (defaultOpt && c.addresses.length > 0) {
+          addressSelect.value = defaultOpt.value;
+          fields["job_address"] = defaultOpt.value;
+          var addrEl = document.getElementById('job_address');
+          if (addrEl) addrEl.value = defaultOpt.value;
+        }
+      } else if (addressSelect) {
+        addressSelect.innerHTML = '<option value="">No addresses</option>';
+        addressSelect.style.display = '';
+      }
+    }
+
+    var addressSelectEl = document.getElementById('client_address_select');
+    if (addressSelectEl) {
+      addressSelectEl.addEventListener('change', function() {
+        var addrEl = document.getElementById('job_address');
+        if (addrEl && this.value) addrEl.value = this.value;
       });
     }
 
