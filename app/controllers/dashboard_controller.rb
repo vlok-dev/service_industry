@@ -114,7 +114,7 @@ case current_user.role
   # or just scheduled_date when no end date is set. Use this to make multi-day jobs
   # (projects) appear on each day they run in the schedule view.
   def overlaps_period(start_date, end_date)
-    @jobs.where("scheduled_date <= :end AND (scheduled_end_date IS NULL OR scheduled_end_date >= :start)", start: start_date, end: end_date)
+    @jobs.where("scheduled_date <= :end AND COALESCE(scheduled_end_date, scheduled_date) >= :start", start: start_date, end: end_date)
   end
 
   def schedule_range_label(view, date)

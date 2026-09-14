@@ -66,7 +66,12 @@ class JobsController < ApplicationController
 
     @job.status = params[:status]
     if @job.save
-      redirect_back(fallback_location: dashboard_path, notice: "Job status was updated.")
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace("job-#{@job.id}-status", partial: "dashboard/status_dropdown", locals: { job: @job })
+        end
+        format.html { redirect_back(fallback_location: dashboard_path, notice: "Job status was updated.") }
+      end
     else
       redirect_back(fallback_location: dashboard_path, alert: @job.errors.full_messages.join(", "))
     end
@@ -77,7 +82,12 @@ class JobsController < ApplicationController
 
     @job.is_project = ActiveRecord::Type::Boolean.new.cast(params[:is_project])
     if @job.save
-      redirect_back(fallback_location: dashboard_path, notice: "Job type was updated.")
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace("job-#{@job.id}-job-type", partial: "dashboard/job_type_dropdown", locals: { job: @job })
+        end
+        format.html { redirect_back(fallback_location: dashboard_path, notice: "Job type was updated.") }
+      end
     else
       redirect_back(fallback_location: dashboard_path, alert: @job.errors.full_messages.join(", "))
     end
@@ -88,7 +98,12 @@ class JobsController < ApplicationController
 
     @job.assigned_to_id = params[:assigned_to_id].present? ? params[:assigned_to_id] : nil
     if @job.save
-      redirect_back(fallback_location: dashboard_path, notice: "Assigned plumber was updated.")
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace("job-#{@job.id}-assigned-to", partial: "dashboard/assigned_to_dropdown", locals: { job: @job })
+        end
+        format.html { redirect_back(fallback_location: dashboard_path, notice: "Assigned plumber was updated.") }
+      end
     else
       redirect_back(fallback_location: dashboard_path, alert: @job.errors.full_messages.join(", "))
     end

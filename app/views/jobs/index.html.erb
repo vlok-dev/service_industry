@@ -1,10 +1,11 @@
 <%
+  all_jobs = policy_scope(Job)
   counts = {
-    pending:    @jobs.where(status: :pending).count,
-    scheduled:  @jobs.where(status: :scheduled).count,
-    in_progress: @jobs.where(status: :in_progress).count,
-    completed:  @jobs.where(status: :completed).count,
-    cancelled:  @jobs.where(status: :cancelled).count
+    pending:    all_jobs.where(status: :pending).count,
+    scheduled:  all_jobs.where(status: :scheduled).count,
+    in_progress: all_jobs.where(status: :in_progress).count,
+    completed:  all_jobs.where(status: :completed).count,
+    cancelled:  all_jobs.where(status: :cancelled).count
   }
   current_filter = params[:filter]
 %>

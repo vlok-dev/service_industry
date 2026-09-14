@@ -137,19 +137,19 @@
   min-width: 36px;
   min-height: 36px;
   border-radius: 8px;
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  background: var(--industro-navy);
+  color: white;
+  border: none;
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.2s;
 }
 .btn-icon:hover {
-  background: #e5e7eb;
-  color: #111827;
+  background: #26418a;
+  color: white;
   transform: translateY(-1px);
 }
 .btn-icon svg {
@@ -158,22 +158,32 @@
   flex-shrink: 0;
 }
 .btn-icon.btn-icon-danger {
-  color: #dc2626;
-  border-color: #fee2e2;
-  background: #fef2f2;
+  background: #dc2626;
+  border-color: #dc2626;
 }
 .btn-icon.btn-icon-danger:hover {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: #b91c1c;
 }
 .btn-icon.btn-icon-success {
-  color: #059669;
-  border-color: #d1fae5;
-  background: #ecfdf5;
+  background: #059669;
+  border-color: #059669;
 }
 .btn-icon.btn-icon-success:hover {
-  background: #d1fae5;
-  color: #047857;
+  background: #047857;
+}
+.btn-icon.btn-icon-edit {
+  background: #b2d33e;
+  color: #1b2c65;
+}
+.btn-icon.btn-icon-edit:hover {
+  background: #84cc16;
+  color: #1b2c65;
+}
+.btn-icon.btn-icon-primary {
+  background: var(--industro-navy);
+}
+.btn-icon.btn-icon-primary:hover {
+  background: #26418a;
 }
 .actions-icon {
   display: flex;
@@ -249,14 +259,19 @@
 
 /* Job number link in tables */
 .job-number {
-  color: var(--primary);
+  color: white;
   font-family: ui-monospace, monospace;
   font-size: 0.8rem;
   font-weight: 600;
   text-decoration: none;
+  background: var(--industro-navy);
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  display: inline-block;
 }
 .job-number:hover {
-  text-decoration: underline;
+  background: #26418a;
+  color: white;
 }
 
 /* Nav brand */
