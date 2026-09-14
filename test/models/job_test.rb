@@ -26,11 +26,10 @@ class JobTest < ActiveSupport::TestCase
     assert Job.new(base_attributes).valid?
   end
 
-  test "is invalid when another non-cancelled job occupies the same date and time" do
+  test "is valid even when another job occupies the same date and time" do
     Job.create!(base_attributes.merge(customer_name: "Existing"))
     conflicting = Job.new(base_attributes.merge(customer_name: "New"))
-    assert_not conflicting.valid?
-    assert_match(/already taken/, conflicting.errors[:scheduled_time].join)
+    assert conflicting.valid?, conflicting.errors.full_messages.to_sentence
   end
 
   test "is valid when scheduling the same time on a different day" do

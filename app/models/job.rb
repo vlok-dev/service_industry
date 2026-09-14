@@ -10,7 +10,6 @@ class Job < ApplicationRecord
 
   validates :customer_name, :address, :description, :status, :priority, :user, presence: true
   validates :job_number, uniqueness: { allow_blank: true }
-  validate :no_conflicting_scheduled_time, if: -> { scheduled_date.present? && scheduled_time.present? }
   validates :scheduled_end_date,
             comparison: { greater_than_or_equal_to: :scheduled_date },
             if: -> { scheduled_date.present? && scheduled_end_date.present? }
@@ -59,19 +58,6 @@ class Job < ApplicationRecord
   def add_extra_day!
     self.scheduled_end_date = (scheduled_end_date || scheduled_date) + 1.day
     save
-  end
-
-  def no_conflicting_scheduled_time
-    conflicts = Job
-      .where(scheduled_date: scheduled_date, scheduled_time: scheduled_time)
-      .where.not(status: :cancelled)
-    conflicts = conflicts.where.not(id: id) if persisted?
-    if assigned_to_id.present?
-      conflicts = conflicts.where(assigned_to_id: assigned_to_id)
-    end
-    if conflicts.exists?
-      errors.add(:scheduled_time, "is already taken. Another job is already scheduled for #{scheduled_date.strftime('%Y-%m-%d')} at #{scheduled_time.strftime('%H:%M')}.")
-    end
   end
 
   private
