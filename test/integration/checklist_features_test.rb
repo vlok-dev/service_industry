@@ -58,7 +58,7 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
 
   # --- Item 1: Accountant can close a job ---
 
-  test "accountant closes pending job marks completed with invoice" do
+  test "accountant closes pending job marks completed without an invoice" do
     sign_in @accountant
     job = create_job!(status: :pending, scheduled_date: Date.today, scheduled_time: Time.zone.parse("09:00"))
 
@@ -67,11 +67,11 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
     assert_response :redirect
     job.reload
     assert job.completed?, "Job should be marked as completed"
-    assert job.invoice_number.present?, "Job should have an auto-generated invoice number"
+    assert job.invoice_number.blank?, "Invoice number should only be assigned by the accountant"
     assert job.completed_at.present?, "Job should have completed_at set"
   end
 
-  test "accountant closes scheduled job marks completed with invoice" do
+  test "accountant closes scheduled job marks completed without an invoice" do
     sign_in @accountant
     job = create_job!(status: :scheduled, scheduled_time: Time.zone.parse("10:00"))
 
@@ -80,10 +80,10 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
     assert_response :redirect
     job.reload
     assert job.completed?
-    assert job.invoice_number.present?
+    assert job.invoice_number.blank?
   end
 
-  test "accountant closes in_progress job marks completed with invoice" do
+  test "accountant closes in_progress job marks completed without an invoice" do
     sign_in @accountant
     job = create_job!(status: :in_progress, scheduled_time: Time.zone.parse("11:00"))
 
@@ -92,7 +92,7 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
     assert_response :redirect
     job.reload
     assert job.completed?
-    assert job.invoice_number.present?
+    assert job.invoice_number.blank?
   end
 
   test "closing an already completed job does not raise and stays completed" do

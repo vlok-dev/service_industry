@@ -1,12 +1,15 @@
-<% status_pill_bg = case @job.status
+<% status_key = @job.display_status_key
+status_pill_bg = case status_key
   when "completed" then "#d1fae5"
+  when "invoiced" then "#cffafe"
   when "scheduled" then "#dbeafe"
   when "in_progress" then "#ede9fe"
   when "cancelled" then "#fee2e2"
   else "#fef3c7"
 end
-status_pill_fg = case @job.status
+status_pill_fg = case status_key
   when "completed" then "#065f46"
+  when "invoiced" then "#0e7490"
   when "scheduled" then "#1e40af"
   when "in_progress" then "#6d28d9"
   when "cancelled" then "#991b1b"
@@ -41,7 +44,7 @@ end %>
   </div>
   <div class="hero-meta">
     <span class="pill" style="background: <%= status_pill_bg %>; color: <%= status_pill_fg %>;">
-      <%= @job.status.humanize %>
+      <%= @job.display_status %>
     </span>
     <span class="pill"><%= @job.priority.humanize %> priority</span>
     <% if @job.scheduled_date.present? %>

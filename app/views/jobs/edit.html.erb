@@ -126,7 +126,7 @@
       <div class="card-body">
         <div class="field">
           <%= f.label :invoice_number, "Invoice Number" %>
-          <%= f.text_field :invoice_number, placeholder: "Auto-generated when status is set to Completed" %>
+          <%= f.text_field :invoice_number, placeholder: "Enter invoice number" %>
           <% if @job.completed? && @job.invoice_number.blank? %>
             <p style="color: #dc2626; font-size: 0.8rem; margin-top: 0.25rem;">Status is Completed but no invoice number set. Add one now.</p>
           <% end %>

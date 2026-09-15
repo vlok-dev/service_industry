@@ -4,7 +4,7 @@
 <p><strong>Customer:</strong> <%= @job.customer_name %></p>
 
 <p style="margin-bottom: 1rem;">
-  <span class="badge badge-<%= @job.status %>"><%= @job.status.humanize %></span>
+  <span class="badge badge-<%= @job.display_status_key %>"><%= @job.display_status %></span>
   <% if @job.is_project? %>
     <span class="badge badge-scheduled">Project</span>
   <% end %>

@@ -133,11 +133,12 @@
                   "scheduled"   => { bg: "#dbeafe", fg: "#1e40af" },
                   "in_progress" => { bg: "#ede9fe", fg: "#6d28d9" },
                   "completed"   => { bg: "#d1fae5", fg: "#065f46" },
+                  "invoiced"    => { bg: "#cffafe", fg: "#0e7490" },
                   "cancelled"   => { bg: "#fee2e2", fg: "#991b1b" }
                 }
-                sc = status_colors[job.status.to_s] || { bg: "#fef3c7", fg: "#92400e" }
+                sc = status_colors[job.display_status_key] || { bg: "#fef3c7", fg: "#92400e" }
               %>
-              <span class="pill" style="background: <%= sc[:bg] %>; color: <%= sc[:fg] %>; font-weight: 600;"><%= job.status.humanize %></span>
+              <span class="pill" style="background: <%= sc[:bg] %>; color: <%= sc[:fg] %>; font-weight: 600;"><%= job.display_status %></span>
             </td>
             <td>
               <span class="pill" style="background: <%= job.project? ? '#fce7f3' : '#fef3c7' %>; color: <%= job.project? ? '#9d174d' : '#92400e' %>;">

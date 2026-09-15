@@ -64,7 +64,8 @@ class JobsController < ApplicationController
   def update_status
     authorize @job, :update_status?
 
-    @job.status = params[:status]
+    requested_status = params[:status]
+    @job.status = requested_status == "invoiced" ? :completed : requested_status
     if @job.save
       respond_to do |format|
         format.turbo_stream do
@@ -119,7 +120,7 @@ class JobsController < ApplicationController
 
     @job.status = :completed
     if @job.save
-      redirect_back(fallback_location: @job, notice: "Job was closed and marked as completed (Invoice: #{@job.invoice_number}).")
+      redirect_back(fallback_location: @job, notice: "Job was closed and marked as completed.")
     else
       redirect_back(fallback_location: @job, alert: @job.errors.full_messages.join(", "))
     end

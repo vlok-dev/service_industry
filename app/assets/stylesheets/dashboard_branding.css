@@ -341,6 +341,7 @@ nav .brand {
 .badge-scheduled { background: #dbeafe; color: #1e40af; }
 .badge-in-progress { background: #ede9fe; color: #6d28d9; }
 .badge-completed { background: #d1fae5; color: #065f46; }
+.badge-invoiced { background: #cffafe; color: #0e7490; }
 .badge-cancelled { background: #fee2e2; color: #991b1b; }
 
 /* Modern Collapsible Sidebar */

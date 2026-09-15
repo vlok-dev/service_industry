@@ -63,6 +63,29 @@ class JobTest < ActiveSupport::TestCase
     assert_match(/^JOB-/, job.job_number)
   end
 
+  test "completed job with an invoice displays as invoiced" do
+    job = Job.create!(base_attributes.merge(status: :completed, invoice_number: "INV-00001"))
+
+    assert job.invoiced?
+    assert_equal "Invoiced", job.display_status
+    assert_equal "invoiced", job.display_status_key
+  end
+
+  test "completed job without an invoice remains completed" do
+    job = Job.create!(base_attributes.merge(status: :completed))
+
+    assert_not job.invoiced?
+    assert_equal "Completed", job.display_status
+    assert_equal "completed", job.display_status_key
+  end
+
+  test "invoiced scope returns completed jobs with invoices" do
+    invoiced_job = Job.create!(base_attributes.merge(status: :completed, invoice_number: "INV-00001"))
+    Job.create!(base_attributes.merge(customer_name: "Uninvoiced", status: :completed))
+
+    assert_includes Job.invoiced, invoiced_job
+  end
+
   test "auto-generates a job number when the form submits an empty string" do
     job = Job.new(base_attributes.merge(customer_name: "New", job_number: ""))
     job.valid?
