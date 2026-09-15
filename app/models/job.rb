@@ -24,7 +24,7 @@ class Job < ApplicationRecord
           q: sanitized)
   }
   scope :created_today, -> { where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day) }
-  scope :outstanding, -> { created_today.where.missing(:purchase_orders) }
+  scope :outstanding, -> { where.missing(:purchase_orders).where(status: [:completed]).where("invoice_number IS NULL OR invoice_number = ''") }
   scope :invoiced, -> { completed.where("invoice_number IS NOT NULL AND invoice_number <> ''") }
 
   def self.next_job_number

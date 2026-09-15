@@ -50,11 +50,21 @@ case current_user.role
       @completed_jobs = @my_jobs.completed
     end
 
-    @my_jobs = sort_job_list(@my_jobs) if @my_jobs
-    @pending_jobs = sort_job_list(@pending_jobs) if @pending_jobs
-    @in_progress_jobs = sort_job_list(@in_progress_jobs) if @in_progress_jobs
-    @completed_jobs = sort_job_list(@completed_jobs) if @completed_jobs
-    @outstanding_jobs = sort_job_list(@outstanding_jobs) if @outstanding_jobs
+    # Default sort for super_admin and scheduler: newest first by scheduled_date
+    if current_user.super_admin? || current_user.scheduler?
+      @my_jobs = @my_jobs.order(scheduled_date: :desc, scheduled_time: :desc) if @my_jobs
+      @pending_jobs = @pending_jobs.order(scheduled_date: :desc, scheduled_time: :desc) if @pending_jobs
+      @in_progress_jobs = @in_progress_jobs.order(scheduled_date: :desc, scheduled_time: :desc) if @in_progress_jobs
+      @completed_jobs = @completed_jobs.order(scheduled_date: :desc, scheduled_time: :desc) if @completed_jobs
+      @outstanding_jobs = @outstanding_jobs.order(scheduled_date: :desc, scheduled_time: :desc) if @outstanding_jobs
+    else
+      @my_jobs = sort_job_list(@my_jobs) if @my_jobs
+      @pending_jobs = sort_job_list(@pending_jobs) if @pending_jobs
+      @in_progress_jobs = sort_job_list(@in_progress_jobs) if @in_progress_jobs
+      @completed_jobs = sort_job_list(@completed_jobs) if @completed_jobs
+      @outstanding_jobs = sort_job_list(@outstanding_jobs) if @outstanding_jobs
+    end
+
     @all_jobs = sort_job_list(@all_jobs) if @all_jobs
     @today_jobs = sort_job_list(@today_jobs) if @today_jobs
     if @scheduled_jobs

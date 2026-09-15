@@ -8,3 +8,49 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+.pagy-nav {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.pagy-nav a,
+.pagy-nav span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.pagy-nav a:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.pagy-nav .page.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.pagy-nav .page.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.pagy-nav .gap {
+  color: var(--text-muted);
+}

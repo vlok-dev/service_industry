@@ -1,4 +1,18 @@
 module ApplicationHelper
+  def filter_display_name(filter)
+    case filter
+    when "pending" then "Pending"
+    when "scheduled" then "Scheduled"
+    when "in_progress" then "In Progress"
+    when "completed" then "Completed"
+    when "cancelled" then "Cancelled"
+    when "invoiced" then "Invoiced"
+    when "outstanding" then "Outstanding"
+    when "my_jobs" then "My Jobs"
+    else "All"
+    end
+  end
+
   def sortable_header(title, column)
     current = params[:sort] == column
     direction = if current && params[:direction] == "desc"

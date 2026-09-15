@@ -1,12 +1,13 @@
 <%
-  all_jobs = policy_scope(Job)
+  pipeline_scope = current_user.super_admin? ? policy_scope(Job).where(user: current_user) : policy_scope(Job)
   counts = {
-    pending:    all_jobs.where(status: :pending).count,
-    scheduled:  all_jobs.where(status: :scheduled).count,
-    in_progress: all_jobs.where(status: :in_progress).count,
-    completed:  all_jobs.where(status: :completed).count,
-    cancelled:  all_jobs.where(status: :cancelled).count,
-    invoiced:   all_jobs.invoiced.count
+    pending:    pipeline_scope.where(status: :pending).count,
+    scheduled:  pipeline_scope.where(status: :scheduled).count,
+    in_progress: pipeline_scope.where(status: :in_progress).count,
+    completed:  pipeline_scope.where(status: :completed).count,
+    cancelled:  pipeline_scope.where(status: :cancelled).count,
+    invoiced:   pipeline_scope.invoiced.count,
+    outstanding: pipeline_scope.outstanding.count
   }
   current_filter = params[:filter]
   filter_date = params[:filter_date].present? ? Date.parse(params[:filter_date]) : nil
@@ -16,7 +17,7 @@
   <div>
     <h1>Jobs</h1>
     <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem;">
-      <%= pluralize(@jobs.count, "job") %> • <%= number_with_precision(counts[:completed] * 100.0 / [@jobs.count, 1].max, precision: 0) %>% completion rate
+      <%= pluralize(@pipeline_scope.count, "job") %> • <%= number_with_precision(counts[:completed] * 100.0 / [@pipeline_scope.count, 1].max, precision: 0) %>% completion rate
     </p>
   </div>
    <div class="actions">
@@ -87,7 +88,7 @@
   <%= link_to "All", jobs_path, class: "chip #{current_filter.blank? ? 'active' : ''}" %>
   <%= link_to jobs_path(filter: "outstanding"), class: "chip #{current_filter == 'outstanding' ? 'active' : ''}" do %>
     Outstanding
-    <span class="count"><%= Job.outstanding.count %></span>
+    <span class="count"><%= counts[:outstanding] %></span>
   <% end %>
   <%= link_to jobs_path(filter: "pending"), class: "chip #{current_filter == 'pending' ? 'active' : ''}" do %>
     Pending
@@ -124,109 +125,137 @@
   </div>
 <% end %>
 
-<div class="modern-table">
-  <table>
-    <thead>
-      <tr>
-        <th><%= sortable_header "Job #", "job_number" %></th>
-        <th><%= sortable_header "Date", "scheduled_date" %></th>
-        <th><%= sortable_header "Customer", "customer_name" %></th>
-        <th><%= sortable_header "Address", "address" %></th>
-        <th><%= sortable_header "Status", "status" %></th>
-        <th><%= sortable_header "Priority", "priority" %></th>
-        <th><%= sortable_header "Assigned", "assigned_to" %></th>
-        <th><%= sortable_header "Invoice", "invoice_number" %></th>
-        <th style="text-align: left;">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% if @jobs.any? %>
-        <% @jobs.each do |job| %>
-          <tr data-job-id="<%= job.id %>">
-            <td>
-              <%= link_to (job.job_number || "N/A"), job, class: "job-number" %>
-              <span class="row-highlight-trigger" title="Highlight row">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.7;"><path d="M17.5 19A3.5 3.5 0 1 1 14 15.5a3.5 3.5 0 0 1 3.5 3.5zM13.5 11A3.5 3.5 0 1 1 10 7.5 3.5 3.5 0 0 1 13.5 11zM6 6h12"></path><path d="M9.5 19.5A3.5 3.5 0 1 1 6 16a3.5 3.5 0 0 1 3.5 3.5z"></path><circle cx="15" cy="12.5" r="3.5"></circle></svg>
-              </span>
-            </td>
-            <td><%= date_columns_display(job.scheduled_date) %></td>
-            <td>
-              <div class="customer"><%= job.customer_name %></div>
-              <% if job.contact_number.present? %>
-                <div style="font-size: 0.75rem; color: var(--text-muted);"><%= job.contact_number %></div>
-              <% end %>
-            </td>
-            <td class="address"><%= job.address.truncate(50) %></td>
-            <td>
-              <%
-                status_colors = {
-                  "pending"     => { bg: "#fef3c7", fg: "#92400e" },
-                  "scheduled"   => { bg: "#dbeafe", fg: "#1e40af" },
-                  "in_progress" => { bg: "#ede9fe", fg: "#6d28d9" },
-                  "completed"   => { bg: "#d1fae5", fg: "#065f46" },
-                  "invoiced"    => { bg: "#cffafe", fg: "#0e7490" },
-                  "cancelled"   => { bg: "#fee2e2", fg: "#991b1b" }
-                }
-                sc = status_colors[job.display_status_key] || { bg: "#fef3c7", fg: "#92400e" }
-              %>
-              <span class="pill" style="background: <%= sc[:bg] %>; color: <%= sc[:fg] %>; font-weight: 600;"><%= job.display_status %></span>
-            </td>
-            <td>
-              <span class="pill" style="background: <%= job.project? ? '#fce7f3' : '#fef3c7' %>; color: <%= job.project? ? '#9d174d' : '#92400e' %>;">
-                <%= job.priority.humanize %>
-              </span>
-            </td>
-            <td>
-              <% if job.assigned_to %>
-                <%= job.assigned_to.name %>
-              <% else %>
-                <span style="color: var(--text-muted);">Unassigned</span>
-              <% end %>
-            </td>
-            <td>
-              <span style="font-family: ui-monospace, monospace; font-size: 0.8rem;"><%= job.invoice_number || "—" %></span>
-            </td>
-            <td>
-              <div class="actions-icon">
-                <button type="button" class="row-colour-btn" title="Row Colour">Row Colour</button>
-                <%= link_to job, class: "btn-icon btn-icon-primary", title: "View" do %>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                <% end %>
-                <% if policy(job).edit? %>
-                  <%= link_to edit_job_path(job), class: "btn-icon", title: "Edit" do %>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                  <% end %>
-                <% end %>
-                <% if policy(job).destroy? %>
-                  <%= button_to job, method: :delete, data: { confirm: "Are you sure?" }, class: "btn-icon btn-icon-danger", title: "Delete" do %>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  <% end %>
-                <% end %>
-              </div>
-              <% if current_user.scheduler? && !current_user.super_admin? && job.pending? %>
-                <div style="margin-top: 0.5rem;">
-                  <%= form_with url: schedule_job_path(job), method: :patch, local: true, style: "display: flex; gap: 0.375rem; flex-wrap: wrap;" do |f| %>
-                    <%= f.hidden_field :status, value: "scheduled" %>
-                    <%= f.date_field :scheduled_date, value: Date.tomorrow, required: true, style: "padding: 0.3rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem;" %>
-                    <%= f.time_field :scheduled_time, value: "08:00", required: true, style: "padding: 0.3rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem;" %>
-                    <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, job.assigned_to_id), { include_blank: "Plumber" }, { style: "padding: 0.3rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem;" } %>
-                    <%= f.submit "Schedule", class: "btn btn-sm btn-success" %>
-                  <% end %>
-                </div>
-              <% end %>
-            </td>
-          </tr>
-        <% end %>
-      <% else %>
-        <tr><td colspan="9" class="empty-row">
+<% if current_user.super_admin? || current_user.scheduler? %>
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2><%= filter_display_name(current_filter) %> Jobs</h2>
+      <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <%= form_with url: jobs_path, method: :get, local: true, style: "display: flex; gap: 0.5rem;" do |f| %>
+          <%= f.text_field :q, value: @search_query, placeholder: "Search by job #, customer, address...", style: "padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; width: 280px;" %>
+          <%= f.submit "Search", class: "btn btn-sm" %>
           <% if @search_query.present? %>
-            No jobs found matching "<%= @search_query %>".
-          <% else %>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-            <div style="margin-top: 0.5rem;">No jobs to show. <% if current_user.super_admin? %><%= link_to "Create the first one", new_job_path, style: "color: var(--primary); font-weight: 600;" %><% end %></div>
+            <%= link_to "Clear", jobs_path, class: "btn btn-sm btn-secondary" %>
           <% end %>
-        </td></tr>
+        <% end %>
+        <% if current_user.super_admin? %>
+          <%= link_to "New Job", new_job_path, class: "btn" %>
+        <% end %>
+      </div>
+    </div>
+    <div class="card-body no-padding">
+      <% if @pipeline_jobs.present? %>
+        <div class="modern-table" style="border: none; box-shadow: none; border-radius: 0;">
+        <table>
+          <thead>
+            <tr>
+              <th><%= sortable_header "Job #", "job_number" %></th>
+              <th><%= sortable_header "Date", "scheduled_date" %></th>
+              <th><%= sortable_header "Time", "scheduled_time" %></th>
+              <th><%= sortable_header "Customer", "customer_name" %></th>
+              <th><%= sortable_header "Problem", "description" %></th>
+              <th><%= sortable_header "Address", "address" %></th>
+              <th><%= sortable_header "Status", "status" %></th>
+              <th><%= sortable_header "Job Type", "is_project" %></th>
+              <th><%= sortable_header "Assigned To", "assigned_to" %></th>
+              <th><%= sortable_header "Invoice", "invoice_number" %></th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @pipeline_jobs.each do |job| %>
+              <tr data-job-id="<%= job.id %>">
+              <td><%= link_to (job.job_number || "N/A"), job, class: "job-number", title: "View job" %></td>
+                <td><%= date_columns_display(job.scheduled_date) %></td>
+                <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
+                <td><%= job.customer_name %></td>
+                <td><%= job.description.to_s.truncate(60) %></td>
+                <td><%= job.address.to_s.truncate(40) %></td>
+                <td><%= render "dashboard/status_dropdown", job: job %></td>
+                <td><%= render "dashboard/job_type_dropdown", job: job %></td>
+                <td><%= render "dashboard/assigned_to_dropdown", job: job %></td>
+                <td><%= job.invoice_number || "—" %></td>
+                <td>
+                  <div class="actions-icon">
+                    <button type="button" class="row-colour-btn" title="Row Colour">Row Colour</button>
+                    <% if job.pending? %>
+                      <button type="button" class="btn btn-sm btn-schedule-toggle" data-job-id="<%= job.id %>">
+                        Schedule
+                      </button>
+                    <% end %>
+                    <%= link_to job, class: "btn-icon btn-icon-primary", title: "View" do %>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <% end %>
+                    <% if policy(job).edit? %>
+                      <%= link_to edit_job_path(job), class: "btn-icon btn-icon-edit", title: "Edit" do %>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                      <% end %>
+                    <% end %>
+                    <% if policy(job).destroy? %>
+                      <%= button_to job, method: :delete, data: { confirm: "Are you sure?" }, class: "btn-icon btn-icon-danger", title: "Delete" do %>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+              <% if job.pending? %>
+                <tr id="schedule-row-<%= job.id %>" class="schedule-row" style="display: none;">
+                  <td colspan="11">
+                    <div class="schedule-form">
+                      <%= form_with url: schedule_job_path(job), method: :patch, local: true do |f| %>
+                        <%= f.hidden_field :status, value: "scheduled" %>
+                        <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+                          <%= f.date_field :scheduled_date, value: job.scheduled_date || Date.today, required: true, style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" %>
+                          <%= f.time_field :scheduled_time, value: (job.scheduled_time&.strftime("%H:%M") || ""), style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" %>
+                          <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, job.assigned_to_id), { include_blank: "Plumber" }, { style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" } %>
+                          <div style="display: flex; gap: 0.5rem;">
+                            <%= f.submit "Save", class: "btn btn-sm btn-success" %>
+                            <button type="button" class="btn btn-sm btn-secondary btn-cancel-schedule" data-job-id="<%= job.id %>">Cancel</button>
+                          </div>
+                        </div>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+        </div>
+
+        <% if @pagy.pages > 1 %>
+          <div class="pagination-nav" style="padding: 1rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+            <%= @pagy.series_nav %>
+          </div>
+        <% end %>
+
+      <% else %>
+        <div class="empty-state">Nothing here for the moment!</div>
       <% end %>
-    </tbody>
-  </table>
-</div>
+    </div>
+  </div>
+<% end %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-schedule-toggle').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var jobId = btn.getAttribute('data-job-id');
+        var row = document.getElementById('schedule-row-' + jobId);
+        if (row) {
+          row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+        }
+      });
+    });
+
+    document.querySelectorAll('.btn-cancel-schedule').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var jobId = btn.getAttribute('data-job-id');
+        var row = document.getElementById('schedule-row-' + jobId);
+        if (row) {
+          row.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>

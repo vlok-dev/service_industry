@@ -9,46 +9,6 @@
         margin: 2rem auto;
         padding: 0 1rem;
       }
-      .print-header {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-        border: 1px solid #e2e8f0;
-      }
-      .print-header .logo {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-      }
-      .print-header .logo img {
-        width: 180px;
-        height: auto;
-      }
-      .print-header .logo-text {
-        font-size: 1.75rem;
-        font-weight: 800;
-        color: #1b2c65;
-        letter-spacing: -0.02em;
-      }
-      .print-header .logo .tagline {
-        font-size: 0.8rem;
-        color: #64748b;
-        font-weight: 500;
-      }
-      .print-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #0f172a;
-        margin: 0 0 0.25rem;
-      }
-      .print-date {
-        font-size: 1rem;
-        color: #64748b;
-        margin: 0;
-      }
       .print-actions {
         display: flex;
         justify-content: flex-end;
@@ -76,6 +36,7 @@
         border: 1px solid #e2e8f0;
       }
       .btn-back:hover { background: #e2e8f0; color: #334155; }
+      .no-print { display: inline-flex; }
       .print-table {
         width: 100%;
         border-collapse: collapse;
@@ -142,21 +103,13 @@
         border: 2px dashed #e2e8f0;
         border-radius: 8px;
       }
-      .print-footer {
-        margin-top: 1.5rem;
-        text-align: center;
-        color: #94a3b8;
-        font-size: 0.8rem;
-        padding: 1rem;
-      }
       @media print {
+        .no-print { display: none !important; }
         body { background: white !important; margin: 0 !important; padding: 0 !important; }
         .print-container { margin: 0 !important; padding: 0 !important; max-width: none; }
-        .print-header { box-shadow: none !important; border: 1px solid #e2e8f0 !important; border-radius: 0 !important; page-break-inside: avoid; }
         .print-title { page-break-after: avoid; }
         .print-actions { display: none !important; }
         .print-table { box-shadow: none !important; border: none !important; border-radius: 0 !important; }
-        .print-footer { page-break-before: always; }
         .print-table tbody tr { page-break-inside: avoid; }
         .print-table tbody tr { break-inside: avoid; }
       }
@@ -166,77 +119,60 @@
 
 <% content_for :full_page do %>
 <div class="print-container">
-  <div class="print-header">
-    <div class="logo">
-      <%= image_tag "INDUSTRO-PLUMBERS.png", alt: "Industro Plumbers" %>
-      <div>
-        <div class="logo-text">Industro Plumbers</div>
-        <div class="tagline">Scheduled Jobs Report</div>
-      </div>
-    </div>
-    <h1 class="print-title">Tomorrow's Scheduled Jobs</h1>
-    <p class="print-date"><%= @print_date.strftime("%A, %d %B %Y") %></p>
-  </div>
-
   <div class="print-actions">
-    <%= link_to jobs_path, class: "btn btn-back" do %>
+    <%= link_to jobs_path, class: "btn btn-back no-print" do %>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="9 18 5 12 9 6"></polyline></svg>
       Back to Jobs
     <% end %>
-    <button class="btn-print" onclick="window.print()">
+    <button class="btn-print no-print" onclick="window.print()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18h12v6H6v-6z"></path></svg>
       Print
     </button>
   </div>
 
-  <% if @jobs.any? %>
-    <table class="print-table">
-      <thead>
+  <table class="print-table">
+    <thead>
+      <tr>
+        <th>Job #</th>
+        <th>Time</th>
+        <th>Customer</th>
+        <th>Address</th>
+        <th>Problem</th>
+        <th>Plumber</th>
+        <th>Job Type</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @jobs.each_with_index do |job, index| %>
         <tr>
-          <th>#</th>
-          <th>Time</th>
-          <th>Customer</th>
-          <th>Address</th>
-          <th>Problem</th>
-          <th>Plumber</th>
-          <th>Type</th>
-          <th>Status</th>
+          <td><span class="job-number"><%= job.job_number || "N/A" %></span></td>
+          <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
+          <td class="customer"><%= job.customer_name %></td>
+          <td class="address"><%= job.address.truncate(50) %></td>
+          <td><%= job.description.to_s.truncate(60) %></td>
+          <td class="plumber"><%= job.assigned_to&.name || "Unassigned" %></td>
+          <td>
+            <span class="priority-badge <%= job.project? ? 'priority-project' : 'priority-maintenance' %>">
+              <%= job.project? ? "Project" : "Maintenance" %>
+            </span>
+          </td>
+          <td>
+            <span class="status-badge status-<%= job.status.to_s %>">
+              <%= job.display_status %>
+            </span>
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        <% @jobs.each_with_index do |job, index| %>
-          <tr>
-            <td><span class="job-number"><%= job.job_number || "N/A" %></span></td>
-            <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
-            <td class="customer"><%= job.customer_name %></td>
-            <td class="address"><%= job.address.truncate(50) %></td>
-            <td><%= job.description.to_s.truncate(60) %></td>
-            <td class="plumber"><%= job.assigned_to&.name || "Unassigned" %></td>
-            <td>
-              <span class="priority-badge <%= job.project? ? 'priority-project' : 'priority-maintenance' %>">
-                <%= job.project? ? "Project" : "Maintenance" %>
-              </span>
-            </td>
-            <td>
-              <span class="status-badge status-<%= job.status.to_s %>">
-                <%= job.display_status %>
-              </span>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  <% else %>
+      <% end %>
+    </tbody>
+  </table>
+
+  <% if @jobs.none? %>
     <div class="print-empty">
       <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
       <p>No jobs scheduled for tomorrow.</p>
     </div>
   <% end %>
-
-  <div class="print-footer">
-    <p>Industro Plumbers &mdash; Generated on <%= Time.current.strftime("%d %B %Y at %I:%M %p") %></p>
-    <p>Total scheduled jobs: <%= @jobs.count %></p>
-  </div>
 </div>
 
 <script>

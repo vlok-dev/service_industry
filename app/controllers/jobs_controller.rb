@@ -1,13 +1,35 @@
 class JobsController < ApplicationController
+  include Pagy::Method
   before_action :set_job, only: %i[ show edit update destroy schedule whatsapp confirm_whatsapp update_job_type update_assigned_to add_extra_day close update_status ]
 
   def index
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
     @filter_date = params[:filter_date].present? ? Date.parse(params[:filter_date]) : nil
-    @jobs = filter_jobs if params[:filter].present?
-    @jobs = @jobs.search(params[:q]) if params[:q].present?
+    
+    # Base scope for pipeline (my_jobs for super_admin/scheduler)
+    if current_user.super_admin?
+      @pipeline_scope = policy_scope(Job).where(user: current_user)
+    elsif current_user.scheduler?
+      @pipeline_scope = policy_scope(Job)
+    else
+      @pipeline_scope = policy_scope(Job)
+    end
+    
+    @pipeline_scope = filter_jobs if params[:filter].present?
+    @pipeline_scope = @pipeline_scope.search(params[:q]) if params[:q].present?
     @search_query = params[:q]
-    @jobs = sort_job_list(@jobs)
+    @pipeline_scope = sort_job_list(@pipeline_scope)
+
+    # Default to newest-first by scheduled date for scheduler/super_admin
+    if (current_user.super_admin? || current_user.scheduler?) && params[:sort].blank?
+      @pipeline_scope = @pipeline_scope.order(scheduled_date: :desc, scheduled_time: :desc)
+    end
+    
+    # Paginate the pipeline - 100 per page
+    @pagy, @pipeline_jobs = pagy(:offset, @pipeline_scope, limit: 100)
+    
+    # For backwards compat with other roles
+    @jobs = @pipeline_jobs
   end
 
   def show
@@ -204,24 +226,27 @@ class JobsController < ApplicationController
     params.permit(:status, :scheduled_date, :scheduled_time, :assigned_to_id)
   end
 
-  def filter_jobs
+  def filter_jobs(scope = nil)
+    scope ||= @pipeline_scope
     case params[:filter]
     when "pending"
-      policy_scope(Job).pending
+      scope.pending
     when "scheduled"
-      scoped = policy_scope(Job).scheduled
+      scoped = scope.scheduled
       scoped = scoped.where(scheduled_date: @filter_date) if @filter_date
       scoped
     when "completed"
-      policy_scope(Job).completed
+      scope.completed
+    when "in_progress"
+      scope.in_progress
     when "outstanding"
-      policy_scope(Job).outstanding
+      scope.outstanding
     when "invoiced"
-      policy_scope(Job).invoiced
+      scope.invoiced
     when "my_jobs"
-      policy_scope(Job).where(assigned_to: current_user)
+      scope.where(assigned_to: current_user)
     else
-      policy_scope(Job)
+      scope
     end
   end
 end
