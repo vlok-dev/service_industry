@@ -12,12 +12,13 @@
 
 ActiveRecord::Schema[8.1].define(version: 2026_09_14_190700) do
   create_table "addresses", force: :cascade do |t|
-    t.references :client, null: false, foreign_key: true
-    t.string "label", default: "Other"
     t.text "address"
-    t.boolean "is_default", default: false
+    t.integer "client_id", null: false
     t.datetime "created_at", null: false
+    t.boolean "is_default", default: false
+    t.string "label", default: "Other"
     t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_addresses_on_client_id"
   end
 
   create_table "claims", force: :cascade do |t|
@@ -203,6 +204,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_190700) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "addresses", "clients"
   add_foreign_key "claims", "jobs"
   add_foreign_key "jobs", "clients"
   add_foreign_key "jobs", "users"

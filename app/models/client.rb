@@ -22,7 +22,7 @@ class Client < ApplicationRecord
     else
       self.name = [ first_name, last_name ].reject(&:blank?).join(" ")
     end
-    self.contact_person = [ first_name, last_name ].reject(&:blank?).join(" ") if company.present?
+    self.contact_person = [ first_name, last_name ].reject(&:blank?).join(" ") if company.present? && contact_person.blank?
   end
 
   def must_have_company_or_name

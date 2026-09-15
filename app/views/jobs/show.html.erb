@@ -76,6 +76,13 @@ end %>
     <% end %>
   </div>
   <div class="info-tile">
+    <div class="label">Primary Contact</div>
+    <div class="value"><%= @job.contact_person.presence || @job.client&.contact_person || "—" %></div>
+    <% if (@job.contact_number.presence || @job.client&.primary_contact_mobile.presence || @job.client&.phone_number).present? %>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;"><%= @job.contact_number.presence || @job.client&.primary_contact_mobile.presence || @job.client&.phone_number %></div>
+    <% end %>
+  </div>
+  <div class="info-tile">
     <div class="label">Delivery Address</div>
     <div class="value"><%= @job.address %></div>
   </div>

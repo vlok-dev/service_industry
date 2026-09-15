@@ -33,8 +33,8 @@
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :contact_person, "Primary Contact" %><br>
-    <%= f.text_field :contact_person, readonly: @client.company.present?, placeholder: "Person to contact" %>
-    <p style="color: #666; font-size: 0.875rem;">For company clients, this is auto-filled from name fields. For company clients, update first/last name to change contact.</p>
+    <%= f.text_field :contact_person, placeholder: "Person to contact" %>
+    <p style="color: #666; font-size: 0.875rem;">Name of the primary contact person for this client.</p>
   </div>
 
   <div style="margin-bottom: 1rem;">
