@@ -1393,12 +1393,13 @@
 
         if (whatsappYesBtn) {
           whatsappYesBtn.addEventListener('click', function() {
-            var jobId = whatsappModal.getAttribute('data-job-id');
-            if (!jobId) return;
+            var url = whatsappModal.getAttribute('data-url');
+            var cellId = whatsappModal.getAttribute('data-cell-id');
+            if (!url) return;
 
             var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            fetch('/jobs/' + jobId + '/confirm_whatsapp', {
+            fetch(url, {
               method: 'POST',
               headers: {
                 'X-CSRF-Token': csrfToken,
@@ -1410,16 +1411,19 @@
               return response.json();
             })
             .then(function(data) {
-              var cell = document.getElementById('whatsapp-cell-' + jobId);
+              var cell = cellId ? document.getElementById(cellId) : null;
               if (cell && data.timestamp && data.whatsapp_url) {
-                cell.innerHTML = 'Sent WhatsApp on ' + data.timestamp + ' at ' + data.time;
+                cell.innerHTML = 'Sent Via WhatsApp on ' + data.timestamp + ' at ' + data.time;
+                window.open(data.whatsapp_url, '_blank');
+              } else if (cell && data.whatsapp_url) {
+                cell.innerHTML = 'Sent Via WhatsApp';
                 window.open(data.whatsapp_url, '_blank');
               }
               whatsappModal.classList.remove('active');
             })
             .catch(function(error) {
               console.error('Error:', error);
-              alert('Failed to confirm WhatsApp send. Please try again.');
+              alert('Failed to send WhatsApp. Please try again.');
               whatsappModal.classList.remove('active');
             });
           });
@@ -1428,7 +1432,16 @@
         document.querySelectorAll('.whatsapp-confirm-btn').forEach(function(btn) {
           btn.addEventListener('click', function(e) {
             e.preventDefault();
-            whatsappModal.setAttribute('data-job-id', btn.getAttribute('data-job-id'));
+            var url = btn.getAttribute('data-url');
+            var cellId = btn.getAttribute('data-cell-id');
+            if (!url) {
+              var jobId = btn.getAttribute('data-job-id');
+              if (!jobId) return;
+              url = '/jobs/' + jobId + '/confirm_whatsapp';
+              cellId = 'whatsapp-cell-' + jobId;
+            }
+            whatsappModal.setAttribute('data-url', url);
+            whatsappModal.setAttribute('data-cell-id', cellId);
             whatsappModal.classList.add('active');
           });
         });
@@ -1441,7 +1454,7 @@
           <h3>Send WhatsApp</h3>
         </div>
         <div class="modal-body">
-          Are you sure you want to send this job via WhatsApp?
+          Are you sure you want to send this via WhatsApp?
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="whatsapp-confirm-cancel">Cancel</button>

@@ -37,6 +37,7 @@ Rails.application.routes.draw do
     end
     member do
       get :whatsapp
+      post :confirm_whatsapp
     end
   end
 

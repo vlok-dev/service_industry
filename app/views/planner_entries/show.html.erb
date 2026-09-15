@@ -1,0 +1,40 @@
+<div class="card">
+  <div class="card-header">
+    <h2><%= @planner_entry.title %></h2>
+    <%= link_to planner_entries_path, class: "btn btn-sm btn-secondary" do %>
+      Back to Planner
+    <% end %>
+  </div>
+  <div class="card-body">
+    <div class="planner-card" style="border-left: 4px solid <%= @planner_entry.category_color %>;">
+      <div class="planner-card-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span class="planner-icon"><%= @planner_entry.category_icon %></span>
+          <span class="planner-category" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: <%= @planner_entry.category_color %>;"><%= @planner_entry.category.to_s.humanize %></span>
+        </div>
+        <span class="badge badge-<%= @planner_entry.status %>"><%= @planner_entry.status.to_s.humanize %></span>
+      </div>
+      <div class="planner-card-body">
+        <% if @planner_entry.description.present? %>
+          <p class="planner-desc"><%= @planner_entry.description %></p>
+        <% end %>
+        <div class="planner-meta">
+          <span>📅 <%= @planner_entry.entry_date.strftime("%d %b %Y") %></span>
+          <% if @planner_entry.entry_time.present? %>
+            <span>⏰ <%= @planner_entry.entry_time.strftime("%I:%M %p") %></span>
+          <% end %>
+          <% if @planner_entry.assigned_to %>
+            <span>👤 <%= @planner_entry.assigned_to.name %></span>
+          <% end %>
+          <% if @planner_entry.whatsapp_sent_at %>
+            <span>💬 Sent Via WhatsApp on <%= (@planner_entry.whatsapp_sent_at + 2.hours).strftime('%d %b %Y') %> at <%= (@planner_entry.whatsapp_sent_at + 2.hours).strftime('%I:%M %p') %></span>
+          <% end %>
+        </div>
+      </div>
+      <div class="planner-card-footer" style="padding-top: 0.5rem; border-top: 1px solid var(--border-light); margin-top: 0.5rem;">
+        <%= link_to "Edit", edit_planner_entry_path(@planner_entry), class: "btn btn-sm" %>
+        <%= link_to "Delete", planner_entry_path(@planner_entry), method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-sm btn-danger" %>
+      </div>
+    </div>
+  </div>
+</div>
