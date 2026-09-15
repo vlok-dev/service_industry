@@ -1,7 +1,17 @@
 <div id="job-<%= job.id %>-status">
   <% if policy(job).update_status? %>
+    <%
+      badge_colors = {
+        "pending"     => { bg: "#fef3c7", fg: "#92400e" },
+        "scheduled"   => { bg: "#dbeafe", fg: "#1e40af" },
+        "in_progress" => { bg: "#ede9fe", fg: "#6d28d9" },
+        "completed"   => { bg: "#d1fae5", fg: "#065f46" },
+        "cancelled"   => { bg: "#fee2e2", fg: "#991b1b" }
+      }
+      colors = badge_colors[job.status.to_s] || { bg: "#fef3c7", fg: "#92400e" }
+    %>
     <%= form_with url: update_status_job_path(job), method: :patch, style: "display: inline;" do |f| %>
-      <%= f.select :status, Job.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: false, selected: job.status }, { onchange: "this.form.requestSubmit();", style: "padding: 0.25rem 0.4rem; border: none; border-radius: 6px; font-size: 0.8rem; background: var(--industro-navy); color: white; cursor: pointer;" } %>
+      <%= f.select :status, Job.statuses.keys.map { |s| [s.humanize, s, { style: "background: #{badge_colors[s][:bg]}; color: #{badge_colors[s][:fg]}; font-weight: 600;" }] }, { include_blank: false, selected: job.status }, { onchange: "this.form.requestSubmit();", style: "padding: 0.25rem 0.4rem; border: none; border-radius: 6px; font-size: 0.8rem; background: #{colors[:bg]}; color: #{colors[:fg]}; cursor: pointer; font-weight: 600;" } %>
     <% end %>
   <% else %>
     <span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span>

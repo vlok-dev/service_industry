@@ -1,9 +1,16 @@
 <div id="job-<%= job.id %>-job-type">
   <% if policy(job).update_job_type? %>
+    <%
+      type_colors = {
+        "false" => { bg: "#fef3c7", fg: "#92400e" },
+        "true"  => { bg: "#fce7f3", fg: "#9d174d" }
+      }
+      current = type_colors[job.is_project.to_s]
+    %>
     <%= form_with url: update_job_type_job_path(job), method: :patch, style: "display: inline;" do |f| %>
-      <%= f.select :is_project, [["Maintenance", false], ["Project", true]], { include_blank: false, selected: job.is_project }, { onchange: "this.form.requestSubmit();", style: "padding: 0.25rem 0.4rem; border: none; border-radius: 6px; font-size: 0.8rem; background: var(--industro-navy); color: white; cursor: pointer;" } %>
+      <%= f.select :is_project, [["Maintenance", false, { style: "background: #{type_colors['false'][:bg]}; color: #{type_colors['false'][:fg]}; font-weight: 600;" }], ["Project", true, { style: "background: #{type_colors['true'][:bg]}; color: #{type_colors['true'][:fg]}; font-weight: 600;" }]], { include_blank: false, selected: job.is_project }, { onchange: "this.form.requestSubmit();", style: "padding: 0.25rem 0.4rem; border: none; border-radius: 6px; font-size: 0.8rem; background: #{current[:bg]}; color: #{current[:fg]}; cursor: pointer; font-weight: 600;" } %>
     <% end %>
   <% else %>
-    <span class="badge badge-<%= job.is_project? ? 'scheduled' : 'pending' %>"><%= job.is_project? ? "Project" : "Maintenance" %></span>
+    <span class="pill" style="background: <%= job.is_project? ? '#fce7f3' : '#fef3c7' %>; color: <%= job.is_project? ? '#9d174d' : '#92400e' %>;"><%= job.is_project? ? "Project" : "Maintenance" %></span>
   <% end %>
 </div>

@@ -126,7 +126,19 @@
               <% end %>
             </td>
             <td class="address"><%= job.address.truncate(50) %></td>
-            <td><span class="badge badge-<%= job.status %>"><%= job.status.humanize %></span></td>
+            <td>
+              <%
+                status_colors = {
+                  "pending"     => { bg: "#fef3c7", fg: "#92400e" },
+                  "scheduled"   => { bg: "#dbeafe", fg: "#1e40af" },
+                  "in_progress" => { bg: "#ede9fe", fg: "#6d28d9" },
+                  "completed"   => { bg: "#d1fae5", fg: "#065f46" },
+                  "cancelled"   => { bg: "#fee2e2", fg: "#991b1b" }
+                }
+                sc = status_colors[job.status.to_s] || { bg: "#fef3c7", fg: "#92400e" }
+              %>
+              <span class="pill" style="background: <%= sc[:bg] %>; color: <%= sc[:fg] %>; font-weight: 600;"><%= job.status.humanize %></span>
+            </td>
             <td>
               <span class="pill" style="background: <%= job.project? ? '#fce7f3' : '#fef3c7' %>; color: <%= job.project? ? '#9d174d' : '#92400e' %>;">
                 <%= job.priority.humanize %>

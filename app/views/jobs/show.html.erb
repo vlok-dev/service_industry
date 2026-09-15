@@ -1,14 +1,14 @@
 <% status_pill_bg = case @job.status
   when "completed" then "#d1fae5"
   when "scheduled" then "#dbeafe"
-  when "in_progress" then "#fce7f3"
+  when "in_progress" then "#ede9fe"
   when "cancelled" then "#fee2e2"
   else "#fef3c7"
 end
 status_pill_fg = case @job.status
   when "completed" then "#065f46"
   when "scheduled" then "#1e40af"
-  when "in_progress" then "#9d174d"
+  when "in_progress" then "#6d28d9"
   when "cancelled" then "#991b1b"
   else "#92400e"
 end %>
