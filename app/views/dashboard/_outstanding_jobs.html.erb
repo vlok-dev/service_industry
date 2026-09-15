@@ -7,6 +7,7 @@
           <tr>
             <th><%= sortable_header "Job #", "job_number" %></th>
             <th><%= sortable_header "Customer", "customer_name" %></th>
+            <th><%= sortable_header "Problem", "description" %></th>
             <th><%= sortable_header "Address", "address" %></th>
             <th><%= sortable_header "Status", "status" %></th>
             <th><%= sortable_header "Date", "scheduled_date" %></th>
@@ -20,9 +21,10 @@
         </thead>
         <tbody>
           <% @outstanding_jobs.each do |job| %>
-            <tr>
+            <tr data-job-id="<%= job.id %>">
               <td><%= link_to (job.job_number || "N/A"), job, class: "job-number", title: "View job" %></td>
               <td><%= job.customer_name %></td>
+              <td><%= job.description.to_s.truncate(60) %></td>
               <td><%= job.address.truncate(40) %></td>
               <td><%= render "status_dropdown", job: job %></td>
               <td><%= date_columns_display(job.scheduled_date) %></td>
@@ -33,6 +35,7 @@
               <td><%= job.invoice_number || "—" %></td>
               <td>
                 <div class="actions-icon">
+                  <button type="button" class="row-colour-btn" title="Row Colour">Row Colour</button>
                   <%= link_to job, class: "btn-icon btn-icon-primary", title: "View" do %>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                   <% end %>

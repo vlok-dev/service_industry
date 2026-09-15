@@ -6,6 +6,12 @@
       <%= link_to "Week", dashboard_path(view: "week", date: @scheduler_date, anchor: "schedule_view"), class: "view-tab #{@scheduler_view == 'week' ? 'active' : ''}" %>
       <%= link_to "Month", dashboard_path(view: "month", date: @scheduler_date, anchor: "schedule_view"), class: "view-tab #{@scheduler_view == 'month' ? 'active' : ''}" %>
     </div>
+    <% if current_user.scheduler? || current_user.super_admin? %>
+      <%= link_to(print_tomorrow_jobs_path, class: "btn btn-sm", target: "_blank", style: "background: #1b2c65; color: white; font-size: 0.75rem; padding: 0.35rem 0.7rem;") do %>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18h12v6H6v-6z"></path><polyline points="6 9 6 5"></polyline></svg>
+        Print Tomorrow's Jobs
+      <% end %>
+    <% end %>
   </div>
   <div class="card-body" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
     <div class="date-navigation">
@@ -26,6 +32,7 @@
             <th><%= sortable_header "Date", "scheduled_date" %></th>
             <th><%= sortable_header "Time", "scheduled_time" %></th>
             <th><%= sortable_header "Customer", "customer_name" %></th>
+            <th><%= sortable_header "Problem", "description" %></th>
             <th><%= sortable_header "Address", "address" %></th>
             <th><%= sortable_header "Plumber", "assigned_to" %></th>
             <th><%= sortable_header "Job Type", "is_project" %></th>
@@ -34,14 +41,16 @@
         </thead>
         <tbody>
           <% @scheduled_jobs.each do |job| %>
-            <tr>
+            <tr data-job-id="<%= job.id %>">
               <td data-label="Date"><%= date_columns_display(job.scheduled_date) %></td>
               <td data-label="Time"><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
               <td data-label="Customer"><%= job.customer_name %></td>
+              <td data-label="Problem"><%= job.description.to_s.truncate(50) %></td>
               <td data-label="Address"><%= job.address.truncate(40) %></td>
               <td data-label="Plumber"><%= job.assigned_to&.name || "Unassigned" %></td>
               <td data-label="Job Type"><%= render "job_type_dropdown", job: job %></td>
               <td data-label="Actions">
+                <button type="button" class="row-colour-btn" title="Row Colour">Row Colour</button>
                 <span id="whatsapp-cell-<%= job.id %>">
                   <% if job.whatsapp_sent_at %>
                     Sent WhatsApp on <%= (job.whatsapp_sent_at + 2.hours).strftime('%d %b %Y') %> at <%= (job.whatsapp_sent_at + 2.hours).strftime('%I:%M %p') %>

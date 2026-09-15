@@ -7,13 +7,13 @@ class CalendarsController < ApplicationController
     when "day"
       @jobs = policy_scope(Job).where(scheduled_date: @date)
     when "week"
-      start_date = @date.beginning_of_week
-      end_date = @date.end_of_week
+      start_date = @date.beginning_of_week(:sunday)
+      end_date = @date.end_of_week(:sunday)
       @jobs = policy_scope(Job).where(scheduled_date: start_date..end_date)
       @week_start = start_date
     when "month"
-      start_date = @date.beginning_of_month.beginning_of_week
-      end_date = @date.end_of_month.end_of_week
+      start_date = @date.beginning_of_month.beginning_of_week(:sunday)
+      end_date = @date.end_of_month.end_of_week(:sunday)
       @jobs = policy_scope(Job).where(scheduled_date: start_date..end_date)
       @month_start = @date.beginning_of_month
     else

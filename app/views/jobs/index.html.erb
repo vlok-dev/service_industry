@@ -5,9 +5,11 @@
     scheduled:  all_jobs.where(status: :scheduled).count,
     in_progress: all_jobs.where(status: :in_progress).count,
     completed:  all_jobs.where(status: :completed).count,
-    cancelled:  all_jobs.where(status: :cancelled).count
+    cancelled:  all_jobs.where(status: :cancelled).count,
+    invoiced:   all_jobs.invoiced.count
   }
   current_filter = params[:filter]
+  filter_date = params[:filter_date].present? ? Date.parse(params[:filter_date]) : nil
 %>
 
 <div class="action-bar">
@@ -17,11 +19,17 @@
       <%= pluralize(@jobs.count, "job") %> • <%= number_with_precision(counts[:completed] * 100.0 / [@jobs.count, 1].max, precision: 0) %>% completion rate
     </p>
   </div>
-  <div class="actions">
+   <div class="actions">
     <% if current_user.super_admin? %>
       <%= link_to new_job_path, class: "btn" do %>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         New Job
+      <% end %>
+    <% end %>
+    <% if current_user.scheduler? || current_user.super_admin? %>
+      <%= link_to(print_tomorrow_jobs_path, class: "btn", target: "_blank", style: "background: #1b2c65;") do %>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18h12v6H6v-6z"></path></svg>
+        Print Tomorrow's Jobs
       <% end %>
     <% end %>
   </div>
@@ -65,6 +73,9 @@
     <% if current_filter.present? %>
       <%= f.hidden_field :filter, value: current_filter %>
     <% end %>
+    <% if current_filter == "scheduled" && params[:filter_date].present? %>
+      <%= f.hidden_field :filter_date, value: params[:filter_date] %>
+    <% end %>
     <%= f.submit "Search", class: "btn" %>
     <% if @search_query.present? || current_filter.present? %>
       <%= link_to "Clear", jobs_path, class: "btn btn-secondary" %>
@@ -94,7 +105,24 @@
     Completed
     <span class="count"><%= counts[:completed] %></span>
   <% end %>
+  <%= link_to jobs_path(filter: "invoiced"), class: "chip #{current_filter == 'invoiced' ? 'active' : ''}" do %>
+    Invoiced
+    <span class="count"><%= counts[:invoiced] %></span>
+  <% end %>
 </div>
+
+<% if current_filter == "scheduled" %>
+  <div class="scheduled-date-picker" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); box-shadow: var(--shadow);">
+    <label for="filter_date" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin: 0;">Show scheduled jobs for:</label>
+    <%= form_with url: jobs_path(filter: "scheduled"), method: :get, local: true, style: "display: flex; align-items: center; gap: 0.5rem;" do |f| %>
+      <%= f.hidden_field :filter, value: "scheduled" %>
+      <%= f.date_field :filter_date, value: filter_date || Date.tomorrow, id: "filter_date", style: "padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem;", onchange: "this.form.requestSubmit();" %>
+      <% if filter_date.present? %>
+        <%= link_to "Clear date", jobs_path(filter: "scheduled"), class: "btn btn-sm btn-secondary" %>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
 
 <div class="modern-table">
   <table>
@@ -114,9 +142,12 @@
     <tbody>
       <% if @jobs.any? %>
         <% @jobs.each do |job| %>
-          <tr>
+          <tr data-job-id="<%= job.id %>">
             <td>
               <%= link_to (job.job_number || "N/A"), job, class: "job-number" %>
+              <span class="row-highlight-trigger" title="Highlight row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.7;"><path d="M17.5 19A3.5 3.5 0 1 1 14 15.5a3.5 3.5 0 0 1 3.5 3.5zM13.5 11A3.5 3.5 0 1 1 10 7.5 3.5 3.5 0 0 1 13.5 11zM6 6h12"></path><path d="M9.5 19.5A3.5 3.5 0 1 1 6 16a3.5 3.5 0 0 1 3.5 3.5z"></path><circle cx="15" cy="12.5" r="3.5"></circle></svg>
+              </span>
             </td>
             <td><%= date_columns_display(job.scheduled_date) %></td>
             <td>
@@ -157,6 +188,7 @@
             </td>
             <td>
               <div class="actions-icon">
+                <button type="button" class="row-colour-btn" title="Row Colour">Row Colour</button>
                 <%= link_to job, class: "btn-icon btn-icon-primary", title: "View" do %>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                 <% end %>

@@ -71,8 +71,8 @@
   <% end %>
 
 <% elsif @view == "month" %>
-  <% start_date = @month_start.beginning_of_week %>
-  <% end_date = @month_start.end_of_month.end_of_week %>
+  <% start_date = @month_start.beginning_of_week(:sunday) %>
+  <% end_date = @month_start.end_of_month.end_of_week(:sunday) %>
   <table style="width: 100%; border-collapse: collapse;">
     <thead>
       <tr style="background: #f3f4f6;">

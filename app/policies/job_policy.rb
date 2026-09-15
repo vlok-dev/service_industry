@@ -28,11 +28,11 @@ class JobPolicy < ApplicationPolicy
   end
 
   def schedule?
-    user.scheduler?
+    user.scheduler? || user.super_admin?
   end
 
   def bulk_whatsapp?
-    user.scheduler?
+    user.scheduler? || user.super_admin?
   end
 
   def add_extra_day?

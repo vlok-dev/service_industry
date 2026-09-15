@@ -3,6 +3,7 @@ class JobsController < ApplicationController
 
   def index
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
+    @filter_date = params[:filter_date].present? ? Date.parse(params[:filter_date]) : nil
     @jobs = filter_jobs if params[:filter].present?
     @jobs = @jobs.search(params[:q]) if params[:q].present?
     @search_query = params[:q]
@@ -178,6 +179,12 @@ class JobsController < ApplicationController
     @date = date
   end
 
+  def print_tomorrow
+    authorize Job, :schedule?
+    @print_date = Date.tomorrow
+    @jobs = policy_scope(Job).scheduled.where(scheduled_date: @print_date).order(:scheduled_time)
+  end
+
   private
 
   def set_job
@@ -202,11 +209,15 @@ class JobsController < ApplicationController
     when "pending"
       policy_scope(Job).pending
     when "scheduled"
-      policy_scope(Job).scheduled
+      scoped = policy_scope(Job).scheduled
+      scoped = scoped.where(scheduled_date: @filter_date) if @filter_date
+      scoped
     when "completed"
       policy_scope(Job).completed
     when "outstanding"
       policy_scope(Job).outstanding
+    when "invoiced"
+      policy_scope(Job).invoiced
     when "my_jobs"
       policy_scope(Job).where(assigned_to: current_user)
     else

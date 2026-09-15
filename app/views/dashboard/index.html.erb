@@ -50,6 +50,8 @@
     </div>
   </div>
 
+  <%= render "schedule_view" %>
+
   <div class="card">
     <div class="card-header">
       <h2>Job Pipeline</h2>
@@ -85,8 +87,8 @@
           </thead>
           <tbody>
             <% @my_jobs.each do |job| %>
-              <tr>
-                <td><%= link_to (job.job_number || "N/A"), job, class: "job-number", title: "View job" %></td>
+              <tr data-job-id="<%= job.id %>">
+              <td><%= link_to (job.job_number || "N/A"), job, class: "job-number", title: "View job" %></td>
                 <td><%= date_columns_display(job.scheduled_date) %></td>
                 <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
                 <td><%= job.customer_name %></td>
@@ -98,6 +100,7 @@
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
                   <div class="actions-icon">
+                    <button type="button" class="row-colour-btn" title="Row Colour">Row Colour</button>
                     <% if job.pending? %>
                       <button type="button" class="btn btn-sm btn-schedule-toggle" data-job-id="<%= job.id %>">
                         Schedule
@@ -148,7 +151,6 @@
 
   <% if @dashboard_tab == "jobs" %>
   <%= render "outstanding_jobs" %>
-  <%= render "schedule_view" %>
   <% end %>
 
   <% if @dashboard_tab == "planner" %>
@@ -376,23 +378,23 @@
   <% end %>
 <% end %>
 
-<% if current_user.scheduler? %>
-  <% dl_counts = {
-       pending:    @pending_jobs.count,
-       scheduled:  @scheduled_jobs.count,
-       in_progress: @in_progress_jobs.count,
-       completed:  @completed_jobs.count
-     } %>
-  <div class="tab-row" style="margin-bottom: 1.5rem;">
-    <%= link_to dashboard_path(tab: "jobs"), class: "tab #{@dashboard_tab == 'jobs' ? 'active' : ''}" do %>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-      Jobs
-    <% end %>
-    <%= link_to dashboard_path(tab: "planner"), class: "tab #{@dashboard_tab == 'planner' ? 'active' : ''}" do %>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-      Planner
-    <% end %>
-  </div>
+  <% if current_user.scheduler? %>
+    <% dl_counts = {
+         pending:    @pending_jobs.count,
+         scheduled:  @scheduled_jobs.count,
+         in_progress: @in_progress_jobs.count,
+         completed:  @completed_jobs.count
+       } %>
+    <div class="tab-row" style="margin-bottom: 1.5rem;">
+      <%= link_to dashboard_path(tab: "jobs"), class: "tab #{@dashboard_tab == 'jobs' ? 'active' : ''}" do %>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        Jobs
+      <% end %>
+      <%= link_to dashboard_path(tab: "planner"), class: "tab #{@dashboard_tab == 'planner' ? 'active' : ''}" do %>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        Planner
+      <% end %>
+    </div>
 
   <% if @dashboard_tab == "jobs" %>
   <div class="kpi-strip">
@@ -417,6 +419,8 @@
       <div class="sub">All done</div>
     </div>
   </div>
+
+  <%= render "schedule_view" %>
 
   <div class="card">
     <div class="card-header">
@@ -452,8 +456,8 @@
           </thead>
           <tbody>
             <% @my_jobs.each do |job| %>
-              <tr>
-                <td><%= link_to (job.job_number || "N/A"), job, class: "job-number", title: "View job" %></td>
+              <tr data-job-id="<%= job.id %>">
+              <td><%= link_to (job.job_number || "N/A"), job, class: "job-number", title: "View job" %></td>
                 <td><%= date_columns_display(job.scheduled_date) %></td>
                 <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
                 <td><%= job.customer_name %></td>
@@ -465,6 +469,7 @@
                 <td><%= job.invoice_number || "—" %></td>
                 <td>
                   <div class="actions-icon">
+                    <button type="button" class="row-colour-btn" title="Row Colour">Row Colour</button>
                     <% if job.pending? %>
                       <button type="button" class="btn btn-sm btn-schedule-toggle" data-job-id="<%= job.id %>">
                         Schedule
@@ -509,11 +514,6 @@
 
   <% if @dashboard_tab == "jobs" %>
   <%= render "outstanding_jobs" %>
-  <%= render "schedule_view" %>
-
-  <% if @scheduler_view == "day" && @scheduled_jobs.present? %>
-    <%= link_to "All #{@scheduler_date.strftime('%A')}'s Jobs via WhatsApp", bulk_whatsapp_jobs_path(scheduled_date: @scheduler_date), class: "btn btn-success", style: "margin-top: 1rem;" %>
-  <% end %>
   <% end %>
 
   <% if @dashboard_tab == "planner" %>
@@ -549,8 +549,8 @@
             </tr>
           </thead>
           <tbody>
-            <% @today_jobs.each do |job| %>
-              <tr>
+              <% @today_jobs.each do |job| %>
+              <tr data-job-id="<%= job.id %>">
                 <td><%= link_to (job.job_number || "N/A"), job_path(job), style: "color: var(--primary); text-decoration: none; font-weight: 600;", title: "View job and purchase orders" %></td>
                 <td><%= date_columns_display(job.scheduled_date) %></td>
                 <td><%= job.created_at.strftime("%I:%M %p")&.strip %></td>
@@ -559,7 +559,12 @@
                 <td><%= job.description.truncate(50) %></td>
                 <td><%= render "status_dropdown", job: job %></td>
                 <td><%= render "job_type_dropdown", job: job %></td>
-                <td><%= link_to "Add PO", new_job_purchase_order_path(job), class: "btn btn-sm" %></td>
+                <td>
+                  <div class="actions-icon">
+                    <%= link_to "Add PO", new_job_purchase_order_path(job), class: "btn btn-sm" %>
+                    <%= button_tag "Row Colour", type: "button", class: "row-colour-btn btn btn-sm btn-outline", title: "Highlight this row" %>
+                  </div>
+                </td>
               </tr>
             <% end %>
           </tbody>
@@ -594,7 +599,7 @@
           </thead>
           <tbody>
             <% @all_jobs.each do |job| %>
-              <tr>
+              <tr data-job-id="<%= job.id %>">
                 <td><%= link_to (job.job_number || "N/A"), job_path(job), style: "color: var(--primary); text-decoration: none; font-weight: 600;", title: "View job and purchase orders" %></td>
                 <td><%= date_columns_display(job.scheduled_date) %></td>
                 <td><%= job.created_at.strftime("%Y-%m-%d") %></td>
@@ -602,7 +607,12 @@
                 <td><%= job.address.truncate(40) %></td>
                 <td><%= render "status_dropdown", job: job %></td>
                 <td><%= render "job_type_dropdown", job: job %></td>
-                <td><%= link_to "Add PO", new_job_purchase_order_path(job), class: "btn btn-sm" %></td>
+                <td>
+                  <div class="actions-icon">
+                    <%= link_to "Add PO", new_job_purchase_order_path(job), class: "btn btn-sm" %>
+                    <%= button_tag "Row Colour", type: "button", class: "row-colour-btn btn btn-sm btn-outline", title: "Highlight this row" %>
+                  </div>
+                </td>
               </tr>
             <% end %>
           </tbody>
@@ -654,8 +664,12 @@
           </thead>
           <tbody>
             <% @my_jobs.each do |job| %>
-              <tr>
-                <td><%= job.customer_name %></td>
+              <tr data-job-id="<%= job.id %>">
+                <td><%= job.customer_name %>
+                  <span class="row-highlight-trigger" title="Highlight row" style="float: right; display: block; margin-top: 0.25rem;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5;"><path d="M2.5 14.5c.5.5 1 .75 1.5 1"></path><path d="M2 17l3 3 4-4"></path></svg>
+                  </span>
+                </td>
                 <td><%= job.address.truncate(40) %></td>
                 <td><%= date_columns_display(job.scheduled_date) %></td>
                 <td><%= (job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD") %></td>
@@ -664,6 +678,7 @@
                 <td>
                   <div class="actions-icon">
                     <%= link_to "Update Status", edit_job_path(job), class: "btn btn-sm" %>
+                    <%= button_tag "Row Colour", type: "button", class: "row-colour-btn btn btn-sm btn-outline", title: "Highlight this row" %>
                     <% if job.whatsapp_sent_at %>
                       <span style="font-size: 0.8rem; color: var(--text-muted);">Sent WhatsApp on <%= (job.whatsapp_sent_at + 2.hours).strftime('%d %b %Y') %> at <%= (job.whatsapp_sent_at + 2.hours).strftime('%I:%M %p') %></span>
                     <% else %>

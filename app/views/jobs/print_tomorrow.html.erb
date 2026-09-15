@@ -1,0 +1,247 @@
+<% content_for :title, "Scheduled Jobs - #{@print_date.strftime('%d %B %Y')}" %>
+
+<% content_for :head do %>
+  <style>
+    @media screen {
+      body { background: #f8fafc; }
+      .print-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      .print-header {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e2e8f0;
+      }
+      .print-header .logo {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      .print-header .logo img {
+        width: 180px;
+        height: auto;
+      }
+      .print-header .logo-text {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1b2c65;
+        letter-spacing: -0.02em;
+      }
+      .print-header .logo .tagline {
+        font-size: 0.8rem;
+        color: #64748b;
+        font-weight: 500;
+      }
+      .print-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 0.25rem;
+      }
+      .print-date {
+        font-size: 1rem;
+        color: #64748b;
+        margin: 0;
+      }
+      .print-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+      .print-actions .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.6rem 1.1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.15s;
+      }
+      .btn-print { background: #1b2c65; color: white; }
+      .btn-print:hover { background: #26418a; transform: translateY(-1px); }
+      .btn-back {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+      }
+      .btn-back:hover { background: #e2e8f0; color: #334155; }
+      .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+        border: 1px solid #e2e8f0;
+      }
+      .print-table th {
+        background: #1b2c65;
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+      .print-table td {
+        padding: 0.8rem 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.875rem;
+        color: #0f172a;
+      }
+      .print-table tbody tr:last-child td { border-bottom: none; }
+      .print-table tbody tr:hover td { background: #f8fafc; }
+      .print-table .job-number {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-weight: 700;
+        color: #1b2c65;
+        background: #eff6ff;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+      }
+      .print-table .customer { font-weight: 600; color: #0f172a; }
+      .print-table .address { color: #64748b; font-size: 0.825rem; }
+      .print-table .plumber { font-weight: 500; }
+      .print-table .priority-badge {
+        display: inline-block;
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+      .priority-maintenance { background: #fef3c7; color: #92400e; }
+      .priority-project { background: #fce7f3; color: #9d174d; }
+      .print-table .status-badge {
+        display: inline-block;
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+      .status-scheduled { background: #dbeafe; color: #1e40af; }
+      .status-in_progress { background: #ede9fe; color: #6d28d9; }
+      .print-empty {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #94a3b8;
+        font-size: 1rem;
+        border: 2px dashed #e2e8f0;
+        border-radius: 8px;
+      }
+      .print-footer {
+        margin-top: 1.5rem;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.8rem;
+        padding: 1rem;
+      }
+      @media print {
+        body { background: white !important; margin: 0 !important; padding: 0 !important; }
+        .print-container { margin: 0 !important; padding: 0 !important; max-width: none; }
+        .print-header { box-shadow: none !important; border: 1px solid #e2e8f0 !important; border-radius: 0 !important; page-break-inside: avoid; }
+        .print-title { page-break-after: avoid; }
+        .print-actions { display: none !important; }
+        .print-table { box-shadow: none !important; border: none !important; border-radius: 0 !important; }
+        .print-footer { page-break-before: always; }
+        .print-table tbody tr { page-break-inside: avoid; }
+        .print-table tbody tr { break-inside: avoid; }
+      }
+    }
+  </style>
+<% end %>
+
+<% content_for :full_page do %>
+<div class="print-container">
+  <div class="print-header">
+    <div class="logo">
+      <%= image_tag "INDUSTRO-PLUMBERS.png", alt: "Industro Plumbers" %>
+      <div>
+        <div class="logo-text">Industro Plumbers</div>
+        <div class="tagline">Scheduled Jobs Report</div>
+      </div>
+    </div>
+    <h1 class="print-title">Tomorrow's Scheduled Jobs</h1>
+    <p class="print-date"><%= @print_date.strftime("%A, %d %B %Y") %></p>
+  </div>
+
+  <div class="print-actions">
+    <%= link_to jobs_path, class: "btn btn-back" do %>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="9 18 5 12 9 6"></polyline></svg>
+      Back to Jobs
+    <% end %>
+    <button class="btn-print" onclick="window.print()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18h12v6H6v-6z"></path></svg>
+      Print
+    </button>
+  </div>
+
+  <% if @jobs.any? %>
+    <table class="print-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Time</th>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Problem</th>
+          <th>Plumber</th>
+          <th>Type</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @jobs.each_with_index do |job, index| %>
+          <tr>
+            <td><span class="job-number"><%= job.job_number || "N/A" %></span></td>
+            <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
+            <td class="customer"><%= job.customer_name %></td>
+            <td class="address"><%= job.address.truncate(50) %></td>
+            <td><%= job.description.to_s.truncate(60) %></td>
+            <td class="plumber"><%= job.assigned_to&.name || "Unassigned" %></td>
+            <td>
+              <span class="priority-badge <%= job.project? ? 'priority-project' : 'priority-maintenance' %>">
+                <%= job.project? ? "Project" : "Maintenance" %>
+              </span>
+            </td>
+            <td>
+              <span class="status-badge status-<%= job.status.to_s %>">
+                <%= job.display_status %>
+              </span>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <div class="print-empty">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+      <p>No jobs scheduled for tomorrow.</p>
+    </div>
+  <% end %>
+
+  <div class="print-footer">
+    <p>Industro Plumbers &mdash; Generated on <%= Time.current.strftime("%d %B %Y at %I:%M %p") %></p>
+    <p>Total scheduled jobs: <%= @jobs.count %></p>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    window.print();
+  });
+</script>
+<% end %>

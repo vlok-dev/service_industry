@@ -24,6 +24,7 @@ Rails.application.routes.draw do
     end
     collection do
       get :bulk_whatsapp
+      get :print_tomorrow
     end
     resources :purchase_orders, only: [:new, :create, :show, :edit, :update, :destroy]
     resources :claims
