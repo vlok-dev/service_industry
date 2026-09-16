@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
 
   before_action :authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :track_last_login, if: :user_signed_in?
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
@@ -54,5 +55,12 @@ class ApplicationController < ActionController::Base
   def user_not_authorized
     flash[:alert] = "You are not authorized to perform this action."
     redirect_to(request.referrer || root_path)
+  end
+
+  def track_last_login
+    now = Time.current
+    if current_user.last_logged_in_at.nil? || current_user.last_logged_in_at < now - 1.hour
+      User.where(id: current_user.id).update_all(last_logged_in_at: now)
+    end
   end
 end

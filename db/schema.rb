@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_210000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_16_130000) do
   create_table "addresses", force: :cascade do |t|
     t.text "address"
     t.integer "client_id", null: false
@@ -194,6 +194,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_210000) do
     t.datetime "created_at", null: false
     t.string "email"
     t.string "encrypted_password", default: "", null: false
+    t.datetime "last_logged_in_at"
     t.string "name"
     t.string "phone_number"
     t.datetime "remember_created_at"
@@ -202,6 +203,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_210000) do
     t.integer "role"
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["last_logged_in_at"], name: "index_users_on_last_logged_in_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
