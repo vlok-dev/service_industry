@@ -43,7 +43,7 @@
             <%= link_to planner_entry_path(entry), class: "btn-icon btn-icon-primary", title: "View" do %>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             <% end %>
-            <% if entry.assigned_to&.phone_number.present? && entry.whatsapp_sent_at.blank? %>
+            <% if entry.whatsapp_sent_at.blank? %>
               <span id="whatsapp-cell-<%= entry.id %>">
                 <%= link_to "Send WhatsApp", "#", class: "btn btn-sm btn-success whatsapp-confirm-btn", data: { url: confirm_whatsapp_planner_entry_path(entry), cell_id: "whatsapp-cell-#{entry.id}" } %>
               </span>

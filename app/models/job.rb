@@ -20,7 +20,7 @@ class Job < ApplicationRecord
   scope :search, ->(query) {
     return all if query.blank?
     sanitized = "%#{ActiveRecord::Base.sanitize_sql_like(query.to_s.strip)}%"
-    where("CAST(job_number AS TEXT) LIKE :q OR address LIKE :q OR CAST(invoice_number AS TEXT) LIKE :q OR customer_name LIKE :q",
+    where("LOWER(CAST(job_number AS TEXT)) LIKE LOWER(:q) OR LOWER(address) LIKE LOWER(:q) OR LOWER(CAST(invoice_number AS TEXT)) LIKE LOWER(:q) OR LOWER(customer_name) LIKE LOWER(:q)",
           q: sanitized)
   }
   scope :created_today, -> { where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day) }

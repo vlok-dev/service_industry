@@ -256,6 +256,30 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, "whatsapp-cell-#{entry.id}"
   end
 
+  test "planner WhatsApp button shows for entry without assigned user" do
+    sign_in @scheduler
+    entry = PlannerEntry.create!(
+      title: "Unassigned Entry",
+      description: "Meeting with no assigned user",
+      category: :meeting,
+      entry_date: Date.tomorrow,
+      created_by: @scheduler
+    )
+
+    get dashboard_path(tab: "planner")
+
+    assert_response :success
+    assert_includes response.body, "Send WhatsApp"
+    assert_includes response.body, confirm_whatsapp_planner_entry_path(entry)
+    assert_includes response.body, "whatsapp-cell-#{entry.id}"
+
+    post confirm_whatsapp_planner_entry_path(entry), headers: { "ACCEPT" => "application/json" }
+
+    assert_response :unprocessable_entity
+    assert_nil entry.reload.whatsapp_sent_at
+    assert_includes response.body, "No phone number"
+  end
+
   test "accountant dashboard shows stat cards" do
     sign_in @accountant
 

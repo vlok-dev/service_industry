@@ -92,4 +92,16 @@ class JobTest < ActiveSupport::TestCase
     assert job.job_number.present?, "job_number should be auto-generated, not blank"
     assert_match(/^JOB-/, job.job_number)
   end
+
+  test "search is case-insensitive across customer_name, address, and job_number" do
+    Job.create!(base_attributes.merge(customer_name: "BSp Builders", address: "274 Cape Road"))
+
+    assert_includes Job.search("bsp"), Job.find_by!(customer_name: "BSp Builders")
+    assert_includes Job.search("BSP"), Job.find_by!(customer_name: "BSp Builders")
+    assert_includes Job.search("cape"), Job.find_by!(customer_name: "BSp Builders")
+    assert_includes Job.search("CAPE"), Job.find_by!(customer_name: "BSp Builders")
+    assert_includes Job.search("274"), Job.find_by!(customer_name: "BSp Builders")
+    assert_empty Job.search("xyzxyz")
+    assert_equal Job.count, Job.search("").count
+  end
 end

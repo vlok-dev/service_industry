@@ -25,7 +25,7 @@ class PlannerEntry < ApplicationRecord
   scope :search, ->(query) {
     return all if query.blank?
     sanitized = "%#{ActiveRecord::Base.sanitize_sql_like(query.to_s.strip)}%"
-    where("title LIKE :q OR description LIKE :q OR notes LIKE :q", q: sanitized)
+    where("LOWER(title) LIKE LOWER(:q) OR LOWER(description) LIKE LOWER(:q) OR LOWER(notes) LIKE LOWER(:q)", q: sanitized)
   }
 
   def category_color
