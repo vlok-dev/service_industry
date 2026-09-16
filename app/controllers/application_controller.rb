@@ -58,9 +58,6 @@ class ApplicationController < ActionController::Base
   end
 
   def track_last_login
-    now = Time.current
-    if current_user.last_logged_in_at.nil? || current_user.last_logged_in_at < now - 1.hour
-      User.where(id: current_user.id).update_all(last_logged_in_at: now)
-    end
+    User.where(id: current_user.id).update_all(last_logged_in_at: Time.current)
   end
 end
