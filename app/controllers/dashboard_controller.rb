@@ -50,6 +50,15 @@ case current_user.role
       @completed_jobs = @my_jobs.completed
     end
 
+    @dashboard_counts = {
+      pending: @jobs.pending.count,
+      scheduled: @jobs.scheduled.count,
+      in_progress: @jobs.in_progress.count,
+      completed: @jobs.completed.count,
+      invoiced: @jobs.invoiced.count
+    }
+    @invoiced_jobs = @jobs.invoiced
+
     # Default sort for super_admin and scheduler: newest first by scheduled_date
     if current_user.super_admin? || current_user.scheduler?
       @my_jobs = @my_jobs.order(scheduled_date: :desc, scheduled_time: :desc) if @my_jobs

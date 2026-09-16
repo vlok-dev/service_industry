@@ -7,7 +7,7 @@
       <%= link_to "Month", dashboard_path(view: "month", date: @scheduler_date, anchor: "schedule_view"), class: "view-tab #{@scheduler_view == 'month' ? 'active' : ''}" %>
     </div>
     <% if current_user.scheduler? || current_user.super_admin? %>
-      <%= link_to(print_tomorrow_jobs_path, class: "btn btn-sm", target: "_blank", style: "background: #1b2c65; color: white; font-size: 0.75rem; padding: 0.35rem 0.7rem;") do %>
+      <%= link_to(print_tomorrow_jobs_path, class: "btn btn-sm btn-print-jobs", target: "_blank") do %>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18h12v6H6v-6z"></path><polyline points="6 9 6 5"></polyline></svg>
         Print Tomorrow's Jobs
       <% end %>

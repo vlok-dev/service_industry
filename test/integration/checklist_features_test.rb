@@ -38,6 +38,13 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
       u.password_confirmation = "password123"
       u.role = :plumber
     end
+
+    @admin = User.find_or_create_by!(email: "admin@test.com") do |u|
+      u.name = "Admin"
+      u.password = "password123"
+      u.password_confirmation = "password123"
+      u.role = :admin
+    end
   end
 
   def create_job!(attrs = {})
@@ -183,6 +190,72 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
     assert_includes body, "Job Pipeline"
   end
 
+  test "invoiced KPI appears on dashboard and Jobs for every role" do
+    create_job!(
+      customer_name: "Invoiced KPI Job",
+      status: :completed,
+      invoice_number: "INV-KPI-001",
+      assigned_to: @plumber
+    )
+
+    roles = [ @super_admin, @scheduler, @reporter, @plumber, @accountant, @admin ]
+
+    roles.each do |user|
+      sign_in user
+
+      get dashboard_path
+      assert_response :success
+      if user.plumber?
+        assert_includes response.body, "stat-invoiced", "#{user.role} dashboard KPI"
+      else
+        assert_includes response.body, "kpi-invoiced", "#{user.role} dashboard KPI"
+      end
+      assert_includes response.body, "Invoiced", "#{user.role} dashboard label"
+
+      get jobs_path
+      assert_response :success
+      assert_includes response.body, "kpi-invoiced", "#{user.role} Jobs KPI"
+      assert_includes response.body, "Invoiced", "#{user.role} Jobs label"
+    end
+
+    sign_in @admin
+    get admin_root_path
+    assert_response :success
+    assert_includes response.body, "kpi-invoiced"
+    assert_includes response.body, "Invoiced"
+  end
+
+  test "planner WhatsApp button appears before confirmation and hides after imprint" do
+    sign_in @scheduler
+    @plumber.update!(phone_number: "0821112233")
+    entry = PlannerEntry.create!(
+      title: "Planner WhatsApp Test",
+      description: "Car service reminder",
+      category: :car_service,
+      entry_date: Date.tomorrow,
+      assigned_to: @plumber,
+      created_by: @scheduler
+    )
+
+    get dashboard_path(tab: "planner")
+
+    assert_response :success
+    assert_includes response.body, "Send WhatsApp"
+    assert_includes response.body, confirm_whatsapp_planner_entry_path(entry)
+    assert_includes response.body, "whatsapp-cell-#{entry.id}"
+
+    post confirm_whatsapp_planner_entry_path(entry), headers: { "ACCEPT" => "application/json" }
+
+    assert_response :success
+    assert_not_nil entry.reload.whatsapp_sent_at
+
+    get dashboard_path(tab: "planner")
+
+    assert_response :success
+    assert_includes response.body, "Sent Via WhatsApp"
+    assert_not_includes response.body, "whatsapp-cell-#{entry.id}"
+  end
+
   test "accountant dashboard shows stat cards" do
     sign_in @accountant
 
@@ -264,8 +337,77 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
     outstanding_job = create_job!(status: :pending, scheduled_time: Time.zone.parse("16:00"))
 
     get jobs_path(filter: "outstanding")
+
     assert_response :success
     assert_includes response.body, outstanding_job.customer_name
+  end
+
+  test "accountant jobs index shows matching jobs for each status filter" do
+    sign_in @accountant
+
+    pending_job = create_job!(customer_name: "Accountant Pending Filter", status: :pending)
+    pending_job.purchase_orders.create!(
+      supplier_name: "Test Supplier",
+      order_date: Date.today,
+      created_by: @accountant
+    )
+    scheduled_job = create_job!(customer_name: "Accountant Scheduled Filter", status: :scheduled)
+    in_progress_job = create_job!(customer_name: "Accountant In Progress Filter", status: :in_progress)
+    completed_job = create_job!(customer_name: "Accountant Completed Filter", status: :completed)
+    invoiced_job = create_job!(customer_name: "Accountant Invoiced Filter", status: :completed, invoice_number: "INV-ACC-001")
+    outstanding_job = create_job!(customer_name: "Accountant Outstanding Filter", status: :completed)
+
+    all_jobs = [
+      pending_job,
+      scheduled_job,
+      in_progress_job,
+      completed_job,
+      invoiced_job,
+      outstanding_job
+    ]
+
+    filters = {
+      "pending" => [ pending_job ],
+      "scheduled" => [ scheduled_job ],
+      "in_progress" => [ in_progress_job ],
+      "completed" => [ completed_job, invoiced_job, outstanding_job ],
+      "invoiced" => [ invoiced_job ],
+      "outstanding" => [ completed_job, outstanding_job ]
+    }
+
+    filters.each do |filter, matching_jobs|
+      get jobs_path(filter: filter)
+
+      assert_response :success
+      assert_not_includes response.body, ">Schedule</button>" if filter == "pending"
+      all_jobs.each do |job|
+        if matching_jobs.include?(job)
+          assert_includes response.body, job.customer_name, "#{filter} did not include #{job.customer_name}"
+        else
+          assert_not_includes response.body, job.customer_name, "#{filter} unexpectedly included #{job.customer_name}"
+        end
+      end
+    end
+  end
+
+  test "accountant job actions are available in Jobs and not Dashboard" do
+    sign_in @accountant
+    create_job!(customer_name: "Accountant Action Job", status: :scheduled)
+
+    get jobs_path
+
+    assert_response :success
+    assert_includes response.body, "Assign Invoice"
+    assert_includes response.body, 'title="Close Job"'
+    assert_includes response.body, 'points="20 6 9 17 4 12"'
+    assert_not_includes response.body, ">Close Job</button>"
+
+    get dashboard_path
+
+    assert_response :success
+    assert_not_includes response.body, "Assign Invoice"
+    assert_not_includes response.body, "close_job_path"
+    assert_not_includes response.body, 'points="20 6 9 17 4 12"'
   end
 
   test "outstanding jobs are no longer outstanding when purchase order is added" do

@@ -3,6 +3,34 @@
   <p>Manage users, settings, and system configuration.</p>
 </div>
 
+<div class="kpi-strip">
+  <div class="kpi kpi-pending">
+    <div class="label">Pending</div>
+    <div class="value"><%= @dashboard_counts[:pending] %></div>
+    <div class="sub">Awaiting schedule</div>
+  </div>
+  <div class="kpi kpi-scheduled">
+    <div class="label">Scheduled</div>
+    <div class="value"><%= @dashboard_counts[:scheduled] %></div>
+    <div class="sub">Booked in</div>
+  </div>
+  <div class="kpi kpi-progress">
+    <div class="label">In Progress</div>
+    <div class="value"><%= @dashboard_counts[:in_progress] %></div>
+    <div class="sub">Active on site</div>
+  </div>
+  <div class="kpi kpi-completed">
+    <div class="label">Completed</div>
+    <div class="value"><%= @dashboard_counts[:completed] %></div>
+    <div class="sub">All done</div>
+  </div>
+  <div class="kpi kpi-invoiced">
+    <div class="label">Invoiced</div>
+    <div class="value"><%= @dashboard_counts[:invoiced] %></div>
+    <div class="sub">Invoice issued</div>
+  </div>
+</div>
+
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
   <div class="card">
     <div class="card-body">

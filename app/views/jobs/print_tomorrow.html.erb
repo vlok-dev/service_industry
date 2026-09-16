@@ -76,6 +76,7 @@
       }
       .print-table .customer { font-weight: 600; color: #0f172a; }
       .print-table .address { color: #64748b; font-size: 0.825rem; }
+      .print-table .problem { word-break: break-word; word-wrap: break-word; white-space: normal; min-width: 220px; }
       .print-table .plumber { font-weight: 500; }
       .print-table .priority-badge {
         display: inline-block;
@@ -131,6 +132,16 @@
   </div>
 
   <table class="print-table">
+    <colgroup>
+      <col style="width: 4%;">
+      <col style="width: 8%;">
+      <col style="width: 14%;">
+      <col style="width: 18%;">
+      <col style="width: 28%;">
+      <col style="width: 12%;">
+      <col style="width: 10%;">
+      <col style="width: 6%;">
+    </colgroup>
     <thead>
       <tr>
         <th>Job #</th>
@@ -150,7 +161,7 @@
           <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "—" %></td>
           <td class="customer"><%= job.customer_name %></td>
           <td class="address"><%= job.address.truncate(50) %></td>
-          <td><%= job.description.to_s.truncate(60) %></td>
+          <td class="problem"><%= job.description.to_s.truncate(60) %></td>
           <td class="plumber"><%= job.assigned_to&.name || "Unassigned" %></td>
           <td>
             <span class="priority-badge <%= job.project? ? 'priority-project' : 'priority-maintenance' %>">

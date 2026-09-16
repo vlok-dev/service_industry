@@ -13,7 +13,8 @@
        pending:    @pending_jobs.count,
        scheduled:  @scheduled_jobs.count,
        in_progress: @in_progress_jobs.count,
-       completed:  @completed_jobs.count
+       completed:  @completed_jobs.count,
+       invoiced:   @dashboard_counts[:invoiced]
      } %>
   <div class="tab-row" style="margin-bottom: 1.5rem;">
     <%= link_to dashboard_path(tab: "jobs"), class: "tab #{@dashboard_tab == 'jobs' ? 'active' : ''}" do %>
@@ -47,6 +48,11 @@
       <div class="label">Completed</div>
       <div class="value"><%= dl_counts[:completed] %></div>
       <div class="sub">All done</div>
+    </div>
+    <div class="kpi kpi-invoiced">
+      <div class="label">Invoiced</div>
+      <div class="value"><%= dl_counts[:invoiced] %></div>
+      <div class="sub">Invoice issued</div>
     </div>
   </div>
 
@@ -82,6 +88,11 @@
       <div class="value"><%= @completed_jobs.count %></div>
       <div class="sub">Ready to invoice</div>
     </div>
+    <div class="kpi kpi-invoiced">
+      <div class="label">Invoiced</div>
+      <div class="value"><%= @dashboard_counts[:invoiced] %></div>
+      <div class="sub">Invoice issued</div>
+    </div>
   </div>
 
   <%= render "outstanding_jobs" %>
@@ -110,7 +121,6 @@
               <th><%= sortable_header "Job Type", "is_project" %></th>
               <th><%= sortable_header "Created By", "created_by" %></th>
               <th><%= sortable_header "Invoice #", "invoice_number" %></th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -124,12 +134,6 @@
                 <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= job.user.name %></td>
                 <td><%= job.invoice_number || "—" %></td>
-                <td>
-                  <div class="actions-icon">
-                    <%= button_to close_job_path(job), method: :patch, data: { confirm: "Close this job and mark it as completed with invoice?" }, class: "btn btn-sm btn-success" %>
-                    <%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %>
-                  </div>
-                </td>
               </tr>
             <% end %>
           </tbody>
@@ -156,7 +160,6 @@
               <th>Job Type</th>
               <th>Assigned To</th>
               <th>Invoice #</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -171,12 +174,6 @@
                 <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= render "assigned_to_dropdown", job: job %></td>
                 <td><%= job.invoice_number || "—" %></td>
-                <td>
-                  <div class="actions-icon">
-                    <%= button_to close_job_path(job), method: :patch, data: { confirm: "Close this job and mark it as completed with invoice?" }, class: "btn btn-sm btn-success" %>
-                    <%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %>
-                  </div>
-                </td>
               </tr>
             <% end %>
           </tbody>
@@ -203,7 +200,6 @@
               <th>Job Type</th>
               <th>Assigned To</th>
               <th>Invoice #</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -218,12 +214,6 @@
                 <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= render "assigned_to_dropdown", job: job %></td>
                 <td><%= job.invoice_number || "—" %></td>
-                <td>
-                  <div class="actions-icon">
-                    <%= button_to close_job_path(job), method: :patch, data: { confirm: "Close this job and mark it as completed with invoice?" }, class: "btn btn-sm btn-success" %>
-                    <%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %>
-                  </div>
-                </td>
               </tr>
             <% end %>
           </tbody>
@@ -250,7 +240,6 @@
               <th>Completed</th>
               <th><%= sortable_header "Job Type", "is_project" %></th>
               <th><%= sortable_header "Invoice #", "invoice_number" %></th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -265,11 +254,6 @@
                 <td><%= job.completed_at&.strftime("%b %d, %Y %I:%M %p") || "N/A" %></td>
                 <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= job.invoice_number || "—" %></td>
-                <td>
-                  <div class="actions-icon">
-                    <%= link_to "Assign Invoice", edit_job_path(job), class: "btn btn-sm" %>
-                  </div>
-                </td>
               </tr>
             <% end %>
           </tbody>
@@ -280,12 +264,45 @@
   <% end %>
 <% end %>
 
+<% if current_user.admin? %>
+  <div class="kpi-strip">
+    <div class="kpi kpi-pending">
+      <div class="label">Pending</div>
+      <div class="value"><%= @dashboard_counts[:pending] %></div>
+      <div class="sub">Awaiting schedule</div>
+    </div>
+    <div class="kpi kpi-scheduled">
+      <div class="label">Scheduled</div>
+      <div class="value"><%= @dashboard_counts[:scheduled] %></div>
+      <div class="sub">Booked in</div>
+    </div>
+    <div class="kpi kpi-progress">
+      <div class="label">In Progress</div>
+      <div class="value"><%= @dashboard_counts[:in_progress] %></div>
+      <div class="sub">Active on site</div>
+    </div>
+    <div class="kpi kpi-completed">
+      <div class="label">Completed</div>
+      <div class="value"><%= @dashboard_counts[:completed] %></div>
+      <div class="sub">All done</div>
+    </div>
+    <div class="kpi kpi-invoiced">
+      <div class="label">Invoiced</div>
+      <div class="value"><%= @dashboard_counts[:invoiced] %></div>
+      <div class="sub">Invoice issued</div>
+    </div>
+  </div>
+
+  <%= link_to "Open Admin Dashboard", admin_root_path, class: "btn" %>
+<% end %>
+
 <% if current_user.scheduler? %>
     <% dl_counts = {
          pending:    @pending_jobs.count,
          scheduled:  @scheduled_jobs.count,
          in_progress: @in_progress_jobs.count,
-         completed:  @completed_jobs.count
+         completed:  @completed_jobs.count,
+         invoiced:   @dashboard_counts[:invoiced]
        } %>
     <div class="tab-row" style="margin-bottom: 1.5rem;">
       <%= link_to dashboard_path(tab: "jobs"), class: "tab #{@dashboard_tab == 'jobs' ? 'active' : ''}" do %>
@@ -320,6 +337,11 @@
       <div class="value"><%= dl_counts[:completed] %></div>
       <div class="sub">All done</div>
     </div>
+    <div class="kpi kpi-invoiced">
+      <div class="label">Invoiced</div>
+      <div class="value"><%= dl_counts[:invoiced] %></div>
+      <div class="sub">Invoice issued</div>
+    </div>
   </div>
 
   <%= render "schedule_view" %>
@@ -333,6 +355,34 @@
 <% end %>
 
 <% if current_user.reporter? %>
+  <div class="kpi-strip">
+    <div class="kpi kpi-pending">
+      <div class="label">Pending</div>
+      <div class="value"><%= @dashboard_counts[:pending] %></div>
+      <div class="sub">Awaiting schedule</div>
+    </div>
+    <div class="kpi kpi-scheduled">
+      <div class="label">Scheduled</div>
+      <div class="value"><%= @dashboard_counts[:scheduled] %></div>
+      <div class="sub">Booked in</div>
+    </div>
+    <div class="kpi kpi-progress">
+      <div class="label">In Progress</div>
+      <div class="value"><%= @dashboard_counts[:in_progress] %></div>
+      <div class="sub">Active on site</div>
+    </div>
+    <div class="kpi kpi-completed">
+      <div class="label">Completed</div>
+      <div class="value"><%= @dashboard_counts[:completed] %></div>
+      <div class="sub">All done</div>
+    </div>
+    <div class="kpi kpi-invoiced">
+      <div class="label">Invoiced</div>
+      <div class="value"><%= @dashboard_counts[:invoiced] %></div>
+      <div class="sub">Invoice issued</div>
+    </div>
+  </div>
+
   <%= render "outstanding_jobs" %>
 
   <div class="page-header">
@@ -454,6 +504,10 @@
     <div class="stat-card stat-completed">
       <span class="stat-value"><%= @completed_jobs.count %></span>
       <span class="stat-label">Completed</span>
+    </div>
+    <div class="stat-card stat-invoiced">
+      <span class="stat-value"><%= @dashboard_counts[:invoiced] %></span>
+      <span class="stat-label">Invoiced</span>
     </div>
   </div>
 

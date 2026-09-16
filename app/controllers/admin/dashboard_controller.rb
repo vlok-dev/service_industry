@@ -6,6 +6,13 @@ module Admin
     def index
       @users = User.all
       @jobs = Job.all
+      @dashboard_counts = {
+        pending: @jobs.pending.count,
+        scheduled: @jobs.scheduled.count,
+        in_progress: @jobs.in_progress.count,
+        completed: @jobs.completed.count,
+        invoiced: @jobs.invoiced.count
+      }
       @settings = Setting.first_or_create
     end
 
