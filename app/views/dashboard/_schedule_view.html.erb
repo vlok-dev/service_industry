@@ -47,7 +47,7 @@
               <td data-label="Customer"><%= job.customer_name %></td>
               <td data-label="Problem"><%= job.description.to_s.truncate(50) %></td>
               <td data-label="Address"><%= job.address.truncate(40) %></td>
-              <td data-label="Plumber"><%= job.assigned_to&.name || "Unassigned" %></td>
+              <td data-label="Plumber"><%= render "assigned_to_dropdown", job: job %></td>
               <td data-label="Job Type"><%= render "job_type_dropdown", job: job %></td>
               <td data-label="Actions">
                 <button type="button" class="row-colour-btn" title="Row Colour">Row Colour</button>
