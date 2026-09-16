@@ -154,7 +154,7 @@ class JobsController < ApplicationController
 
     phone = @job.assigned_to&.phone_number
     if phone.present?
-      message = "New Job Assigned:\n\nCustomer: #{@job.customer_name}\n\nAddress: #{@job.address}\n\nDescription: #{@job.description}\n\nTomorrow at #{@job.scheduled_time.strftime('%I:%M %p')}"
+      message = "New Job Assigned:\n\nCustomer: #{@job.customer_name}\n\nAddress: #{@job.address}\n\nDescription: #{@job.description}\n\nTomorrow#{@job.scheduled_time&.strftime(' at %I:%M %p')}"
       redirect_to "https://wa.me/#{phone.gsub(/[^0-9]/, '')}?text=#{CGI.escape(message)}", allow_other_host: true
     else
       redirect_to @job, alert: "No phone number available for the assigned plumber."
@@ -180,7 +180,7 @@ class JobsController < ApplicationController
 
     phone = @job.assigned_to&.phone_number
     if phone.present?
-      message = "New Job Assigned:\n\nCustomer: #{@job.customer_name}\n\nAddress: #{@job.address}\n\nDescription: #{@job.description}\n\nTomorrow at #{@job.scheduled_time.strftime('%I:%M %p')}"
+      message = "New Job Assigned:\n\nCustomer: #{@job.customer_name}\n\nAddress: #{@job.address}\n\nDescription: #{@job.description}\n\nTomorrow#{@job.scheduled_time&.strftime(' at %I:%M %p')}"
       whatsapp_url = "https://wa.me/#{phone.gsub(/[^0-9]/, '')}?text=#{CGI.escape(message)}"
       render json: {
         timestamp: (@job.whatsapp_sent_at + 2.hours).strftime('%d %b %Y'),
