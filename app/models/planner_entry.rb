@@ -20,6 +20,8 @@ class PlannerEntry < ApplicationRecord
 
   validates :title, :entry_date, :created_by, presence: true
 
+  after_commit :schedule_whatsapp_reminder, on: [:create, :update], if: :should_schedule_whatsapp?
+
   scope :upcoming, -> { where("entry_date >= ?", Date.today).order(:entry_date, :entry_time) }
   scope :past, -> { where("entry_date < ?", Date.today).order(:entry_date, :entry_time) }
   scope :search, ->(query) {
@@ -47,6 +49,23 @@ class PlannerEntry < ApplicationRecord
     when "admin" then "📋"
     when "training" then "📚"
     else "📌"
+    end
+  end
+
+  private
+
+  def should_schedule_whatsapp?
+    assigned_to_id.present? && entry_date.present? && entry_time.present? && assigned_to&.phone_number.present?
+  end
+
+  def schedule_whatsapp_reminder
+    # Calculate when to send reminder (1 day before at 9:00 AM)
+    reminder_time = entry_date - 1.day
+    reminder_time = reminder_time.in_time_zone.change(hour: 9, min: 0)
+
+    # Only schedule if reminder time is in the future
+    if reminder_time > Time.current
+      PlannerEntryWhatsappReminderJob.set(wait_until: reminder_time).perform_later(id)
     end
   end
 end

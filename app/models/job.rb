@@ -17,6 +17,7 @@ class Job < ApplicationRecord
   before_validation :assign_job_number, on: :create
   before_validation :populate_from_client, if: -> { client_id_changed? && client_id.present? }
   before_save :set_completed_at_on_completion
+  before_save :sync_status_with_invoice
   scope :search, ->(query) {
     return all if query.blank?
     sanitized = "%#{ActiveRecord::Base.sanitize_sql_like(query.to_s.strip)}%"
@@ -72,6 +73,22 @@ class Job < ApplicationRecord
     if status_changed? && completed?
       self.completed_at = Time.current
     elsif status_changed? && !completed?
+      self.completed_at = nil
+    end
+  end
+
+  def sync_status_with_invoice
+    return unless invoice_number_changed?
+    
+    if invoice_number.present? && !completed?
+      # Invoice added - mark as completed (invoiced)
+      self.status = :completed
+      self.completed_at = Time.current
+    elsif invoice_number.blank? && completed? && invoice_number_was.present?
+      # Invoice removed - revert to previous status if it was "invoiced" state
+      # We need to determine what the previous status was before it became completed
+      # For now, revert to scheduled as a sensible default for jobs that were invoiced
+      self.status = :scheduled
       self.completed_at = nil
     end
   end
