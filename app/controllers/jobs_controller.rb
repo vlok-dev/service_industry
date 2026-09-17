@@ -6,10 +6,10 @@ class JobsController < ApplicationController
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
     @filter_date = params[:filter_date].present? ? Date.parse(params[:filter_date]) : nil
     
-    # Base scope for pipeline (my_jobs for super_admin/scheduler)
+    # Base scope for pipeline
     if current_user.super_admin?
       @pipeline_scope = policy_scope(Job).where(user: current_user)
-    elsif current_user.scheduler?
+    elsif current_user.scheduler? || current_user.reporter? || current_user.accountant? || current_user.admin?
       @pipeline_scope = policy_scope(Job)
     else
       @pipeline_scope = policy_scope(Job)

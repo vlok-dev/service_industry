@@ -1,0 +1,30 @@
+<p><%= link_to "Back to Admin Dashboard", admin_root_path %></p>
+
+<h1>Reports & Suggestions</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Type</th>
+      <th>Title</th>
+      <th>Submitted by</th>
+      <th>Role</th>
+      <th>Status</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @reports.each do |report| %>
+      <tr>
+        <td><%= report.created_at.in_time_zone('Africa/Johannesburg').strftime('%d %b %Y') %></td>
+        <td><span class="badge badge-<%= report.bug? ? 'pending' : 'scheduled' %>"><%= report.category.humanize %></span></td>
+        <td><%= report.title %></td>
+        <td><%= report.user&.name || "—" %></td>
+        <td><%= report.role&.humanize || "—" %></td>
+        <td><%= report.status.humanize %></td>
+        <td><%= report.description.to_s.truncate(80) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

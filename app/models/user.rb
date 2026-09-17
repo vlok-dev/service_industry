@@ -8,6 +8,7 @@ class User < ApplicationRecord
 
   has_many :assigned_jobs, class_name: "Job", foreign_key: :assigned_to_id, dependent: :nullify
   has_many :jobs, dependent: :nullify
+  has_many :reports, dependent: :destroy
 
   before_validation :normalize_email
 

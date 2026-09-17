@@ -592,4 +592,166 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
     assert(Client.exists?(name: "Acme Plumbing"))
     assert(Client.exists?(name: "Acme Corp"))
   end
+
+  # --- Feature: Report Bug / Suggestion ---
+
+  test "report button appears on dashboard for every role" do
+    roles = [ @super_admin, @scheduler, @reporter, @plumber, @accountant, @admin ]
+
+    roles.each do |user|
+      sign_in user
+      get dashboard_path
+      assert_response :success
+      assert_includes response.body, "Report Bug / Suggestion", "#{user.role} should see report button"
+      assert_includes response.body, new_report_path, "#{user.role} should link to report form"
+    end
+  end
+
+  test "user can submit a bug report" do
+    sign_in @plumber
+
+    post reports_path, params: {
+      report: {
+        category: "bug",
+        title: "Login page flashes on load",
+        description: "When I visit the login page the logo flashes briefly then disappears."
+      }
+    }
+
+    assert_redirected_to dashboard_path
+    assert_equal "Thank you for your submission!", flash[:notice]
+
+    report = Report.last
+    assert_equal "bug", report.category
+    assert_equal "Login page flashes on load", report.title
+    assert_equal @plumber.id, report.user_id
+    assert_equal "plumber", report.role
+  end
+
+  test "user can submit a suggestion report" do
+    sign_in @scheduler
+
+    post reports_path, params: {
+      report: {
+        category: "suggestion",
+        title: "Add dark mode toggle",
+        description: "It would be nice to have a dark mode for working late evenings."
+      }
+    }
+
+    assert_redirected_to dashboard_path
+    assert_equal "Thank you for your submission!", flash[:notice]
+
+    report = Report.last
+    assert_equal "suggestion", report.category
+    assert_equal "Add dark mode toggle", report.title
+    assert_equal @scheduler.id, report.user_id
+    assert_equal "scheduler", report.role
+  end
+
+  test "report submission requires category and title" do
+    sign_in @reporter
+
+    post reports_path, params: {
+      report: {
+        category: "",
+        title: "",
+        description: "Missing required fields"
+      }
+    }
+
+    assert_response :unprocessable_entity
+    assert_includes response.body, "Title can&#39;t be blank"
+  end
+
+  test "admin can view the reports listing" do
+    sign_in @admin
+
+    Report.create!(
+      category: :bug,
+      title: "Bug from admin test",
+      description: "Something broke",
+      role: "admin",
+      user: @admin
+    )
+
+    get admin_reports_path
+    assert_response :success
+    assert_includes response.body, "Bug from admin test"
+    assert_includes response.body, "Reports & Suggestions"
+  end
+
+  test "super_admin can view the reports listing" do
+    sign_in @super_admin
+
+    Report.create!(
+      category: :suggestion,
+      title: "SA test suggestion",
+      description: "Make it better",
+      role: "super_admin",
+      user: @super_admin
+    )
+
+    get admin_reports_path
+    assert_response :success
+    assert_includes response.body, "SA test suggestion"
+  end
+
+  test "non-admin cannot access reports listing" do
+    sign_in @scheduler
+
+    get admin_reports_path
+    assert_response :redirect
+    assert_equal "You are not authorized to access this section.", flash[:alert]
+  end
+
+  test "admin can search reports by title" do
+    sign_in @admin
+
+    Report.create!(
+      category: :bug,
+      title: "Searchable bug report",
+      description: "Details here",
+      role: "admin",
+      user: @admin
+    )
+    Report.create!(
+      category: :suggestion,
+      title: "Unrelated suggestion",
+      description: "Different content",
+      role: "scheduler",
+      user: @scheduler
+    )
+
+    get admin_reports_path(q: "Searchable")
+
+    assert_response :success
+    assert_includes response.body, "Searchable bug report"
+    assert_not_includes response.body, "Unrelated suggestion"
+  end
+
+  test "admin can search reports by role" do
+    sign_in @admin
+
+    Report.create!(
+      category: :suggestion,
+      title: "Plumber idea",
+      description: "Nice to have",
+      role: "plumber",
+      user: @plumber
+    )
+    Report.create!(
+      category: :bug,
+      title: "Reporter issue",
+      description: "Broken thing",
+      role: "reporter",
+      user: @reporter
+    )
+
+    get admin_reports_path(q: "plumber")
+
+    assert_response :success
+    assert_includes response.body, "Plumber idea"
+    assert_not_includes response.body, "Reporter issue"
+  end
 end

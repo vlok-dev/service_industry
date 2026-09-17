@@ -61,9 +61,12 @@ Rails.application.routes.draw do
   get "/calendar/previous" => "calendars#previous_date", as: :calendar_previous
   get "/calendar/next" => "calendars#next_date", as: :calendar_next
 
+  resources :reports, only: [:new, :create]
+
   namespace :admin do
     root to: "dashboard#index"
     resources :users
+    resources :reports, only: [:index]
     resource :settings, only: [:edit, :update]
   end
 end

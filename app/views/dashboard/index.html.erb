@@ -8,6 +8,10 @@
   </div>
 </div>
 
+<div style="margin: 0.5rem 0;">
+  <%= link_to "Report Bug / Suggestion", new_report_path, class: "btn btn-sm btn-secondary" %>
+</div>
+
 <% if current_user.super_admin? %>
   <% dl_counts = {
        pending:    @pending_jobs.count,

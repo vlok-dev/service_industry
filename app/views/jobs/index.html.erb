@@ -130,7 +130,7 @@
   </div>
 <% end %>
 
-<% if current_user.super_admin? || current_user.scheduler? || current_user.accountant? %>
+<% if current_user.super_admin? || current_user.scheduler? || current_user.accountant? || current_user.reporter? %>
   <div class="card" style="margin-bottom: 1.5rem;">
     <div class="card-header">
       <h2><%= filter_display_name(current_filter) %> Jobs</h2>

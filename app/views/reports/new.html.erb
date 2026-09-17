@@ -1,0 +1,32 @@
+<div class="page-header">
+  <h1>Report a Bug or Suggestion</h1>
+  <p>Let me know what's not working or what you'd like to see improved.</p>
+</div>
+
+<%= form_with model: @report, url: reports_path, local: true, class: "form" do |f| %>
+  <% if @report.errors.any? %>
+    <div class="alert alert-danger">
+      <%= @report.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :category, "What is this?" %><br>
+    <%= f.select :category, [["Bug / Problem", "bug"], ["Suggestion / Feature Request", "suggestion"]], { include_blank: "Select a category" }, class: "form-control" %>
+  </div>
+
+  <div class="field">
+    <%= f.label :title, "Summary" %><br>
+    <%= f.text_field :title, placeholder: "Brief description of the issue or suggestion...", class: "form-control" %>
+  </div>
+
+  <div class="field">
+    <%= f.label :description, "Details" %><br>
+    <%= f.text_area :description, rows: 4, placeholder: "Tell us more — what happened, what you expected, what would help...", class: "form-control" %>
+  </div>
+
+  <div class="actions" style="margin-top: 1.5rem;">
+    <%= f.submit "Submit", class: "btn" %>
+    <%= link_to "Cancel", dashboard_path, class: "btn btn-secondary" %>
+  </div>
+<% end %>

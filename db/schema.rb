@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_16_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_16_140000) do
   create_table "addresses", force: :cascade do |t|
     t.text "address"
     t.integer "client_id", null: false
@@ -167,6 +167,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_16_130000) do
     t.index ["supplier_id"], name: "index_purchase_orders_on_supplier_id"
   end
 
+  create_table "reports", force: :cascade do |t|
+    t.integer "category", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "role", null: false
+    t.integer "status", default: 0, null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_reports_on_user_id"
+  end
+
   create_table "settings", force: :cascade do |t|
     t.string "company_name"
     t.datetime "created_at", null: false
@@ -219,4 +231,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_16_130000) do
   add_foreign_key "purchase_orders", "jobs"
   add_foreign_key "purchase_orders", "suppliers"
   add_foreign_key "purchase_orders", "users", column: "created_by_id"
+  add_foreign_key "reports", "users"
 end

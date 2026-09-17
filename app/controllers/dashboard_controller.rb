@@ -43,6 +43,12 @@ case current_user.role
       @all_jobs = @jobs.order(created_at: :desc)
       @today_jobs = @jobs.where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day)
       @outstanding_jobs = @jobs.outstanding
+    when "admin"
+      @pending_jobs = @jobs.pending
+      @scheduled_jobs = @jobs.scheduled
+      @in_progress_jobs = @jobs.in_progress
+      @completed_jobs = @jobs.completed
+      @outstanding_jobs = @jobs.outstanding
     when "plumber"
       @my_jobs = @jobs.where(assigned_to: current_user)
       @pending_jobs = @my_jobs.pending
