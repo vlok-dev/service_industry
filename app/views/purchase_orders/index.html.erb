@@ -1,0 +1,113 @@
+<%
+  pipeline_scope = policy_scope(Job)
+  counts = {
+    pending:    pipeline_scope.where(status: :pending).count,
+    scheduled:  pipeline_scope.where(status: :scheduled).count,
+    in_progress: pipeline_scope.where(status: :in_progress).count,
+    completed:  pipeline_scope.where(status: :completed).count,
+    cancelled:  pipeline_scope.where(status: :cancelled).count,
+    invoiced:   pipeline_scope.invoiced.count,
+    outstanding: pipeline_scope.outstanding.count
+  }
+%>
+
+<div class="action-bar">
+  <div>
+    <h1>Purchase Orders</h1>
+    <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem;">
+      <%= pluralize(@purchase_orders.count, "purchase order") %>
+    </p>
+  </div>
+  <div class="actions">
+    <%= link_to "Export CSV", purchase_orders_path(format: :csv, q: params[:q]), class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<div class="kpi-strip">
+  <div class="kpi kpi-pending">
+    <div class="label">Pending</div>
+    <div class="value"><%= counts[:pending] %></div>
+    <div class="sub">Awaiting schedule</div>
+  </div>
+  <div class="kpi kpi-scheduled">
+    <div class="label">Scheduled</div>
+    <div class="value"><%= counts[:scheduled] %></div>
+    <div class="sub">Booked in</div>
+  </div>
+  <div class="kpi kpi-progress">
+    <div class="label">In Progress</div>
+    <div class="value"><%= counts[:in_progress] %></div>
+    <div class="sub">Active on site</div>
+  </div>
+  <div class="kpi kpi-completed">
+    <div class="label">Completed</div>
+    <div class="value"><%= counts[:completed] %></div>
+    <div class="sub">All done</div>
+  </div>
+  <div class="kpi kpi-invoiced">
+    <div class="label">Invoiced</div>
+    <div class="value"><%= counts[:invoiced] %></div>
+    <div class="sub">Invoice issued</div>
+  </div>
+</div>
+
+<div class="search-bar">
+  <%= form_with url: purchase_orders_path, method: :get, local: true, style: "display: contents;" do |f| %>
+    <%= f.text_field :q, value: params[:q], placeholder: "Search by PO #, Supplier, Job #, Customer..." %>
+    <%= f.submit "Search", class: "btn" %>
+    <% if params[:q].present? %>
+      <%= link_to "Clear", purchase_orders_path, class: "btn btn-secondary" %>
+    <% end %>
+  <% end %>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem;">
+  <div class="card-header">
+    <h2>Purchase Orders</h2>
+  </div>
+  <div class="card-body no-padding">
+    <% if @purchase_orders.present? %>
+      <div class="modern-table" style="border: none; box-shadow: none; border-radius: 0;">
+      <table>
+        <thead>
+          <tr>
+            <th>PO #</th>
+            <th>Job #</th>
+            <th>Customer</th>
+            <th>Supplier</th>
+            <th>Order Date</th>
+            <th>Items</th>
+            <th>Total (incl. VAT)</th>
+            <th>Created By</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @purchase_orders.each do |po| %>
+            <tr>
+              <td><%= link_to po.po_number, job_purchase_order_path(po.job, po), class: "job-number", title: "View Purchase Order" %></td>
+              <td><%= link_to (po.job.job_number || "N/A"), job_path(po.job), class: "job-number", title: "View Job" %></td>
+              <td><%= po.job.customer_name %></td>
+              <td><%= po.supplier_display_name %></td>
+              <td><%= po.order_date&.strftime("%d %b %Y") %></td>
+              <td><%= po.items.count %></td>
+              <td><%= number_to_currency(po.total_amount || po.total_including_vat, unit: "R", precision: 2) %></td>
+              <td><%= po.created_by&.name %></td>
+              <td><%= po.created_at&.strftime("%d %b %Y %H:%M") %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      </div>
+
+      <% if @pagy.pages > 1 %>
+        <div class="pagination-nav" style="padding: 1rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+          <%= @pagy.series_nav %>
+        </div>
+      <% end %>
+
+    <% else %>
+      <div class="empty-state">No purchase orders found.</div>
+    <% end %>
+  </div>
+</div>

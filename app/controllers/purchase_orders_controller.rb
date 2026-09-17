@@ -1,6 +1,12 @@
 class PurchaseOrdersController < ApplicationController
-  before_action :set_job
-  before_action :set_purchase_order, only: %i[ show edit update destroy ]
+  include Pagy::Method
+  before_action :set_job, only: [:new, :create, :show, :edit, :update, :destroy]
+  before_action :set_purchase_order, only: [:show, :edit, :update, :destroy]
+  before_action :set_purchase_orders, only: [:index]
+
+  def index
+    @pagy, @purchase_orders = pagy(@purchase_orders, limit: 100)
+  end
 
   def show
   end
@@ -59,6 +65,15 @@ class PurchaseOrdersController < ApplicationController
     redirect_to @job, notice: "Purchase Order was deleted."
   end
 
+  def export
+    @purchase_orders = @purchase_orders.limit(10000)
+    respond_to do |format|
+      format.csv do
+        send_data generate_csv, filename: "purchase-orders-#{Date.today}.csv"
+      end
+    end
+  end
+
   private
 
   def set_job
@@ -69,10 +84,42 @@ class PurchaseOrdersController < ApplicationController
     @purchase_order = @job.purchase_orders.find(params[:id])
   end
 
+  def set_purchase_orders
+    @purchase_orders = PurchaseOrder.includes(:job, :created_by).order(created_at: :desc)
+    @purchase_orders = @purchase_orders.joins(:job).where("jobs.id IS NOT NULL")
+    if params[:q].present?
+      query = "%#{params[:q].downcase}%"
+      @purchase_orders = @purchase_orders.where(
+        "LOWER(purchase_orders.po_number) LIKE ? OR LOWER(purchase_orders.supplier_name) LIKE ? OR LOWER(jobs.job_number) LIKE ? OR LOWER(jobs.customer_name) LIKE ?",
+        query, query, query, query
+      )
+    end
+  end
+
   def purchase_order_params
     params.require(:purchase_order).permit(
       :supplier_id, :supplier_name, :supplier_contact, :order_date, :expected_delivery, :notes, :vat_rate,
       items_attributes: [ :id, :description, :quantity, :unit_price, :code, :inventory_item_id, :_destroy ]
     )
+  end
+
+  def generate_csv
+    require 'csv'
+    CSV.generate(headers: true) do |csv|
+      csv << ["PO #", "Job #", "Customer", "Supplier", "Order Date", "Items", "Total (incl. VAT)", "Created By", "Created At"]
+      @purchase_orders.each do |po|
+        csv << [
+          po.po_number,
+          po.job.job_number,
+          po.job.customer_name,
+          po.supplier_display_name,
+          po.order_date&.strftime("%d %b %Y"),
+          po.items.count,
+          po.total_amount || po.total_including_vat,
+          po.created_by&.name,
+          po.created_at&.strftime("%d %b %Y %H:%M")
+        ]
+      end
+    end
   end
 end

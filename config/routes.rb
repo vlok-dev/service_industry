@@ -42,6 +42,11 @@ Rails.application.routes.draw do
   end
 
   resources :suppliers
+  resources :purchase_orders, only: [:index] do
+    collection do
+      get :export
+    end
+  end
   resources :clients do
     collection do
       get :import

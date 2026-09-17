@@ -5,7 +5,6 @@ class JobsController < ApplicationController
   def index
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
     @filter_date = params[:filter_date].present? ? Date.parse(params[:filter_date]) : nil
-    @current_tab = params[:tab].presence_in(%w[jobs purchase_orders]) || "jobs"
 
     # Base scope for pipeline
     if current_user.super_admin?
@@ -16,27 +15,18 @@ class JobsController < ApplicationController
       @pipeline_scope = policy_scope(Job)
     end
 
-    if @current_tab == "purchase_orders"
-      @purchase_orders = PurchaseOrder.includes(:job, :created_by).order(created_at: :desc)
-      @purchase_orders = @purchase_orders.joins(:job).where("jobs.id IS NOT NULL")
-      if params[:q].present?
-        @purchase_orders = @purchase_orders.where("purchase_orders.po_number ILIKE ? OR purchase_orders.supplier_name ILIKE ? OR jobs.job_number ILIKE ? OR jobs.customer_name ILIKE ?", "%#{params[:q]}%", "%#{params[:q]}%", "%#{params[:q]}%", "%#{params[:q]}%")
-      end
-      @pagy, @purchase_orders = pagy(@purchase_orders, limit: 100)
-    else
-      @pipeline_scope = filter_jobs if params[:filter].present?
-      @pipeline_scope = @pipeline_scope.search(params[:q]) if params[:q].present?
-      @search_query = params[:q]
-      @pipeline_scope = sort_job_list(@pipeline_scope)
+    @pipeline_scope = filter_jobs if params[:filter].present?
+    @pipeline_scope = @pipeline_scope.search(params[:q]) if params[:q].present?
+    @search_query = params[:q]
+    @pipeline_scope = sort_job_list(@pipeline_scope)
 
-      # Default to newest-first by scheduled date for scheduler/super_admin
-      if (current_user.super_admin? || current_user.scheduler?) && params[:sort].blank?
-        @pipeline_scope = @pipeline_scope.order(scheduled_date: :desc, scheduled_time: :desc)
-      end
-
-      # Paginate the pipeline - 100 per page
-      @pagy, @pipeline_jobs = pagy(:offset, @pipeline_scope, limit: 100)
+    # Default to newest-first by scheduled date for scheduler/super_admin
+    if (current_user.super_admin? || current_user.scheduler?) && params[:sort].blank?
+      @pipeline_scope = @pipeline_scope.order(scheduled_date: :desc, scheduled_time: :desc)
     end
+
+    # Paginate the pipeline - 100 per page
+    @pagy, @pipeline_jobs = pagy(:offset, @pipeline_scope, limit: 100)
 
     # For backwards compat with other roles
     @jobs = @pipeline_jobs
