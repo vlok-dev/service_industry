@@ -23,7 +23,7 @@
         <td><%= report.user&.name || "—" %></td>
         <td><%= report.role&.humanize || "—" %></td>
         <td><%= report.status.humanize %></td>
-        <td><%= report.description.to_s.truncate(80) %></td>
+        <td><%= report.description.to_s.truncate(500) %></td>
       </tr>
     <% end %>
   </tbody>
