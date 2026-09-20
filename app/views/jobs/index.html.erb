@@ -28,9 +28,9 @@
       <% end %>
     <% end %>
     <% if current_user.scheduler? || current_user.super_admin? %>
-      <%= link_to(print_tomorrow_jobs_path, class: "btn btn-print-jobs", target: "_blank") do %>
+      <%= link_to "#", class: "btn btn-print-jobs", id: "printJobsBtn", target: "_blank" do %>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18h12v6H6v-6z"></path></svg>
-        Print Tomorrow's Jobs
+        Print Jobs
       <% end %>
     <% end %>
   </div>
@@ -123,6 +123,7 @@
     <%= form_with url: jobs_path(filter: "scheduled"), method: :get, local: true, style: "display: flex; align-items: center; gap: 0.5rem;" do |f| %>
       <%= f.hidden_field :filter, value: "scheduled" %>
       <%= f.date_field :filter_date, value: filter_date || Date.tomorrow, id: "filter_date", style: "padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem;", onchange: "this.form.requestSubmit();" %>
+      <%= link_to "View All", jobs_path(filter: "scheduled"), class: "btn btn-sm btn-secondary" %>
       <% if filter_date.present? %>
         <%= link_to "Clear date", jobs_path(filter: "scheduled"), class: "btn btn-sm btn-secondary" %>
       <% end %>
@@ -270,5 +271,65 @@
         }
       });
     });
+
+    // Print Jobs modal
+    var printBtn = document.getElementById('printJobsBtn');
+    if (printBtn) {
+      printBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var modal = document.getElementById('printJobsModal');
+        if (modal) modal.classList.add('active');
+      });
+    }
+
+    var printCancel = document.getElementById('printJobsCancel');
+    if (printCancel) {
+      printCancel.addEventListener('click', function() {
+        var modal = document.getElementById('printJobsModal');
+        if (modal) modal.classList.remove('active');
+      });
+    }
+
+    var printConfirm = document.getElementById('printJobsConfirm');
+    if (printConfirm) {
+      printConfirm.addEventListener('click', function() {
+        var dateInput = document.getElementById('printJobsDate');
+        var date = dateInput.value;
+        var modal = document.getElementById('printJobsModal');
+        if (modal) modal.classList.remove('active');
+        if (date) {
+          window.open(print_tomorrow_jobs_path + '?scheduled_date=' + date, '_blank');
+        }
+      });
+    }
+
+    document.addEventListener('click', function(e) {
+      var modal = document.getElementById('printJobsModal');
+      if (modal && modal.classList.contains('active') && !e.target.closest('.print-jobs-modal-content')) {
+        modal.classList.remove('active');
+      }
+    });
   });
 </script>
+
+<div class="modal-overlay" id="printJobsModal">
+  <div class="modal-dialog print-jobs-modal-content">
+    <div class="modal-header">
+      <h3>Print Jobs</h3>
+    </div>
+    <div class="modal-body">
+      <p>Select a date to print scheduled jobs for that day:</p>
+      <div class="field">
+        <label for="printJobsDate">Date</label>
+        <input type="date" id="printJobsDate" value="<%= Date.tomorrow.strftime('%Y-%m-%d') %>" style="width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.9rem;">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" id="printJobsCancel">Cancel</button>
+      <button type="button" class="btn btn-success" id="printJobsConfirm">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18h12v6H6v-6z"></path></svg>
+        Print
+      </button>
+    </div>
+  </div>
+</div>

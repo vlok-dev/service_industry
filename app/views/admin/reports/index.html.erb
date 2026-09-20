@@ -12,6 +12,7 @@
       <th>Role</th>
       <th>Status</th>
       <th>Details</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -24,6 +25,7 @@
         <td><%= report.role&.humanize || "—" %></td>
         <td><%= report.status.humanize %></td>
         <td><%= report.description.to_s.truncate(500) %></td>
+        <td><%= button_to "Delete", admin_report_path(report), method: :delete, data: { confirm: "Delete this report?" }, class: "btn btn-danger btn-sm" %></td>
       </tr>
     <% end %>
   </tbody>

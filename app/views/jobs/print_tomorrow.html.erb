@@ -125,6 +125,12 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="9 18 5 12 9 6"></polyline></svg>
       Back to Jobs
     <% end %>
+    <div class="no-print" style="display: flex; align-items: center; gap: 0.5rem;">
+      <label for="print_date" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Print jobs for:</label>
+      <%= form_with url: print_tomorrow_jobs_path, method: :get, local: true, style: "display: flex; align-items: center; gap: 0.5rem;" do |f| %>
+        <%= f.date_field :scheduled_date, value: @print_date, style: "padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem;", onchange: "this.form.requestSubmit();" %>
+      <% end %>
+    </div>
     <button class="btn-print no-print" onclick="window.print()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18h12v6H6v-6z"></path></svg>
       Print

@@ -215,7 +215,7 @@ class JobsController < ApplicationController
 
   def print_tomorrow
     authorize Job, :schedule?
-    @print_date = Date.tomorrow
+    @print_date = params[:scheduled_date].present? ? Date.parse(params[:scheduled_date]) : Date.tomorrow
     @jobs = policy_scope(Job).scheduled.where(scheduled_date: @print_date).order(:scheduled_time)
   end
 
