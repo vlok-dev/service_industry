@@ -1,6 +1,6 @@
 class JobsController < ApplicationController
   include Pagy::Method
-  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp confirm_whatsapp update_job_type update_assigned_to add_extra_day close update_status ]
+  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp schedule_whatsapp confirm_whatsapp update_job_type update_assigned_to add_extra_day close update_status ]
 
   def index
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
