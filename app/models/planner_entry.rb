@@ -1,5 +1,5 @@
 class PlannerEntry < ApplicationRecord
-  belongs_to :assigned_to, class_name: "User", optional: true
+  belongs_to :assigned_to, class_name: "User"
   belongs_to :created_by, class_name: "User", optional: true
 
   enum :category, {
@@ -18,7 +18,7 @@ class PlannerEntry < ApplicationRecord
     cancelled: 3
   }
 
-  validates :title, :entry_date, :created_by, presence: true
+  validates :title, :entry_date, :created_by, :assigned_to, presence: true
 
   after_commit :schedule_whatsapp_reminder, on: [:create, :update], if: :should_schedule_whatsapp?
 
