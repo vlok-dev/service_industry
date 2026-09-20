@@ -18,7 +18,7 @@
         <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Upcoming Reminders</h3>
         <p style="margin: 0.25rem 0 0; font-size: 0.85rem; opacity: 0.9;">My <%= pluralize(@reminders.count, "event") %> coming up</p>
         <div style="margin-top: 0.75rem; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; padding: 0.6rem 0.8rem; font-size: 0.8rem; line-height: 1.5;">
-          ℹ️ <strong>How reminders work:</strong> This reminder shows once a day for the 3 days before the event. Press <strong>"Dismiss Reminder For Today"</strong> to hide it for today only - it returns tomorrow. The final reminder appears the day before.
+          ℹ️ <strong>How reminders work:</strong> This reminder shows once a day for the 3 days before the event. Press <strong>"Dismiss For Today"</strong> to hide it for today only - it returns tomorrow. The final reminder appears the day before.
         </div>
       </div>
     </div>
@@ -46,7 +46,7 @@
               <% end %>
             </div>
           </div>
-          <%= button_to "Dismiss Reminder For Today", dismiss_reminder_dashboard_path(entry_ids: [entry.id]), method: :patch, class: "btn btn-sm", style: "background: #DC143C; color: #fff; border: 2px solid #B71C1C; padding: 0.5rem 1rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; white-space: nowrap; min-width: 160px; box-shadow: 0 2px 6px rgba\(220,20,60,0.4\);" %>
+          <%= button_to "Dismiss For Today", dismiss_reminder_dashboard_path(entry_ids: [entry.id]), method: :patch, class: "btn btn-sm", style: "background: #DC143C; color: #fff; border: 2px solid #B71C1C; padding: 0.5rem 1rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; white-space: nowrap; min-width: 160px; box-shadow: 0 2px 6px rgba\(220,20,60,0.4\);" %>
         </div>
       <% end %>
     </div>
