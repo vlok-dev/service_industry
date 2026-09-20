@@ -39,6 +39,8 @@ class PlannerEntryPolicy < ApplicationPolicy
     def resolve
       if user.super_admin? || user.admin? || user.scheduler? || user.accountant?
         scope.all
+      elsif user.reporter?
+        scope.where("assigned_to_id IS NULL OR assigned_to_id = ?", user.id)
       else
         scope.none
       end

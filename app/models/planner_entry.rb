@@ -24,6 +24,16 @@ class PlannerEntry < ApplicationRecord
 
   scope :upcoming, -> { where("entry_date >= ?", Date.today).order(:entry_date, :entry_time) }
   scope :past, -> { where("entry_date < ?", Date.today).order(:entry_date, :entry_time) }
+  scope :reminders_due, ->(user = nil) {
+    base = where("entry_date BETWEEN ? AND ?", Date.today, Date.today + 3.days)
+           .where.not(status: :done).where.not(status: :cancelled)
+           .order(:entry_date, :entry_time)
+    if user
+      base.where("assigned_to_id IS NULL OR assigned_to_id = ?", user.id)
+    else
+      base
+    end
+  }
   scope :search, ->(query) {
     return all if query.blank?
     sanitized = "%#{ActiveRecord::Base.sanitize_sql_like(query.to_s.strip)}%"

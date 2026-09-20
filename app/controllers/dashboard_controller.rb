@@ -56,6 +56,11 @@ case current_user.role
       @completed_jobs = @my_jobs.completed
     end
 
+    # Reminder popup for upcoming planner entries (3 days, 2 days, 1 day, today)
+    @reminders = policy_scope(PlannerEntry).reminders_due(current_user).includes(:assigned_to).order(:entry_date, :entry_time)
+    @reminders = @reminders.reject { |e| current_user.dismissed_today?(e.id) }
+    @show_reminder = @reminders.present?
+
     @dashboard_counts = {
       pending: @jobs.pending.count,
       scheduled: @jobs.scheduled.count,
@@ -86,6 +91,15 @@ case current_user.role
       @scheduled_jobs = sort_job_list(@scheduled_jobs)
       @scheduled_jobs = @scheduled_jobs.order(scheduled_date: :asc, scheduled_time: :asc) unless params[:sort].present?
     end
+  end
+
+  def dismiss_reminder
+    entry_ids = params[:entry_ids].presence
+    entry_ids = JSON.parse(entry_ids) if entry_ids.is_a?(String)
+    entry_ids ||= []
+    entry_ids = [entry_ids] unless entry_ids.is_a?(Array)
+    entry_ids.each { |id| current_user.dismiss_reminder!(id) } if entry_ids.present?
+    redirect_to dashboard_path, notice: "Reminders dismissed."
   end
 
   helper_method :prev_date, :next_date
