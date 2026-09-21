@@ -63,7 +63,7 @@
         </div>
         <div class="field">
           <%= f.label :assigned_to_id, "Assigned To" %>
-          <%= f.select :assigned_to_id, options_from_collection_for_select(User.all, :id, :name, f.object.assigned_to_id), { include_blank: "Unassigned" } %>
+          <%= f.select :assigned_to_id, options_from_collection_for_select(User.all, :id, :name, f.object.assigned_to_id), { prompt: "Select Assigned Person" }, required: true %>
         </div>
       </div>
     </div>

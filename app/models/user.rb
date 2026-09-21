@@ -19,6 +19,31 @@ class User < ApplicationRecord
     false
   end
 
+  def dismissed_today?(entry_id)
+    return false if dismissed_reminder_ids_raw.blank?
+    today = Date.today.to_s
+    JSON.parse(dismissed_reminder_ids_raw).any? { |pair| pair.to_s == "#{entry_id}:#{today}" }
+  rescue JSON::ParserError
+    false
+  end
+
+  def dismiss_reminder!(entry_id)
+    pairs = dismissed_pairs
+    pairs << "#{entry_id}:#{Date.today.to_s}" unless pairs.include?("#{entry_id}:#{Date.today.to_s}")
+    update(dismissed_reminder_ids_raw: JSON.generate(pairs))
+  end
+
+  def dismissed_pairs
+    return [] if dismissed_reminder_ids_raw.blank?
+    JSON.parse(dismissed_reminder_ids_raw)
+  rescue JSON::ParserError
+    []
+  end
+
+  def reminder_dismissed_today?
+    reminder_dismissed_at && reminder_dismissed_at >= Time.current.beginning_of_day
+  end
+
   private
 
   def normalize_email

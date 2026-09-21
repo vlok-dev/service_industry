@@ -10,15 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_16_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_20_130000) do
   create_table "addresses", force: :cascade do |t|
     t.text "address"
     t.integer "client_id", null: false
-    t.datetime "created_at", null: false
+    t.datetime "created_at", precision: nil, null: false
     t.boolean "is_default", default: false
-    t.string "label", default: "Other"
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_addresses_on_client_id"
+    t.string "label", limit: 255, default: "Other"
+    t.datetime "updated_at", precision: nil, null: false
   end
 
   create_table "claims", force: :cascade do |t|
@@ -104,6 +103,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_16_140000) do
     t.index ["client_id"], name: "index_jobs_on_client_id"
     t.index ["is_project"], name: "index_jobs_on_is_project"
     t.index ["user_id"], name: "index_jobs_on_user_id"
+  end
+
+  create_table "maintenance_subscriptions", force: :cascade do |t|
+    t.integer "client_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "created_by_id", null: false
+    t.date "end_date"
+    t.date "next_service_date"
+    t.text "notes"
+    t.string "plan", default: "quarterly"
+    t.decimal "price", precision: 10, scale: 2
+    t.date "start_date", null: false
+    t.string "status", default: "active"
+    t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_maintenance_subscriptions_on_client_id"
+    t.index ["created_by_id"], name: "index_maintenance_subscriptions_on_created_by_id"
+    t.index ["next_service_date"], name: "index_maintenance_subscriptions_on_next_service_date"
+    t.index ["plan"], name: "index_maintenance_subscriptions_on_plan"
+    t.index ["status"], name: "index_maintenance_subscriptions_on_status"
   end
 
   create_table "planner_entries", force: :cascade do |t|
@@ -204,12 +222,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_16_140000) do
 
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.text "dismissed_reminder_ids_raw"
     t.string "email"
     t.string "encrypted_password", default: "", null: false
     t.datetime "last_logged_in_at"
     t.string "name"
     t.string "phone_number"
     t.datetime "remember_created_at"
+    t.datetime "reminder_dismissed_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
     t.integer "role"
@@ -224,6 +244,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_16_140000) do
   add_foreign_key "jobs", "clients"
   add_foreign_key "jobs", "users"
   add_foreign_key "jobs", "users", column: "assigned_to_id"
+  add_foreign_key "maintenance_subscriptions", "clients"
+  add_foreign_key "maintenance_subscriptions", "users", column: "created_by_id"
   add_foreign_key "planner_entries", "users", column: "assigned_to_id"
   add_foreign_key "planner_entries", "users", column: "created_by_id"
   add_foreign_key "purchase_order_items", "inventory_items"

@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   root to: redirect("/users/sign_in")
 
   get "/dashboard" => "dashboard#index", as: :dashboard
+  patch "/dashboard/dismiss_reminder" => "dashboard#dismiss_reminder", as: :dismiss_reminder_dashboard
 
   resources :jobs do
     member do
@@ -71,7 +72,7 @@ Rails.application.routes.draw do
   namespace :admin do
     root to: "dashboard#index"
     resources :users
-    resources :reports, only: [:index]
+    resources :reports, only: [:index, :destroy]
     resource :settings, only: [:edit, :update]
   end
 end

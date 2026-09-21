@@ -1,10 +1,16 @@
 class JobsController < ApplicationController
   include Pagy::Method
-  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp confirm_whatsapp update_job_type update_assigned_to add_extra_day close update_status ]
+  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp schedule_whatsapp confirm_whatsapp update_job_type update_assigned_to add_extra_day close update_status ]
 
   def index
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
-    @filter_date = params[:filter_date].present? ? Date.parse(params[:filter_date]) : nil
+    
+    # Default to tomorrow's date for scheduled filter if no date provided
+    if params[:filter] == "scheduled" && params[:filter_date].blank?
+      @filter_date = Date.tomorrow
+    else
+      @filter_date = params[:filter_date].present? ? Date.parse(params[:filter_date]) : nil
+    end
 
     # Base scope for pipeline
     if current_user.super_admin?
@@ -20,8 +26,8 @@ class JobsController < ApplicationController
     @search_query = params[:q]
     @pipeline_scope = sort_job_list(@pipeline_scope)
 
-    # Default to newest-first by scheduled date for scheduler/super_admin
-    if (current_user.super_admin? || current_user.scheduler?) && params[:sort].blank?
+    # Default to newest-first by scheduled date for scheduler/super_admin/accountant
+    if (current_user.super_admin? || current_user.scheduler? || current_user.accountant?) && params[:sort].blank?
       @pipeline_scope = @pipeline_scope.order(scheduled_date: :desc, scheduled_time: :desc)
     end
 
@@ -141,9 +147,15 @@ class JobsController < ApplicationController
       return
     end
 
+    # For accountants, require invoice_number to be set before closing
+    if current_user.accountant? && @job.invoice_number.blank?
+      redirect_back(fallback_location: @job, alert: "Please assign an invoice number before closing this job.")
+      return
+    end
+
     @job.status = :completed
     if @job.save
-      redirect_back(fallback_location: @job, notice: "Job was closed and marked as completed.")
+      redirect_back(fallback_location: @job, notice: "Job was closed and marked as invoiced.")
     else
       redirect_back(fallback_location: @job, alert: @job.errors.full_messages.join(", "))
     end
@@ -203,7 +215,7 @@ class JobsController < ApplicationController
 
   def print_tomorrow
     authorize Job, :schedule?
-    @print_date = Date.tomorrow
+    @print_date = params[:scheduled_date].present? ? Date.parse(params[:scheduled_date]) : Date.tomorrow
     @jobs = policy_scope(Job).scheduled.where(scheduled_date: @print_date).order(:scheduled_time)
   end
 

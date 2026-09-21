@@ -25,6 +25,9 @@ gem "bcrypt", "~> 3.1.7"
 
 gem "csv"
 
+# HTTP client for external APIs
+gem "httparty"
+
 # Authentication and authorization
 gem "devise"
 gem "pundit"

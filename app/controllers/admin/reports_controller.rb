@@ -15,6 +15,12 @@ class Admin::ReportsController < ApplicationController
     @total_pages = (Report.count.to_f / 25).ceil
   end
 
+  def destroy
+    @report = Report.find(params[:id])
+    @report.destroy
+    redirect_to admin_reports_path, notice: "Report was deleted."
+  end
+
   private
 
   def require_admin

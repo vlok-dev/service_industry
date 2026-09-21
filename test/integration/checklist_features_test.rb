@@ -65,7 +65,7 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
 
   # --- Item 1: Accountant can close a job ---
 
-  test "accountant closes pending job marks completed without an invoice" do
+  test "accountant cannot close pending job without invoice number" do
     sign_in @accountant
     job = create_job!(status: :pending, scheduled_date: Date.today, scheduled_time: Time.zone.parse("09:00"))
 
@@ -73,12 +73,11 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
     job.reload
-    assert job.completed?, "Job should be marked as completed"
-    assert job.invoice_number.blank?, "Invoice number should only be assigned by the accountant"
-    assert job.completed_at.present?, "Job should have completed_at set"
+    assert job.pending?, "Job should remain pending when no invoice number"
+    assert flash[:alert].present?, "Should show alert about missing invoice number"
   end
 
-  test "accountant closes scheduled job marks completed without an invoice" do
+  test "accountant cannot close scheduled job without invoice number" do
     sign_in @accountant
     job = create_job!(status: :scheduled, scheduled_time: Time.zone.parse("10:00"))
 
@@ -86,11 +85,11 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
     job.reload
-    assert job.completed?
-    assert job.invoice_number.blank?
+    assert job.scheduled?, "Job should remain scheduled when no invoice number"
+    assert flash[:alert].present?
   end
 
-  test "accountant closes in_progress job marks completed without an invoice" do
+  test "accountant cannot close in_progress job without invoice number" do
     sign_in @accountant
     job = create_job!(status: :in_progress, scheduled_time: Time.zone.parse("11:00"))
 
@@ -98,8 +97,35 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
     job.reload
+    assert job.in_progress?, "Job should remain in_progress when no invoice number"
+    assert flash[:alert].present?
+  end
+
+  test "accountant closes job with invoice number marks invoiced" do
+    sign_in @accountant
+    job = create_job!(status: :scheduled, scheduled_time: Time.zone.parse("10:00"), invoice_number: "INV-001")
+
+    patch close_job_path(job)
+
+    assert_response :redirect
+    job.reload
+    assert job.completed?, "Job should be marked as completed"
+    assert job.invoice_number.present?, "Invoice number should be retained"
+    assert job.invoiced?, "Job should be invoiced"
+    assert job.completed_at.present?, "Job should have completed_at set"
+  end
+
+  test "accountant closes in_progress job with invoice number marks invoiced" do
+    sign_in @accountant
+    job = create_job!(status: :in_progress, scheduled_time: Time.zone.parse("11:00"), invoice_number: "INV-002")
+
+    patch close_job_path(job)
+
+    assert_response :redirect
+    job.reload
     assert job.completed?
-    assert job.invoice_number.blank?
+    assert job.invoice_number.present?
+    assert job.invoiced?
   end
 
   test "closing an already completed job does not raise and stays completed" do
@@ -135,13 +161,14 @@ class ChecklistFeaturesTest < ActionDispatch::IntegrationTest
     assert_equal "pending", job.reload.status
   end
 
-  test "close button appears on job show page for accountant" do
+  test "close button does not appear for accountant on job show page" do
     sign_in @accountant
     job = create_job!(status: :scheduled, scheduled_time: Time.zone.parse("15:00"))
 
     get job_path(job)
     assert_response :success
-    assert_includes response.body, "Close Job"
+    # Accountants don't have close button - they assign invoice instead
+    assert_not_includes response.body, "Close Job"
   end
 
   test "close button does not appear for completed job" do
