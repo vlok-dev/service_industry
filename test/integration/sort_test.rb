@@ -39,4 +39,25 @@ class SortTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "sortable-header"
   end
+
+  test "mobile and tablet user agents use the desktop viewport" do
+    sign_in @user
+
+    get dashboard_path, headers: { "User-Agent" => "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/125.0.0.0 Mobile/15E148 Safari/604.1" }
+    assert_response :success
+    assert_includes response.body, 'name="viewport" content="width=1024"'
+    assert_includes response.headers["Vary"], "User-Agent"
+
+    get dashboard_path, headers: { "User-Agent" => "Mozilla/5.0 (Linux; Android 13; Pixel Tablet) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" }
+    assert_response :success
+    assert_includes response.body, 'name="viewport" content="width=1024"'
+  end
+
+  test "desktop user agent keeps the responsive viewport" do
+    sign_in @user
+    get dashboard_path, headers: { "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" }
+
+    assert_response :success
+    assert_includes response.body, 'name="viewport" content="width=device-width,initial-scale=1"'
+  end
 end

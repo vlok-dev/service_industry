@@ -1,8 +1,13 @@
 class ApplicationController < ActionController::Base
+  MOBILE_OR_TABLET_USER_AGENT = /
+    Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet
+  /ix
+
   include Pundit::Authorization
   allow_browser versions: :modern
   stale_when_importmap_changes
 
+  before_action :force_desktop_on_mobile
   before_action :authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :track_last_login, if: :user_signed_in?
@@ -16,7 +21,7 @@ class ApplicationController < ActionController::Base
     devise_parameter_sanitizer.permit(:account_update, keys: [:name, :role, :phone_number])
   end
 
-  helper_method :sort_job_list
+  helper_method :sort_job_list, :force_desktop_layout?
 
   SORTABLE_JOB_COLUMNS = {
     "job_number" => "jobs.job_number",
@@ -50,6 +55,25 @@ class ApplicationController < ActionController::Base
     else
       scope.order(Arel.sql("#{column} #{direction}"))
     end
+  end
+
+  def force_desktop_on_mobile
+    return unless request.format.html?
+
+    vary_headers = ["User-Agent", "Sec-CH-UA-Mobile", "Sec-CH-UA-Platform"]
+    existing_vary = response.get_header("Vary").to_s.split(",").map(&:strip).reject(&:empty?)
+    response.set_header("Vary", (existing_vary + vary_headers).uniq.join(", "))
+    request.variant = :desktop if mobile_or_tablet_request?
+  end
+
+  def force_desktop_layout?
+    request.variant.desktop?
+  end
+
+  def mobile_or_tablet_request?
+    request.user_agent.to_s.match?(MOBILE_OR_TABLET_USER_AGENT) ||
+      request.headers["Sec-CH-UA-Mobile"] == "?1" ||
+      request.headers["Sec-CH-UA-Platform"].to_s.match?(/\A(?:Android|iOS)\z/i)
   end
 
   def user_not_authorized
