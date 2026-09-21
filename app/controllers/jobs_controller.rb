@@ -208,7 +208,7 @@ class JobsController < ApplicationController
     authorize Job, :schedule?
 
     date = Date.parse(params[:scheduled_date]) rescue Date.tomorrow
-    jobs = policy_scope(Job).scheduled.where(scheduled_date: date)
+    jobs = policy_scope(Job).scheduled.on_date(date)
     @jobs = jobs.select { |job| job.assigned_to&.phone_number.present? }
     @date = date
   end
@@ -216,7 +216,7 @@ class JobsController < ApplicationController
   def print_tomorrow
     authorize Job, :schedule?
     @print_date = params[:scheduled_date].present? ? Date.parse(params[:scheduled_date]) : Date.tomorrow
-    @jobs = policy_scope(Job).scheduled.where(scheduled_date: @print_date).order(:scheduled_time)
+    @jobs = policy_scope(Job).scheduled.on_date(@print_date).order(:scheduled_time)
   end
 
   private
@@ -245,7 +245,7 @@ class JobsController < ApplicationController
       scope.pending
     when "scheduled"
       scoped = scope.scheduled
-      scoped = scoped.where(scheduled_date: @filter_date) if @filter_date
+      scoped = scoped.on_date(@filter_date) if @filter_date
       scoped
     when "completed"
       scope.completed

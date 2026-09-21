@@ -137,7 +137,7 @@ case current_user.role
   def jobs_for_schedule_view
     case @scheduler_view
     when "day"
-      @jobs.where("scheduled_date = :date OR (scheduled_date <= :date AND scheduled_end_date >= :date)", date: @scheduler_date)
+      @jobs.on_date(@scheduler_date)
     when "week"
       week_start = @scheduler_date.beginning_of_week(:monday)
       week_end = @scheduler_date.end_of_week(:monday)

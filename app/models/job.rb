@@ -25,6 +25,16 @@ class Job < ApplicationRecord
           q: sanitized)
   }
   scope :created_today, -> { where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day) }
+
+  # A job occupies a given date if it starts on that date, or it is a multi-day
+  # project whose scheduled range (scheduled_date..scheduled_end_date) covers it.
+  # This keeps the Jobs tab filter, Print Jobs, and dashboard schedule view consistent.
+  scope :on_date, ->(date) {
+    where(
+      "scheduled_date = :date OR (scheduled_end_date IS NOT NULL AND scheduled_date <= :date AND scheduled_end_date >= :date)",
+      date: date
+    )
+  }
   scope :outstanding, -> { where.missing(:purchase_orders).where(status: [:completed]).where("invoice_number IS NULL OR invoice_number = ''") }
   scope :invoiced, -> { completed.where("invoice_number IS NOT NULL AND invoice_number <> ''") }
 
