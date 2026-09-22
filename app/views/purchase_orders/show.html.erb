@@ -24,7 +24,7 @@
     <% @purchase_order.items.each do |item| %>
       <tr>
         <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);"><%= item.description %></td>
-        <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);"><%= item.quantity %></td>
+        <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);"><%= number_with_precision(item.quantity, precision: 2, strip_insignificant_zeros: true) %></td>
         <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">R <%= number_with_precision(item.unit_price, precision: 2) %></td>
         <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">R <%= number_with_precision(item.total, precision: 2) %></td>
       </tr>

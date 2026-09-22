@@ -37,7 +37,7 @@ class PurchaseOrdersController < ApplicationController
     if params[:description].present? && params[:quantity].present? && params[:unit_price].present?
       @purchase_order.items.build(
         description: params[:description],
-        quantity: params[:quantity].to_i,
+        quantity: params[:quantity].to_f,
         unit_price: params[:unit_price].to_f
       )
     end
