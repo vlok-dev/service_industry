@@ -76,6 +76,7 @@
             <th>Customer</th>
             <th>Supplier</th>
             <th>Order Date</th>
+            <th>Delivery Date</th>
             <th>Items</th>
             <th>Total (incl. VAT)</th>
             <th>Created By</th>
@@ -90,6 +91,7 @@
               <td><%= po.job.customer_name %></td>
               <td><%= po.supplier_display_name %></td>
               <td><%= po.order_date&.strftime("%d %b %Y") %></td>
+              <td><%= po.expected_delivery&.strftime("%d %b %Y") %></td>
               <td><%= po.items.count %></td>
               <td><%= number_to_currency(po.total_amount || po.total_including_vat, unit: "R", precision: 2) %></td>
               <td><%= po.created_by&.name %></td>
