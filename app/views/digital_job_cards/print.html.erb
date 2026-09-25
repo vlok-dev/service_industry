@@ -33,7 +33,7 @@
   </div>
   <div class="info-item">
     <div class="label">Plumber</div>
-    <div class="value"><%= @digital_job_card.user&.name || "—" %></div>
+    <div class="value"><%= @digital_job_card.job&.assigned_to&.name || "—" %></div>
   </div>
   <div class="info-item">
     <div class="label">Created</div>
