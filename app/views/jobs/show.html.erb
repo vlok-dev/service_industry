@@ -135,7 +135,11 @@ end %>
         <div style="white-space: pre-wrap; color: var(--text-muted);"><%= @job.notes %></div>
       </div>
     <% end %>
-    <% if policy(@job).add_extra_day? && @job.scheduled_date.present? %>
+    <% if policy(@job).add_extras? && @job.scheduled_date.present? %>
+      <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-light);">
+        <%= link_to "+ Add Extras", add_extras_job_path(@job), class: "btn btn-sm btn-primary" %>
+      </div>
+    <% elsif policy(@job).add_extra_day? && @job.scheduled_date.present? %>
       <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-light);">
         <%= button_to "+ Add Extra Day", add_extra_day_job_path(@job), method: :patch, data: { confirm: "Extend the scheduled end date by one day?" }, class: "btn btn-sm btn-secondary" %>
       </div>
@@ -246,6 +250,65 @@ end %>
     </div>
   </div>
 </div>
+
+<% if @job.digital_job_cards.any? %>
+<div class="section-card">
+  <header>
+    <span>Extras (Extra Work)</span>
+    <% if @job.digital_job_cards.exists? %>
+    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">
+      Total: R <%= number_with_precision(@job.digital_job_cards.sum { |djc| djc.materials.sum(&:total_price) }, precision: 2) %>
+    </span>
+    <% end %>
+  </header>
+  <div class="body">
+    <% if @job.digital_job_cards.any? %>
+      <div class="modern-table" style="border: none; box-shadow: none;">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Plumber</th>
+              <th>Materials Total</th>
+              <th>Labour Total</th>
+              <th>Grand Total (Excl. VAT)</th>
+              <th style="text-align: left;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @job.digital_job_cards.order(date: :desc).each do |djc| %>
+              <tr>
+                <td><%= djc.date&.strftime("%d %b %Y") %></td>
+                <td><%= djc.description.truncate(60) %></td>
+                <td><%= djc.user&.name || "—" %></td>
+                <td>R <%= number_with_precision(djc.materials.where(is_labor: false).sum(&:total_price), precision: 2) %></td>
+                <td>R <%= number_with_precision(djc.materials.where(is_labor: true).sum(&:total_price), precision: 2) %></td>
+                <td><strong>R <%= number_with_precision(djc.materials.sum(&:total_price), precision: 2) %></strong></td>
+                <td style="text-align: right; white-space: nowrap;">
+                  <%= link_to digital_job_card_path(djc), class: "btn-icon btn-icon-primary", title: "View" do %>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <% end %>
+                  <%= link_to print_digital_job_card_path(djc), class: "btn btn-sm btn-outline", title: "Print", target: "_blank" do %>
+                    Print
+                  <% end %>
+                  <% if policy(djc).destroy? %>
+                    <%= button_to digital_job_card_path(djc), method: :delete, data: { confirm: "Delete this extra work record?" }, class: "btn-icon btn-icon-danger", title: "Delete" do %>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <% end %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">No extra work recorded for this job yet.</div>
+    <% end %>
+  </div>
+</div>
+<% end %>
 
 <% if @job.is_project? %>
   <div class="section-card">

@@ -11,6 +11,12 @@ Rails.application.routes.draw do
   get "/dashboard" => "dashboard#index", as: :dashboard
   patch "/dashboard/dismiss_reminder" => "dashboard#dismiss_reminder", as: :dismiss_reminder_dashboard
 
+  resources :digital_job_cards, only: [:index, :show, :edit, :update, :create, :destroy] do
+    member do
+      get :print
+    end
+  end
+
   resources :jobs do
     member do
       patch :schedule
@@ -22,6 +28,8 @@ Rails.application.routes.draw do
       get :whatsapp
       get :schedule_whatsapp
       post :confirm_whatsapp
+      get :add_extras
+      post :create_extras
     end
     collection do
       get :bulk_whatsapp

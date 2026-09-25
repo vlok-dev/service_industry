@@ -1,0 +1,47 @@
+<div class="material-row" data-index="<%= f.index %>" style="display: flex; gap: 0.5rem; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap;">
+  <%= f.hidden_field :_destroy, value: "false" %>
+  <%= f.hidden_field :is_labor, value: f.object.is_labor? ? "true" : "false" %>
+  
+  <div class="field" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+    <%= f.label :material_name, f.object.is_labor? ? "Labour Description" : "Material Name" %><br>
+    <%= f.text_field :material_name, placeholder: f.object.is_labor? ? "e.g. Plumber hours" : "e.g. half inch elbow", required: true %>
+  </div>
+
+  <% unless f.object.is_labor? %>
+    <div class="field" style="width: 120px; margin-bottom: 0;">
+      <%= f.label :inventory_item_id, "Inventory Item" %><br>
+      <%= f.select :inventory_item_id, options_for_select([["-- Select from Inventory --", ""]]), { include_blank: false }, { class: "inventory-select", style: "width: 100%;" } %>
+    </div>
+
+    <div class="field" style="width: 80px; margin-bottom: 0;">
+      <%= f.label :quantity, "Qty" %><br>
+      <%= f.number_field :quantity, step: "0.01", min: "0", value: f.object.quantity || 1, class: "qty-input", style: "width: 100%;" %>
+    </div>
+
+    <div class="field" style="width: 100px; margin-bottom: 0;">
+      <%= f.label :unit_price, "Unit Price" %><br>
+      <%= f.number_field :unit_price, step: "0.01", min: "0", value: f.object.unit_price || 0, class: "unit-price-input", style: "width: 100%;" %>
+    </div>
+
+    <div class="field" style="width: 80px; margin-bottom: 0;">
+      <%= f.label :markup, "Markup %" %><br>
+      <%= f.number_field :markup, step: "1", min: "0", value: f.object.markup || 30, class: "markup-input", style: "width: 100%;" %>
+    </div>
+  <% else %>
+    <div class="field" style="width: 100px; margin-bottom: 0;">
+      <%= f.label :labor_rate, "Labour Rate" %><br>
+      <%= f.number_field :labor_rate, step: "0.01", min: "0", value: f.object.labor_rate || 0, class: "labor-rate-input", style: "width: 100%;" %>
+    </div>
+  <% end %>
+
+  <div class="field" style="width: 100px; margin-bottom: 0;">
+    <%= f.label :total_price, "Total" %><br>
+    <div class="line-total" style="padding: 0.5rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-weight: 600; min-height: 38px; display: flex; align-items: center;">
+      R <%= number_with_precision(f.object.total_price || 0, precision: 2) %>
+    </div>
+  </div>
+
+  <button type="button" class="btn btn-danger btn-sm remove-material" style="height: 38px; padding: 0 0.75rem;" title="Remove">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+  </button>
+</div>

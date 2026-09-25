@@ -1,0 +1,432 @@
+<%= form_with model: digital_job_card, id: "new_digital_job_card_form", local: true do |f| %>
+  <% if digital_job_card.errors.any? %>
+    <div class="alert" style="margin-bottom: 1rem;">
+      <h2><%= pluralize(digital_job_card.errors.count, "error") %> prohibited this card from being saved:</h2>
+      <ul>
+        <% digital_job_card.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :client_name, "Client Name" %>
+    <div class="client-search-wrapper">
+      <input type="hidden" name="digital_job_card[client_id]" id="digital_job_card_client_id" value="<%= digital_job_card.client_id %>">
+      <%= f.hidden_field :client_name, id: "digital_job_card_client_name", value: digital_job_card.client_name %>
+      <input type="text" id="client_search" class="client-search-input" placeholder="Search clients to auto-fill..." autocomplete="off" value="<%= digital_job_card.client&.name || digital_job_card.client_name %>">
+      <div id="client_dropdown" class="client-dropdown"></div>
+    </div>
+    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem;">Optional: Selecting a client auto-fills the fields below. Or type manually.</p>
+  </div>
+
+  <div class="field">
+    <%= f.label :address, "Address" %><br>
+    <%= f.text_area :address, required: true, rows: 2, placeholder: "Enter full address" %>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+    <div class="field">
+      <%= f.label :date, "Date" %><br>
+      <%= f.date_field :date, required: true, value: Date.today %>
+    </div>
+    <div class="field">
+      <%= f.label :time_start, "Time Start" %><br>
+      <%= f.time_field :time_start, required: true %>
+    </div>
+  </div>
+
+  <div class="field">
+    <%= f.label :time_finish, "Time Finish" %><br>
+    <%= f.time_field :time_finish, required: true %>
+  </div>
+
+  <div class="field">
+    <%= f.label :description, "Description" %><br>
+    <%= f.text_area :description, required: true, rows: 3, placeholder: "Describe the work to be done" %>
+  </div>
+
+  <div class="field">
+    <%= f.label :materials, "Materials & Labour Line Items" %>
+    <div id="materials-container">
+      <%= f.fields_for :materials do |mf| %>
+        <%= render "digital_job_cards/material_fields", f: mf %>
+      <% end %>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm" id="add-material-btn" style="margin-top: 0.5rem;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Add Material Line Item
+    </button>
+    <button type="button" class="btn btn-outline btn-sm" id="add-labor-btn" style="margin-top: 0.5rem; margin-left: 0.5rem;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+      Add Labour Line Item
+    </button>
+    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem;">Select from inventory (auto-fills price with 30% markup) or enter custom items. Labour items are separate from materials.</p>
+  </div>
+
+  <div id="totals-summary" style="background: var(--bg); padding: 1rem; border-radius: var(--radius-sm); margin-top: 1rem; border: 1px solid var(--border);">
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Materials Total</div>
+        <div id="total-materials" style="font-size: 1.5rem; font-weight: 700; color: var(--text);">R 0.00</div>
+      </div>
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Labour Total</div>
+        <div id="total-labor" style="font-size: 1.5rem; font-weight: 700; color: var(--text);">R 0.00</div>
+      </div>
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Grand Total (Excl. VAT)</div>
+        <div id="grand-total" style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">R 0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer" style="padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+    <button type="button" class="btn btn-secondary" id="cancelDigitalJobCardBtn">Cancel</button>
+    <%= f.submit "Create Digital Job Card", class: "btn btn-success" %>
+  </div>
+<% end %>
+
+<script>
+  var clientsData = <%= raw Client.ordered.includes(:addresses).map { |c| [
+    c.id,
+    {
+      customer_code: c.customer_code,
+      name: c.name,
+      contact_person: c.contact_person,
+      email: c.email,
+      phone_number: c.primary_contact_mobile || c.phone_number,
+      delivery_address: c.delivery_address,
+      postal_address: c.postal_address || c.delivery_address,
+      addresses: c.addresses.order(id: :asc).map { |a| { id: a.id, label: a.label, address: a.address, is_default: a.is_default } }
+    }
+  ] }.to_h.to_json %>;
+
+  var inventoryItems = <%= raw InventoryItem.active.order(:code).map { |item| [item.id, { code: item.code, name: item.name, list_price: item.list_price || item.unit_price || item.cost_price || 0 }] }.to_h.to_json %>;
+
+  function populateFromClient(clientId) {
+    var c = clientsData[clientId];
+    if (!c) return;
+    var fields = {
+      "digital_job_card_client_name": c.name,
+      "digital_job_card_address": c.delivery_address
+    };
+    Object.keys(fields).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.value = fields[id] || "";
+    });
+  }
+
+  function initClientSearch() {
+    var searchInput = document.getElementById('client_search');
+    var dropdown = document.getElementById('client_dropdown');
+    var hiddenInput = document.getElementById('digital_job_card_client_id');
+    if (!searchInput || !dropdown || !hiddenInput) return;
+
+    var selectedId = hiddenInput.value;
+
+    function renderClients(filterText) {
+      var term = (filterText || '').toLowerCase();
+      var html = '';
+      var count = 0;
+      Object.keys(clientsData).forEach(function(id) {
+        var c = clientsData[id];
+        var label = (c.customer_code ? c.customer_code + ' \u2014 ' : '') + c.name;
+        if (term && label.toLowerCase().indexOf(term) === -1) return;
+        count++;
+        var selectedClass = (String(id) === String(selectedId)) ? ' active' : '';
+        html += '<div class="client-option' + selectedClass + '" data-id="' + id + '"><span class="client-code">' + (c.customer_code || '\u2014') + '</span><span class="client-name">' + (c.name || '').replace(/</g, '<') + '</span></div>';
+      });
+      if (!count) {
+        html = '<div class="client-no-results">No clients found</div>';
+      }
+      dropdown.innerHTML = html;
+      dropdown.classList.add('open');
+
+      dropdown.querySelectorAll('.client-option').forEach(function(el) {
+        el.addEventListener('mousedown', function(e) {
+          e.preventDefault();
+          var id = el.getAttribute('data-id');
+          hiddenInput.value = id;
+          searchInput.value = el.querySelector('.client-name').textContent;
+          dropdown.classList.remove('open');
+          if (id) populateFromClient(id);
+        });
+      });
+    }
+
+    searchInput.addEventListener('input', function() {
+      renderClients(searchInput.value);
+      var hidden = document.getElementById('digital_job_card_client_name');
+      if (hidden && !hidden.value) hidden.value = searchInput.value;
+    });
+
+    searchInput.addEventListener('focus', function() {
+      renderClients(searchInput.value);
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('open');
+      }
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+      var active = dropdown.querySelector('.client-option.active');
+      var options = Array.prototype.slice.call(dropdown.querySelectorAll('.client-option'));
+      var index = options.indexOf(active);
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        var next = options[index + 1];
+        if (next) {
+          options.forEach(function(o) { o.classList.remove('active'); });
+          next.classList.add('active');
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        var prev = options[index - 1];
+        if (prev) {
+          options.forEach(function(o) { o.classList.remove('active'); });
+          prev.classList.add('active');
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (active) {
+          var id = active.getAttribute('data-id');
+          hiddenInput.value = id;
+          searchInput.value = active.querySelector('.client-name').textContent;
+          dropdown.classList.remove('open');
+          if (id) populateFromClient(id);
+        }
+      } else if (e.key === 'Escape') {
+        dropdown.classList.remove('open');
+      }
+    });
+  }
+
+  initClientSearch();
+
+  // Materials line items
+  var materialIndex = <%= digital_job_card.materials.count %>;
+
+  var inventoryItems = <%= raw InventoryItem.active.order(:code).map { |item| [item.id, { code: item.code, name: item.name, list_price: item.list_price || item.unit_price || item.cost_price || 0 }] }.to_h.to_json %>;
+
+  function formatCurrency(val) {
+    return 'R ' + val.toFixed(2);
+  }
+
+  function recalculateTotals() {
+    var materialsTotal = 0;
+    var laborTotal = 0;
+
+    document.querySelectorAll('.material-row').forEach(function(row) {
+      var destroyInput = row.querySelector('input[name$="[_destroy]"]');
+      if (destroyInput && destroyInput.value === 'true') return;
+
+      var isLabor = row.querySelector('input[name$="[is_labor]"]').checked;
+      var quantity = parseFloat(row.querySelector('input[name$="[quantity]"]').value) || 0;
+      var unitPrice = parseFloat(row.querySelector('input[name$="[unit_price]"]').value) || 0;
+      var markup = parseFloat(row.querySelector('input[name$="[markup]"]').value) || 0;
+      var laborRate = parseFloat(row.querySelector('input[name$="[labor_rate]"]').value) || 0;
+
+      var total = (unitPrice * quantity * (1 + markup / 100)) + laborRate;
+
+      var totalEl = row.querySelector('.line-total');
+      if (totalEl) totalEl.textContent = formatCurrency(total);
+
+      if (isLabor) {
+        laborTotal += total;
+      } else {
+        materialsTotal += total;
+      }
+    });
+
+    document.getElementById('total-materials').textContent = formatCurrency(materialsTotal);
+    document.getElementById('total-labor').textContent = formatCurrency(laborTotal);
+    document.getElementById('grand-total').textContent = formatCurrency(materialsTotal + laborTotal);
+  }
+
+  function addMaterialFields(isLabor = false) {
+    var container = document.getElementById('materials-container');
+    var newIndex = materialIndex++;
+    var html = '<div class="material-row" data-index="' + newIndex + '" style="display: flex; gap: 0.5rem; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap;">' +
+      '<input type="hidden" name="digital_job_card[materials_attributes][' + newIndex + '][_destroy]" value="false">' +
+      '<input type="hidden" name="digital_job_card[materials_attributes][' + newIndex + '][is_labor]" value="' + (isLabor ? 'true' : 'false') + '">' +
+      '<div class="field" style="flex: 1; min-width: 200px; margin-bottom: 0;">' +
+        '<label>' + (isLabor ? 'Labour Description' : 'Material Name') + '</label>' +
+        '<input type="text" name="digital_job_card[materials_attributes][' + newIndex + '][material_name]" placeholder="' + (isLabor ? 'e.g. Plumber hours' : 'e.g. half inch elbow') + '" required>' +
+      '</div>' +
+      (isLabor ? '' :
+        '<div class="field" style="width: 120px; margin-bottom: 0;">' +
+          '<label>Inventory Item</label>' +
+          '<div class="inventory-search-wrapper" style="position: relative;">' +
+            '<input type="text" class="inventory-search-input" placeholder="Search by code or name..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--radius-sm);" autocomplete="off">' +
+            '<input type="hidden" name="digital_job_card[materials_attributes][' + newIndex + '][inventory_item_id]" data-inventory-id-target="true">' +
+            '<div class="inventory-dropdown-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: var(--radius-sm); max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: var(--shadow-md);"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="field" style="width: 80px; margin-bottom: 0;">' +
+          '<label>Qty</label>' +
+          '<input type="number" name="digital_job_card[materials_attributes][' + newIndex + '][quantity]" step="0.01" min="0" value="1" class="qty-input" style="width: 100%;">' +
+        '</div>' +
+        '<div class="field" style="width: 100px; margin-bottom: 0;">' +
+          '<label>Unit Price</label>' +
+          '<input type="number" name="digital_job_card[materials_attributes][' + newIndex + '][unit_price]" step="0.01" min="0" value="0" class="unit-price-input" style="width: 100%;">' +
+        '</div>' +
+        '<div class="field" style="width: 80px; margin-bottom: 0;">' +
+          '<label>Markup %</label>' +
+          '<input type="number" name="digital_job_card[materials_attributes][' + newIndex + '][markup]" step="1" min="0" value="30" class="markup-input" style="width: 100%;">' +
+        '</div>'
+      ) +
+      (isLabor ?
+        '<div class="field" style="width: 100px; margin-bottom: 0;">' +
+          '<label>Labour Rate</label>' +
+          '<input type="number" name="digital_job_card[materials_attributes][' + newIndex + '][labor_rate]" step="0.01" min="0" value="0" class="labor-rate-input" style="width: 100%;">' +
+        '</div>' :
+        ''
+      ) +
+      '<div class="field" style="width: 100px; margin-bottom: 0;">' +
+        '<label>Total</label>' +
+        '<div class="line-total" style="padding: 0.5rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-weight: 600; min-height: 38px; display: flex; align-items: center;">R 0.00</div>' +
+      '</div>' +
+      '<button type="button" class="btn btn-danger btn-sm remove-material" style="height: 38px; padding: 0 0.75rem;" title="Remove">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
+      '</button>' +
+    '</div>';
+    container.insertAdjacentHTML('beforeend', html);
+
+    var newRow = container.querySelector('.material-row[data-index="' + newIndex + '"]');
+    attachRemoveListeners(newRow);
+    attachInputListeners(newRow);
+    setupInventorySearch(newRow);
+  }
+
+  function setupInventorySearch(row) {
+    var searchInput = row.querySelector('.inventory-search-input');
+    var hiddenInput = row.querySelector('input[data-inventory-id-target]');
+    var resultsDiv = row.querySelector('.inventory-dropdown-results');
+    if (!searchInput || !hiddenInput) return;
+
+    function renderResults(filter) {
+      var term = (filter || '').toLowerCase().trim();
+      var html = '';
+      var count = 0;
+      
+      Object.keys(inventoryItems).forEach(function(id) {
+        var item = inventoryItems[id];
+        var searchText = (item.code + ' ' + item.name).toLowerCase();
+        if (term && searchText.indexOf(term) === -1) return;
+        count++;
+        html += '<div class="inventory-result-item" data-id="' + id + '" data-price="' + item.list_price + '" style="padding: 0.5rem 0.75rem; cursor: pointer; border-bottom: 1px solid var(--border-light);">' +
+          '<div style="font-weight: 600; font-size: 0.85rem;">' + item.code + ' - ' + item.name + '</div>' +
+          '<div style="font-size: 0.75rem; color: var(--text-muted);">R ' + item.list_price.toFixed(2) + '</div>' +
+        '</div>';
+      });
+      
+      if (!count) {
+        html = '<div style="padding: 0.75rem; color: var(--text-muted); font-size: 0.85rem;">No items found</div>';
+      }
+      
+      resultsDiv.innerHTML = html;
+      resultsDiv.style.display = count > 0 ? 'block' : 'none';
+      
+      // Click handlers for results
+      resultsDiv.querySelectorAll('.inventory-result-item').forEach(function(item) {
+        item.addEventListener('mousedown', function(e) {
+          e.preventDefault();
+          var id = this.getAttribute('data-id');
+          var price = parseFloat(this.getAttribute('data-price')) || 0;
+          
+          hiddenInput.value = id;
+          searchInput.value = this.querySelector('div').textContent.split(' - ')[1] || '';
+          resultsDiv.style.display = 'none';
+          
+          // Auto-fill price and markup
+          var unitPriceInput = row.querySelector('.unit-price-input');
+          var markupInput = row.querySelector('.markup-input');
+          var qtyInput = row.querySelector('.qty-input');
+          var materialNameInput = row.querySelector('input[name$="[material_name]"]');
+          
+          if (price > 0) {
+            unitPriceInput.value = price.toFixed(2);
+            markupInput.value = '30';
+            if (!materialNameInput.value) {
+              materialNameInput.value = searchInput.value;
+            }
+            recalculateTotals();
+          }
+          
+          // Trigger change event on hidden input
+          hiddenInput.dispatchEvent(new Event('change'));
+        });
+      });
+    }
+
+    searchInput.addEventListener('input', function() {
+      renderResults(this.value);
+    });
+
+    searchInput.addEventListener('focus', function() {
+      if (this.value.trim() === '') {
+        renderResults('');
+      }
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        resultsDiv.style.display = 'none';
+        this.blur();
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+        resultsDiv.style.display = 'none';
+      }
+    });
+  }
+
+  function attachInputListeners(row) {
+    var inputs = row.querySelectorAll('input[type="number"], select');
+    inputs.forEach(function(input) {
+      input.addEventListener('input', recalculateTotals);
+      input.addEventListener('change', recalculateTotals);
+    });
+  }
+
+  function attachRemoveListeners(row) {
+    var btn = row.querySelector('.remove-material');
+    if (btn) {
+      btn.onclick = function() {
+        var destroyInput = row.querySelector('input[name$="[_destroy]"]');
+        if (destroyInput) {
+          destroyInput.value = 'true';
+          row.style.display = 'none';
+        } else {
+          row.remove();
+        }
+        recalculateTotals();
+      };
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.material-row').forEach(function(row) {
+      attachRemoveListeners(row);
+      attachInputListeners(row);
+      setupInventorySearch(row);
+    });
+
+    document.getElementById('add-material-btn').addEventListener('click', function() {
+      addMaterialFields(false);
+    });
+
+    document.getElementById('add-labor-btn').addEventListener('click', function() {
+      addMaterialFields(true);
+    });
+
+    // Initial calculation
+    recalculateTotals();
+  });
+</script>

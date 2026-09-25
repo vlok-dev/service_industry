@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  client_name: MyString
+  address: MyText
+  date: 2026-09-24
+  time_start: 2026-09-24 19:11:44
+  time_finish: 2026-09-24 19:11:44
+  description: MyText
+  materials_used: MyText
+  user: one
+
+two:
+  client_name: MyString
+  address: MyText
+  date: 2026-09-24
+  time_start: 2026-09-24 19:11:44
+  time_finish: 2026-09-24 19:11:44
+  description: MyText
+  materials_used: MyText
+  user: two

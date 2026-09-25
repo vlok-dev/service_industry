@@ -4,6 +4,7 @@ class Job < ApplicationRecord
   belongs_to :client, optional: true
   has_many :purchase_orders, dependent: :destroy
   has_many :claims, dependent: :destroy
+  has_many :digital_job_cards, dependent: :destroy
 
   enum :status, { pending: 0, scheduled: 1, in_progress: 2, completed: 3, cancelled: 4 }
   enum :priority, { maintenance: 0, project: 1 }

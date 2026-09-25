@@ -4,11 +4,12 @@ class User < ApplicationRecord
          :rememberable,
          :validatable
 
-  enum :role, { super_admin: 0, scheduler: 1, reporter: 2, plumber: 3, admin: 4, accountant: 5 }
+  enum :role, { super_admin: 0, scheduler: 1, reporter: 2, plumber: 3, admin: 4, accountant: 5, project_manager: 6 }
 
   has_many :assigned_jobs, class_name: "Job", foreign_key: :assigned_to_id, dependent: :nullify
   has_many :jobs, dependent: :nullify
   has_many :reports, dependent: :destroy
+  has_many :digital_job_cards, dependent: :destroy
 
   before_validation :normalize_email
 

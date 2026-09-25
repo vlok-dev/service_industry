@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_21_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_24_181333) do
   create_table "addresses", force: :cascade do |t|
     t.text "address"
     t.integer "client_id", null: false
@@ -50,6 +50,39 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_21_000000) do
     t.datetime "updated_at", null: false
     t.index ["customer_code"], name: "index_clients_on_customer_code"
     t.index ["name"], name: "index_clients_on_name"
+  end
+
+  create_table "digital_job_card_materials", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "digital_job_card_id", null: false
+    t.integer "inventory_item_id"
+    t.boolean "is_labor", default: false
+    t.decimal "labor_rate", precision: 10, scale: 2, default: "0.0"
+    t.decimal "markup", precision: 5, scale: 2, default: "0.0"
+    t.string "material_name"
+    t.decimal "quantity", precision: 10, scale: 4, default: "0.0"
+    t.decimal "total_price", precision: 10, scale: 2, default: "0.0"
+    t.decimal "unit_price", precision: 10, scale: 2, default: "0.0"
+    t.datetime "updated_at", null: false
+    t.index ["digital_job_card_id"], name: "index_digital_job_card_materials_on_digital_job_card_id"
+    t.index ["inventory_item_id"], name: "index_digital_job_card_materials_on_inventory_item_id"
+  end
+
+  create_table "digital_job_cards", force: :cascade do |t|
+    t.text "address"
+    t.integer "client_id"
+    t.string "client_name"
+    t.datetime "created_at", null: false
+    t.date "date"
+    t.text "description"
+    t.integer "job_id"
+    t.time "time_finish"
+    t.time "time_start"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["client_id"], name: "index_digital_job_cards_on_client_id"
+    t.index ["job_id"], name: "index_digital_job_cards_on_job_id"
+    t.index ["user_id"], name: "index_digital_job_cards_on_user_id"
   end
 
   create_table "inventory_items", force: :cascade do |t|
@@ -241,6 +274,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_21_000000) do
 
   add_foreign_key "addresses", "clients"
   add_foreign_key "claims", "jobs"
+  add_foreign_key "digital_job_card_materials", "digital_job_cards"
+  add_foreign_key "digital_job_card_materials", "inventory_items"
+  add_foreign_key "digital_job_cards", "clients"
+  add_foreign_key "digital_job_cards", "jobs"
+  add_foreign_key "digital_job_cards", "users"
   add_foreign_key "jobs", "clients"
   add_foreign_key "jobs", "users"
   add_foreign_key "jobs", "users", column: "assigned_to_id"

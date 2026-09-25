@@ -1,6 +1,6 @@
 class JobsController < ApplicationController
   include Pagy::Method
-  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp schedule_whatsapp confirm_whatsapp update_job_type update_assigned_to add_extra_day close update_status ]
+  before_action :set_job, only: %i[ show edit update destroy schedule whatsapp schedule_whatsapp confirm_whatsapp update_job_type update_assigned_to add_extra_day close update_status add_extras create_extras ]
 
   def index
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
@@ -219,6 +219,44 @@ class JobsController < ApplicationController
     @jobs = policy_scope(Job).scheduled.on_date(@print_date).order(:scheduled_time)
   end
 
+  def add_extras
+    authorize @job, :show?
+    @digital_job_card = @job.digital_job_cards.build(
+      client_name: @job.customer_name,
+      address: @job.address,
+      date: Date.today,
+      user: current_user
+    )
+    @digital_job_card.materials.build
+    @inventory_items = InventoryItem.active.order(:code)
+  end
+
+  def create_extras
+    authorize @job, :show?
+    @digital_job_card = @job.digital_job_cards.build(digital_job_card_params.merge(user: current_user))
+    
+    # Process materials to calculate totals
+    if @digital_job_card.materials.any?
+      @digital_job_card.materials.each do |material|
+        if material.inventory_item_id.present? && material.unit_price.zero?
+          inventory_item = InventoryItem.find(material.inventory_item_id)
+          material.unit_price = inventory_item.list_price || inventory_item.unit_price || inventory_item.cost_price || 0
+          material.material_name = inventory_item.name if material.material_name.blank?
+        end
+        # Apply 30% markup if not set
+        material.markup = 30 if material.markup.zero? && material.unit_price > 0
+        material.total_price = material.calculated_total
+      end
+    end
+
+    if @digital_job_card.save
+      redirect_to job_path(@job), notice: "Extra work added successfully."
+    else
+      @inventory_items = InventoryItem.active.order(:code)
+      render :add_extras, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_job
@@ -232,6 +270,13 @@ class JobsController < ApplicationController
       [ :customer_code, :customer_name, :contact_person, :email, :address, :postal_address, :description, :status, :priority, :assigned_to_id, :notes, :scheduled_date, :scheduled_time, :scheduled_end_date, :job_number, :invoice_number, :is_project, :client_id, :contact_number ]
     end
     params.require(:job).permit(permitted)
+  end
+
+  def digital_job_card_params
+    params.require(:digital_job_card).permit(
+      :client_name, :address, :date, :time_start, :time_finish, :description,
+      materials_attributes: [:id, :inventory_item_id, :material_name, :quantity, :unit_price, :markup, :labor_rate, :is_labor, :_destroy]
+    )
   end
 
   def schedule_params

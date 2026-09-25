@@ -2,13 +2,13 @@ class DashboardController < ApplicationController
   def index
     @jobs = policy_scope(Job)
     @search_query = params[:q].to_s.strip
-    @dashboard_tab = params[:tab].presence_in(%w[jobs planner]) || cookies[:dashboard_tab].presence || "jobs"
+    @dashboard_tab = params[:tab].presence_in(%w[jobs planner dashboard digital_job_cards]) || cookies[:dashboard_tab].presence || "jobs"
     cookies[:dashboard_tab] = { value: @dashboard_tab, expires: 1.year.from_now }
 
     if @search_query.present?
       @jobs = @jobs.search(@search_query)
     end
-case current_user.role
+    case current_user.role
     when "super_admin"
       @my_jobs = filter_jobs_for(@jobs.where(user: current_user))
       @pending_jobs = @jobs.pending
@@ -54,6 +54,11 @@ case current_user.role
       @pending_jobs = @my_jobs.pending
       @in_progress_jobs = @my_jobs.in_progress
       @completed_jobs = @my_jobs.completed
+    when "project_manager"
+      @digital_job_cards = current_user.digital_job_cards.recent.limit(20)
+      @digital_job_card = DigitalJobCard.new
+      @dashboard_tab = params[:tab].presence_in(%w[dashboard digital_job_cards]) || cookies[:dashboard_tab].presence || "dashboard"
+      cookies[:dashboard_tab] = { value: @dashboard_tab, expires: 1.year.from_now }
     end
 
     # Reminder popup for upcoming planner entries (3 days, 2 days, 1 day, today)

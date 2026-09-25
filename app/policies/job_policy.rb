@@ -39,6 +39,10 @@ class JobPolicy < ApplicationPolicy
     user.scheduler? || user.super_admin? || user.admin?
   end
 
+  def add_extras?
+    user.reporter? || user.scheduler? || user.super_admin? || user.admin?
+  end
+
   def close?
     user.admin? || user.super_admin? || user.accountant?
   end

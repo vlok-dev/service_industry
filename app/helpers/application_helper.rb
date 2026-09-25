@@ -53,4 +53,27 @@ module ApplicationHelper
     return "—".html_safe unless date.present?
     date.strftime("%A %-d %b %Y").html_safe
   end
+
+  def format_quantity(quantity)
+    return "" if quantity.nil?
+
+    num = quantity.to_f
+    # Whole number (within floating point tolerance)
+    if (num - num.round).abs < 0.0001
+      num.round.to_s
+    else
+      whole = num.to_i
+      frac = num - whole
+      denominator = 10 ** (frac.to_s.split('.').last.length)
+      numerator = (frac * denominator).round
+      gcd = numerator.gcd(denominator)
+      numerator /= gcd
+      denominator /= gcd
+      if whole > 0
+        "#{whole} #{numerator}/#{denominator}"
+      else
+        "#{numerator}/#{denominator}"
+      end
+    end
+  end
 end
