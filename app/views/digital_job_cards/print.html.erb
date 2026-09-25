@@ -37,7 +37,7 @@
   </div>
   <div class="info-item">
     <div class="label">Created</div>
-    <div class="value"><%= @digital_job_card.created_at.strftime("%d %b %Y %I:%M %p") %></div>
+    <div class="value"><%= (@digital_job_card.created_at + 2.hours).strftime("%d %b %Y %I:%M %p") %></div>
   </div>
 </div>
 
@@ -58,7 +58,7 @@
       <% @materials.each do |m| %>
         <tr>
           <td><%= m.material_name %></td>
-          <td><%= m.inventory_item&.code %></td>
+          <td><%= m.inventory_item_id.present? ? m.inventory_item&.code : "" %></td>
           <td><%= number_with_precision(m.quantity, precision: 2, strip_insignificant_zeros: true) %></td>
           <td>R <%= number_with_precision(m.unit_price, precision: 2) %></td>
           <td><%= number_with_precision(m.markup, precision: 0, strip_insignificant_zeros: true) %>%</td>
