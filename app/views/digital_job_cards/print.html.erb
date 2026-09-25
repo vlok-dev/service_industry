@@ -4,6 +4,12 @@
   <p>Job #<%= @digital_job_card.job&.job_number %> | <%= @digital_job_card.date&.strftime("%d %B %Y") %></p>
 </div>
 
+<% if @digital_job_card.job %>
+  <% content_for :back_link do %>
+    <a href="<%= job_path(@digital_job_card.job) %>" class="btn btn-secondary no-print" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; text-decoration: none;">← Back To Jobs</a>
+  <% end %>
+<% end %>
+
 <div class="info-grid">
   <div class="info-item">
     <div class="label">Client Name</div>
@@ -111,5 +117,4 @@
 
 <div class="footer">
   <p>Industro Plumbers - Extra Work Job Card | Generated <%= Time.current.strftime("%d %b %Y %I:%M %p") %></p>
-  <p>This document is for internal tracking purposes only.</p>
 </div>

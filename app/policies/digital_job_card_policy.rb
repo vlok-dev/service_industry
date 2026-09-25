@@ -18,4 +18,17 @@ class DigitalJobCardPolicy < ApplicationPolicy
   def print?
     show?
   end
+
+  class Scope < ApplicationPolicy::Scope
+    def resolve
+      case user&.role
+      when "super_admin", "admin", "accountant", "scheduler"
+        scope.all
+      when "reporter"
+        scope.where(user_id: user.id)
+      else
+        scope.none
+      end
+    end
+  end
 end
