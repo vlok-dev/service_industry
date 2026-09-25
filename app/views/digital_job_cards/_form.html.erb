@@ -1,4 +1,4 @@
-<%= form_with model: digital_job_card, id: "new_digital_job_card_form", local: true do |f| %>
+<%= form_with model: digital_job_card, id: "new_digital_job_card_form", local: true, data: { turbo: false } do |f| %>
   <% if digital_job_card.errors.any? %>
     <div class="alert" style="margin-bottom: 1rem;">
       <h2><%= pluralize(digital_job_card.errors.count, "error") %> prohibited this card from being saved:</h2>
@@ -224,7 +224,7 @@
       var destroyInput = row.querySelector('input[name$="[_destroy]"]');
       if (destroyInput && destroyInput.value === 'true') return;
 
-      var isLabor = row.querySelector('input[name$="[is_labor]"]').checked;
+      var isLabor = row.querySelector('input[name$="[is_labor]"]').value === 'true';
       var quantity = parseFloat(row.querySelector('input[name$="[quantity]"]').value) || 0;
       var unitPrice = parseFloat(row.querySelector('input[name$="[unit_price]"]').value) || 0;
       var markup = parseFloat(row.querySelector('input[name$="[markup]"]').value) || 0;
