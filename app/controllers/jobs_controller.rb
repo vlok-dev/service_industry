@@ -93,8 +93,11 @@ class JobsController < ApplicationController
   def update_status
     authorize @job, :update_status?
 
-    requested_status = params[:status]
-    @job.status = requested_status == "invoiced" ? :completed : requested_status
+    requested_status = params[:status].to_s
+    # An invoice number is what makes a job invoiced, so a job cannot be moved
+    # there until one has been assigned.
+    requested_status = "completed" if requested_status == "invoiced" && @job.invoice_number.blank?
+    @job.status = requested_status if Job.statuses.key?(requested_status)
     if @job.save
       respond_to do |format|
         format.turbo_stream do
@@ -142,8 +145,8 @@ class JobsController < ApplicationController
   def close
     authorize @job, :close?
 
-    if @job.completed?
-      redirect_back(fallback_location: @job, notice: "Job is already completed.")
+    if @job.completed? || @job.invoiced?
+      redirect_back(fallback_location: @job, notice: "Job is already #{@job.display_status.downcase}.")
       return
     end
 
@@ -153,9 +156,10 @@ class JobsController < ApplicationController
       return
     end
 
-    @job.status = :completed
+    # A job that already carries an invoice is Invoiced, not Completed.
+    @job.status = @job.invoice_number.present? ? :invoiced : :completed
     if @job.save
-      redirect_back(fallback_location: @job, notice: "Job was closed and marked as invoiced.")
+      redirect_back(fallback_location: @job, notice: "Job was closed and marked as #{@job.display_status.downcase}.")
     else
       redirect_back(fallback_location: @job, alert: @job.errors.full_messages.join(", "))
     end

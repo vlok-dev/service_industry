@@ -6,19 +6,23 @@ class Job < ApplicationRecord
   has_many :claims, dependent: :destroy
   has_many :digital_job_cards, dependent: :destroy
 
-  enum :status, { pending: 0, scheduled: 1, in_progress: 2, completed: 3, cancelled: 4 }
+  # invoiced is its own status rather than a flag on completed, so a job is
+  # never both. Values are the stored integers; invoiced: 5 keeps cancelled: 4
+  # stable. Key order drives the status dropdown.
+  enum :status, { pending: 0, scheduled: 1, in_progress: 2, completed: 3, invoiced: 5, cancelled: 4 }
   enum :priority, { maintenance: 0, project: 1 }
 
   validates :customer_name, :address, :description, :status, :priority, :user, presence: true
   validates :job_number, uniqueness: { allow_blank: true }
+  validate :status_matches_invoice
   validates :scheduled_end_date,
             comparison: { greater_than_or_equal_to: :scheduled_date },
             if: -> { scheduled_date.present? && scheduled_end_date.present? }
 
   before_validation :assign_job_number, on: :create
   before_validation :populate_from_client, if: -> { client_id_changed? && client_id.present? }
-  before_save :set_completed_at_on_completion
-  before_save :sync_status_with_invoice
+  before_validation :sync_status_with_invoice
+  before_save :set_completed_at
   scope :search, ->(query) {
     return all if query.blank?
     sanitized = "%#{ActiveRecord::Base.sanitize_sql_like(query.to_s.strip)}%"
@@ -36,8 +40,9 @@ class Job < ApplicationRecord
       date: date
     )
   }
-  scope :outstanding, -> { where.missing(:purchase_orders).where(status: [:completed]).where("invoice_number IS NULL OR invoice_number = ''") }
-  scope :invoiced, -> { completed.where("invoice_number IS NOT NULL AND invoice_number <> ''") }
+  # A job with no purchase order that is finished but not yet invoiced. Invoiced
+  # jobs carry their own status, so they drop out of this scope automatically.
+  scope :outstanding, -> { where.missing(:purchase_orders).where(status: :completed) }
 
   def self.next_job_number
     last_job = Job.order(:id).last
@@ -45,20 +50,12 @@ class Job < ApplicationRecord
     "JOB-#{next_num.to_s.rjust(5, '0')}"
   end
 
-  def completed_with_invoice?
-    invoiced?
-  end
-
-  def invoiced?
-    completed? && invoice_number.present?
-  end
-
   def display_status
-    invoiced? ? "Invoiced" : status.humanize
+    status.humanize
   end
 
   def display_status_key
-    invoiced? ? "invoiced" : status.to_s
+    status.to_s
   end
 
   def costed?
@@ -80,27 +77,36 @@ class Job < ApplicationRecord
     self.job_number = Job.next_job_number if job_number.blank?
   end
 
-  def set_completed_at_on_completion
-    if status_changed? && completed?
-      self.completed_at = Time.current
-    elsif status_changed? && !completed?
+  # The invoice number decides whether a job is Completed or Invoiced, so the
+  # two can never disagree no matter which path set the status.
+  def status_matches_invoice
+    if invoice_number.present? && !invoiced?
+      errors.add(:base, "This job has invoice number #{invoice_number}, so its status must be Invoiced.")
+    elsif invoice_number.blank? && invoiced?
+      errors.add(:base, "An invoice number is required before a job can be Invoiced.")
+    end
+  end
+
+  def set_completed_at
+    return unless status_changed?
+
+    if status.in?(%w[completed invoiced])
+      # Keep the original timestamp when completed simply becomes invoiced.
+      self.completed_at ||= Time.current
+    else
       self.completed_at = nil
     end
   end
 
+  # The invoice number is what makes a job invoiced, so the two never disagree.
   def sync_status_with_invoice
     return unless invoice_number_changed?
-    
-    if invoice_number.present? && !completed?
-      # Invoice added - mark as completed (invoiced)
+
+    if invoice_number.present?
+      self.status = :invoiced
+    elsif invoiced?
+      # Invoice withdrawn - the work is still done, so it goes back to completed.
       self.status = :completed
-      self.completed_at = Time.current
-    elsif invoice_number.blank? && completed? && invoice_number_was.present?
-      # Invoice removed - revert to previous status if it was "invoiced" state
-      # We need to determine what the previous status was before it became completed
-      # For now, revert to scheduled as a sensible default for jobs that were invoiced
-      self.status = :scheduled
-      self.completed_at = nil
     end
   end
 

@@ -1,4 +1,4 @@
-class DashboardController < ApplicationController
+﻿class DashboardController < ApplicationController
   def index
     @jobs = policy_scope(Job)
     @search_query = params[:q].to_s.strip

@@ -11,15 +11,8 @@
       }
       status_key = job.display_status_key
       colors = badge_colors[status_key] || { bg: "#fef3c7", fg: "#92400e" }
-      status_options = Job.statuses.keys.flat_map do |status|
-        if status == "completed" && job.invoiced?
-          [
-            ["Invoiced", "invoiced", { style: "background: #{badge_colors["invoiced"][:bg]}; color: #{badge_colors["invoiced"][:fg]}; font-weight: 600;" }],
-            ["Completed", status, { style: "background: #{badge_colors[status][:bg]}; color: #{badge_colors[status][:fg]}; font-weight: 600;" }]
-          ]
-        else
-          [[status.humanize, status, { style: "background: #{badge_colors[status][:bg]}; color: #{badge_colors[status][:fg]}; font-weight: 600;" }]]
-        end
+      status_options = Job.statuses.keys.map do |status|
+        [status.humanize, status, { style: "background: #{badge_colors[status][:bg]}; color: #{badge_colors[status][:fg]}; font-weight: 600;" }]
       end
     %>
     <%= form_with url: update_status_job_path(job), method: :patch, style: "display: inline;" do |f| %>
