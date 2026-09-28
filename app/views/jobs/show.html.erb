@@ -251,40 +251,38 @@ end %>
   </div>
 </div>
 
-<% if @job.digital_job_cards.any? %>
+<% extras = @job.digital_job_cards.order(date: :desc).includes(:user, :materials) %>
+<% if extras.any? %>
 <div class="section-card">
   <header>
     <span>Extras (Extra Work)</span>
-    <% if @job.digital_job_cards.exists? %>
     <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">
-      Total: R <%= number_with_precision(@job.digital_job_cards.sum { |djc| djc.materials.sum(&:total_price) }, precision: 2) %>
+      Materials: <%= format_currency(extras.sum(&:materials_total)) %> &middot;
+      Labour: <%= format_currency(extras.sum(&:labor_total)) %> &middot;
+      Total: <%= format_currency(extras.sum(&:grand_total)) %>
     </span>
-    <% end %>
   </header>
   <div class="body">
-    <% if @job.digital_job_cards.any? %>
       <div class="modern-table" style="border: none; box-shadow: none;">
         <table>
           <thead>
             <tr>
               <th>Date</th>
               <th>Description</th>
-              <th>Plumber</th>
-              <th>Materials Total</th>
-              <th>Labour Total</th>
-              <th>Grand Total (Excl. VAT)</th>
+              <th>Materials Cost</th>
+              <th>Labour Cost</th>
+              <th>Total (Excl. VAT)</th>
               <th style="text-align: left;">Action</th>
             </tr>
           </thead>
           <tbody>
-            <% @job.digital_job_cards.order(date: :desc).each do |djc| %>
+            <% extras.each do |djc| %>
               <tr>
                 <td><%= djc.date&.strftime("%d %b %Y") %></td>
                 <td><%= djc.description.truncate(60) %></td>
-                <td><%= djc.user&.name || "—" %></td>
-                <td>R <%= number_with_precision(djc.materials.where(is_labor: false).sum(&:total_price), precision: 2) %></td>
-                <td>R <%= number_with_precision(djc.materials.where(is_labor: true).sum(&:total_price), precision: 2) %></td>
-                <td><strong>R <%= number_with_precision(djc.materials.sum(&:total_price), precision: 2) %></strong></td>
+                <td><%= format_currency(djc.materials_total) %></td>
+                <td><%= format_currency(djc.labor_total) %></td>
+                <td><strong><%= format_currency(djc.grand_total) %></strong></td>
                 <td style="text-align: right; white-space: nowrap;">
                   <%= link_to digital_job_card_path(djc), class: "btn-icon btn-icon-primary", title: "View" do %>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
@@ -303,9 +301,6 @@ end %>
           </tbody>
         </table>
       </div>
-    <% else %>
-      <div class="empty-state">No extra work recorded for this job yet.</div>
-    <% end %>
   </div>
 </div>
 <% end %>

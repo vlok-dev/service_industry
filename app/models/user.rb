@@ -6,18 +6,42 @@ class User < ApplicationRecord
 
   enum :role, { super_admin: 0, scheduler: 1, reporter: 2, plumber: 3, admin: 4, accountant: 5, project_manager: 6 }
 
+  # Anybody can pick up a second role for themselves, but the two roles that
+  # hand out power stay with admins so nobody can promote themselves.
+  ADMIN_ONLY_ROLES = %w[admin super_admin].freeze
+
+  def self.self_serviceable_roles
+    roles.keys - ADMIN_ONLY_ROLES
+  end
+
+  belongs_to :person, inverse_of: :profiles
+
   has_many :assigned_jobs, class_name: "Job", foreign_key: :assigned_to_id, dependent: :nullify
   has_many :jobs, dependent: :nullify
   has_many :reports, dependent: :destroy
   has_many :digital_job_cards, dependent: :destroy
 
-  before_validation :normalize_email
+  before_validation :normalize_email, :ensure_person
 
   validates :email, uniqueness: { allow_nil: true }, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
+  validates :email, presence: true, if: :secondary_profile?
   validates :name, presence: true
+  validate :role_not_already_held_by_person
 
   def email_required?
     false
+  end
+
+  # The other logins belonging to the same human. Used to let a user move
+  # between their roles without an admin in the middle.
+  def sibling_profiles
+    return [] if person.blank?
+
+    person.profiles.where.not(id: id).to_a
+  end
+
+  def primary?
+    person.present? && person.primary_profile&.id == id
   end
 
   def dismissed_today?(entry_id)
@@ -49,5 +73,29 @@ class User < ApplicationRecord
 
   def normalize_email
     self.email = nil if email.blank?
+  end
+
+  # A profile is one login belonging to one human. Anyone without a person yet
+  # gets one, so single-role accounts behave exactly as they did before.
+  def ensure_person
+    return if person.present?
+
+    self.person = Person.new(name: name.presence || email.presence || "Unknown", phone_number: phone_number)
+  end
+
+  # A second role means a second login, and every login needs its own address
+  # and password. A lone profile may still be created without an email.
+  def secondary_profile?
+    return false if person.blank? || !person.persisted?
+
+    person.profiles.where.not(id: id).exists?
+  end
+
+  def role_not_already_held_by_person
+    return if person.blank? || !person.persisted? || role.blank?
+
+    return unless person.profiles.where(role: role).where.not(id: id).exists?
+
+    errors.add(:role, "is already assigned to this person")
   end
 end

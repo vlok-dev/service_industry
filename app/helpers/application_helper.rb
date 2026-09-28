@@ -36,6 +36,10 @@ module ApplicationHelper
     )
   end
 
+  def format_currency(amount)
+    "R #{number_with_precision(amount.to_f, precision: 2, delimiter: ',')}"
+  end
+
   private
 
   def arrow_icon(name)

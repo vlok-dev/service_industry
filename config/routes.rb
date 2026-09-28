@@ -75,6 +75,12 @@ Rails.application.routes.draw do
   get "/calendar/previous" => "calendars#previous_date", as: :calendar_previous
   get "/calendar/next" => "calendars#next_date", as: :calendar_next
 
+  # A person can pick up an extra role for themselves. Each role is its own
+  # login, so the new one needs its own email and password.
+  get "/account/roles/new" => "account/roles#new", as: :new_account_role
+  post "/account/roles" => "account/roles#create", as: :account_roles
+  delete "/account/roles/:id" => "account/roles#destroy", as: :account_role
+
   resources :reports, only: [:new, :create]
 
   namespace :admin do

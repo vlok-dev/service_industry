@@ -18,23 +18,9 @@ class DigitalJobCardsController < ApplicationController
 
   def create
     @digital_job_card = current_user.digital_job_cards.build(digital_job_card_params)
-    
-    # Process materials to calculate totals
-    if @digital_job_card.materials.any?
-      @digital_job_card.materials.each do |material|
-        if material.inventory_item_id.present? && material.unit_price.zero?
-          inventory_item = InventoryItem.find(material.inventory_item_id)
-          material.unit_price = inventory_item.list_price || inventory_item.unit_price || inventory_item.cost_price || 0
-          material.material_name = inventory_item.name if material.material_name.blank?
-        end
-        # Apply 30% markup if not set
-        material.markup = 30 if material.markup.zero? && material.unit_price > 0 && !material.is_labor?
-        material.total_price = material.calculated_total
-      end
-    end
 
     if @digital_job_card.save
-      redirect_to digital_job_cards_path, notice: "Digital Job Card created successfully."
+      redirect_to digital_job_cards_path, notice: "Digital job card created successfully."
     else
       @digital_job_cards = current_user.digital_job_cards.recent
       render :index, status: :unprocessable_entity
@@ -63,12 +49,12 @@ class DigitalJobCardsController < ApplicationController
   end
 
   def print
-    @materials = @digital_job_card.materials.where(is_labor: false)
-    @labor_items = @digital_job_card.materials.where(is_labor: true)
-    @total_materials = @materials.sum(&:total_price)
-    @total_labor = @labor_items.sum(&:total_price)
-    @grand_total = @total_materials + @total_labor
-    
+    @materials = @digital_job_card.materials.material_lines
+    @labor_items = @digital_job_card.materials.labor_lines
+    @total_materials = @digital_job_card.materials_total
+    @total_labor = @digital_job_card.labor_total
+    @grand_total = @digital_job_card.grand_total
+
     render layout: 'print'
   end
 
@@ -89,6 +75,6 @@ class DigitalJobCardsController < ApplicationController
   end
 
   def digital_job_card_params
-    params.require(:digital_job_card).permit(:client_id, :client_name, :address, :date, :time_start, :time_finish, :description, materials_attributes: [:id, :inventory_item_id, :material_name, :quantity, :unit_price, :markup, :labor_rate, :is_labor, :_destroy])
+    params.require(:digital_job_card).permit(:client_id, :client_name, :address, :date, :time_start, :time_finish, :description, materials_attributes: [:id, :inventory_item_id, :material_name, :quantity, :unit_price, :markup, :labor_rate, :hours_worked, :is_labor, :_destroy])
   end
 end

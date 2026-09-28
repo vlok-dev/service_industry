@@ -4,10 +4,12 @@ one:
   name: Michael
   email: michael@example.com
   role: scheduler
+  person: one
   encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
 
 two:
   name: Michelle
   email: michelle@example.com
   role: super_admin
+  person: two
   encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>

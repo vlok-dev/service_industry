@@ -808,6 +808,71 @@ nav .brand {
   border-color: #e5e7eb;
 }
 
+.sidebar-role-switch {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.sidebar-role-switch-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+  margin-bottom: 0.35rem;
+}
+
+.sidebar-role-switch form {
+  margin: 0 0 0.25rem 0;
+}
+
+.sidebar-role-switch-btn {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  background: #f3f4f6;
+  color: #111827;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+  font-family: inherit;
+  text-align: center;
+}
+
+.sidebar-role-switch-btn:hover {
+  background: #065f46;
+  color: white;
+  border-color: #065f46;
+}
+
+.sidebar.collapsed .sidebar-role-switch {
+  display: none;
+}
+
+.sidebar-role-add-link {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  background: #065f46;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid #065f46;
+  transition: all 0.2s;
+}
+
+.sidebar-role-add-link:hover {
+  background: #064e3b;
+  border-color: #064e3b;
+}
+
 .main-content {
   flex: 1;
   margin-left: 260px;

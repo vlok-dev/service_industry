@@ -1,6 +1,14 @@
 <p><%= link_to "Back to Admin Dashboard", admin_root_path %></p>
 
-<h1>Edit User</h1>
+<h1>Edit Profile</h1>
+
+<% if @person && @person.multi_role? %>
+  <p>
+    Part of <strong><%= @person.name %></strong>, who holds
+    <strong><%= @person.role_list.join(", ") %></strong>.
+    This profile signs in as <strong><%= @user.role&.humanize %></strong>.
+  </p>
+<% end %>
 
 <%= form_with model: [:admin, @user], local: true do |f| %>
   <% if @user.errors.any? %>
@@ -20,13 +28,13 @@
   </div>
 
   <div style="margin-bottom: 1rem;">
-    <%= f.label :email %><br>
-    <%= f.email_field :email, placeholder: "Optional - leave blank if not needed" %>
+    <%= f.label :email, @person&.multi_role? ? "Login email for this role" : "Email" %><br>
+    <%= f.email_field :email, placeholder: @person&.multi_role? ? "Required - each role signs in with its own email" : "Optional - leave blank if not needed" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :role %><br>
-    <%= f.select :role, User.roles.keys.map { |r| [r.humanize, r] }, { include_blank: true }, { required: true } %>
+    <%= f.select :role, @available_roles.map { |r| [r.humanize, r] }, { include_blank: true }, { required: true } %>
   </div>
 
   <div style="margin-bottom: 1rem;">
@@ -45,6 +53,18 @@
   </div>
 
   <div style="margin-bottom: 1rem;">
-    <%= f.submit "Update User", class: "btn" %>
+    <%= f.submit "Update Profile", class: "btn" %>
   </div>
+<% end %>
+
+<% if @person && @person.multi_role? %>
+  <h2>Other logins for <%= @person.name %></h2>
+  <ul>
+    <% @person.profiles.where.not(id: @user.id).each do |profile| %>
+      <li>
+        <%= profile.role&.humanize %> &mdash; <%= profile.email || "No login email" %>
+        (<%= link_to "Edit", edit_admin_user_path(profile) %>)
+      </li>
+    <% end %>
+  </ul>
 <% end %>

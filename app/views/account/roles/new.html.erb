@@ -1,0 +1,61 @@
+<h1>Add a role</h1>
+
+<p>
+  You are signed in as <strong><%= current_user.role.humanize %></strong>.
+  Adding a role creates a separate login with its own email and password, and
+  gives you that role's dashboard.
+</p>
+
+<p>
+  Your roles so far:
+  <strong><%= @person.role_list.join(", ") %></strong>
+</p>
+
+<% if @available_roles.empty? %>
+  <p>You already hold every role that can be added from here. An admin can add the rest.</p>
+  <p><%= link_to "Back to dashboard", dashboard_path %></p>
+<% else %>
+  <%= form_with model: @user, url: account_roles_path, local: true do |f| %>
+    <% if @user.errors.any? %>
+      <div class="alert">
+        <h2><%= pluralize(@user.errors.count, "error") %> stopped this from being saved:</h2>
+        <ul>
+          <% @user.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :role %><br>
+      <%= f.select :role, @available_roles.map { |r| [r.humanize, r] }, { include_blank: true }, { required: true } %>
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :email, "Login email for the new role" %><br>
+      <%= f.email_field :email, required: true, placeholder: "you@company.com" %>
+      <p style="font-size: 0.8rem; color: #6b7280;">Must be different from the email you use for your other role.</p>
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :password, "Password for the new role" %><br>
+      <%= f.password_field :password, required: true %>
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :password_confirmation %><br>
+      <%= f.password_field :password_confirmation, required: true %>
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :phone_number, "WhatsApp Number" %><br>
+      <%= f.text_field :phone_number, value: @user.phone_number, placeholder: "+27821234567" %>
+      <p style="font-size: 0.8rem; color: #6b7280;">Optional. Can be the same number you use for your other role.</p>
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+      <%= f.submit "Add Role", class: "btn" %>
+    </div>
+  <% end %>
+<% end %>

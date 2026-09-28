@@ -1,4 +1,4 @@
-<div class="page-header">
+﻿<div class="page-header">
   <h1>Digital Job Cards</h1>
   <p>Manage your digital job cards</p>
 </div>
@@ -25,9 +25,9 @@
                <th>Time Start</th>
                <th>Time Finish</th>
                <th>Description</th>
-               <th>Materials Total</th>
-               <th>Labour Total</th>
-               <th>Grand Total</th>
+               <th>Materials Cost</th>
+               <th>Labour Cost</th>
+               <th>Total (Excl. VAT)</th>
                <th>Created</th>
                <th>Actions</th>
             </tr>
@@ -41,9 +41,9 @@
                 <td><%= card.time_start&.strftime("%I:%M %p") %></td>
                 <td><%= card.time_finish&.strftime("%I:%M %p") %></td>
                 <td><%= card.description.truncate(60) %></td>
-                <td>R <%= number_with_precision(card.materials.where(is_labor: false).sum(&:total_price), precision: 2) %></td>
-                <td>R <%= number_with_precision(card.materials.where(is_labor: true).sum(&:total_price), precision: 2) %></td>
-                <td><strong>R <%= number_with_precision(card.materials.sum(&:total_price), precision: 2) %></strong></td>
+                <td><%= format_currency(card.materials_total) %></td>
+                <td><%= format_currency(card.labor_total) %></td>
+                <td><strong><%= format_currency(card.grand_total) %></strong></td>
                 <td><%= card.created_at.strftime("%d %b %Y %I:%M %p") %></td>
                  <td>
                     <div class="actions-icon">

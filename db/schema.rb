@@ -10,15 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_24_181333) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_28_190500) do
   create_table "addresses", force: :cascade do |t|
     t.text "address"
     t.integer "client_id", null: false
-    t.datetime "created_at", null: false
+    t.datetime "created_at", precision: nil, null: false
     t.boolean "is_default", default: false
-    t.string "label", default: "Other"
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_addresses_on_client_id"
+    t.string "label", limit: 255, default: "Other"
+    t.datetime "updated_at", precision: nil, null: false
   end
 
   create_table "claims", force: :cascade do |t|
@@ -56,6 +55,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_24_181333) do
   create_table "digital_job_card_materials", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "digital_job_card_id", null: false
+    t.decimal "hours_worked", default: "1.0", null: false
     t.integer "inventory_item_id"
     t.boolean "is_labor", default: false
     t.decimal "labor_rate", precision: 10, scale: 2, default: "0.0"
@@ -137,6 +137,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_24_181333) do
     t.index ["client_id"], name: "index_jobs_on_client_id"
     t.index ["is_project"], name: "index_jobs_on_is_project"
     t.index ["user_id"], name: "index_jobs_on_user_id"
+  end
+
+  create_table "maintenance_subscriptions", force: :cascade do |t|
+    t.integer "client_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "created_by_id", null: false
+    t.date "end_date"
+    t.date "next_service_date"
+    t.text "notes"
+    t.string "plan", default: "quarterly"
+    t.decimal "price", precision: 10, scale: 2
+    t.date "start_date", null: false
+    t.string "status", default: "active"
+    t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_maintenance_subscriptions_on_client_id"
+    t.index ["created_by_id"], name: "index_maintenance_subscriptions_on_created_by_id"
+    t.index ["next_service_date"], name: "index_maintenance_subscriptions_on_next_service_date"
+    t.index ["plan"], name: "index_maintenance_subscriptions_on_plan"
+    t.index ["status"], name: "index_maintenance_subscriptions_on_status"
+  end
+
+  create_table "people", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "phone_number"
+    t.datetime "updated_at", null: false
   end
 
   create_table "planner_entries", force: :cascade do |t|
@@ -242,6 +268,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_24_181333) do
     t.string "encrypted_password", default: "", null: false
     t.datetime "last_logged_in_at"
     t.string "name"
+    t.integer "person_id", null: false
     t.string "phone_number"
     t.datetime "remember_created_at"
     t.datetime "reminder_dismissed_at"
@@ -251,6 +278,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_24_181333) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["last_logged_in_at"], name: "index_users_on_last_logged_in_at"
+    t.index ["person_id", "role"], name: "index_users_on_person_id_and_role", unique: true
+    t.index ["person_id"], name: "index_users_on_person_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
@@ -264,6 +293,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_24_181333) do
   add_foreign_key "jobs", "clients"
   add_foreign_key "jobs", "users"
   add_foreign_key "jobs", "users", column: "assigned_to_id"
+  add_foreign_key "maintenance_subscriptions", "clients"
+  add_foreign_key "maintenance_subscriptions", "users", column: "created_by_id"
   add_foreign_key "planner_entries", "users", column: "assigned_to_id"
   add_foreign_key "planner_entries", "users", column: "created_by_id"
   add_foreign_key "purchase_order_items", "inventory_items"
@@ -272,4 +303,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_24_181333) do
   add_foreign_key "purchase_orders", "suppliers"
   add_foreign_key "purchase_orders", "users", column: "created_by_id"
   add_foreign_key "reports", "users"
+  add_foreign_key "users", "people"
 end

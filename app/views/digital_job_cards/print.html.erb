@@ -81,6 +81,7 @@
     <thead>
       <tr>
         <th>Description</th>
+        <th>Hours</th>
         <th>Rate</th>
         <th>Total</th>
       </tr>
@@ -89,6 +90,7 @@
       <% @labor_items.each do |l| %>
         <tr>
           <td><%= l.material_name %></td>
+          <td><%= number_with_precision(l.hours_worked, precision: 2, strip_insignificant_zeros: true) %></td>
           <td>R <%= number_with_precision(l.labor_rate, precision: 2) %></td>
           <td>R <%= number_with_precision(l.total_price, precision: 2) %></td>
         </tr>
@@ -101,15 +103,15 @@
 
 <div class="totals">
   <div class="total-row">
-    <span>Total Materials:</span>
+    <span>Materials Cost:</span>
     <span>R <%= number_with_precision(@total_materials, precision: 2) %></span>
   </div>
   <div class="total-row">
-    <span>Total Labour:</span>
+    <span>Labour Cost:</span>
     <span>R <%= number_with_precision(@total_labor, precision: 2) %></span>
   </div>
   <div class="total-row grand">
-    <span>Grand Total (Excl. VAT):</span>
+    <span>Total (Excl. VAT):</span>
     <span>R <%= number_with_precision(@grand_total, precision: 2) %></span>
   </div>
 </div>

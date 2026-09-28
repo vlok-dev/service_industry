@@ -1,8 +1,23 @@
 <p><%= link_to "Back to Admin Dashboard", admin_root_path %></p>
 
-<h1>New User</h1>
+<h1><%= @person ? "Add Role for #{@person.name}" : "New Person" %></h1>
+
+<% if @person %>
+  <p>
+    This adds a second login for an existing person. They keep their current
+    login and gain a separate one for this role, with its own email and password.
+  </p>
+  <p>
+    Current roles:
+    <strong><%= @person.role_list.join(", ").presence || "none" %></strong>
+  </p>
+<% end %>
 
 <%= form_with model: [:admin, @user], local: true do |f| %>
+  <% if @person %>
+    <%= hidden_field_tag "user[person_id]", @person.id %>
+  <% end %>
+
   <% if @user.errors.any? %>
     <div class="alert">
       <h2><%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:</h2>
@@ -14,24 +29,29 @@
     </div>
   <% end %>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :name %><br>
-    <%= f.text_field :name, required: true %>
-  </div>
+  <% unless @person %>
+    <div style="margin-bottom: 1rem;">
+      <%= f.label :name %><br>
+      <%= f.text_field :name, required: true %>
+    </div>
+  <% end %>
 
   <div style="margin-bottom: 1rem;">
-    <%= f.label :email %><br>
-    <%= f.email_field :email, placeholder: "Optional - leave blank if not needed" %>
+    <%= f.label :email, @person ? "Login email for this role" : "Email" %><br>
+    <%= f.email_field :email, required: @person.present?, placeholder: @person ? "Required - each role signs in with its own email" : "Optional - leave blank if not needed" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :role %><br>
-    <%= f.select :role, User.roles.keys.map { |r| [r.humanize, r] }, { include_blank: true }, { required: true } %>
+    <%= f.select :role, @available_roles.map { |r| [r.humanize, r] }, { include_blank: true }, { required: true } %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :phone_number, "WhatsApp Number" %><br>
-    <%= f.text_field :phone_number, placeholder: "+27821234567" %>
+    <%= f.text_field :phone_number, value: @person&.phone_number || @user.phone_number, placeholder: "+27821234567" %>
+    <% if @person %>
+      <p style="font-size: 0.8rem; color: #6b7280;">Optional. Can be the same number this person already uses on another role.</p>
+    <% end %>
   </div>
 
   <div style="margin-bottom: 1rem;">
@@ -45,6 +65,6 @@
   </div>
 
   <div style="margin-bottom: 1rem;">
-    <%= f.submit "Create User", class: "btn" %>
+    <%= f.submit @person ? "Add Role" : "Create Person", class: "btn" %>
   </div>
 <% end %>

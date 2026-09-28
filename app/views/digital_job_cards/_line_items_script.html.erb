@@ -1,0 +1,252 @@
+﻿<%# Shared "Add Material / Add Labour Line Item" behaviour for the new digital job card
+    form and the add extras form. Both pass the same locals so the line items,
+    totals and grand total are identical in each place. %>
+<script>
+  (function() {
+    var inventoryItems = <%= raw inventory_items.map { |item| [item.id, { code: item.code, name: item.name, list_price: (item.list_price || item.unit_price || item.cost_price || 0).to_f }] }.to_h.to_json %>;
+    var materialIndex = <%= initial_material_index %>;
+    var formPrefix = 'digital_job_card[materials_attributes]';
+
+    // Scope every lookup to the container this partial was rendered into so a
+    // page that embeds more than one of these forms cannot cross-contaminate.
+    var root = document.currentScript ? (document.currentScript.parentElement || document) : document;
+
+    function formatCurrency(val) {
+      return 'R ' + (Math.round(val * 100) / 100).toFixed(2);
+    }
+
+    function lineTotal(row) {
+      var quantity = num(row, '.qty-input');
+      var unitPrice = num(row, '.unit-price-input');
+      var markup = num(row, '.markup-input');
+      var hours = num(row, '.hours-input');
+      var laborRate = num(row, '.labor-rate-input');
+
+      if (isLabor(row)) {
+        return laborRate * hours;
+      }
+      return unitPrice * quantity * (1 + markup / 100);
+    }
+
+    function isLabor(row) {
+      var input = row.querySelector('input[name$="[is_labor]"]');
+      return input ? input.value === 'true' : false;
+    }
+
+    function num(row, selector) {
+      var input = row.querySelector(selector);
+      return input ? parseFloat(input.value) || 0 : 0;
+    }
+
+    function recalculateTotals() {
+      var materialsTotal = 0;
+      var laborTotal = 0;
+
+      root.querySelectorAll('.material-row').forEach(function(row) {
+        var destroyInput = row.querySelector('input[name$="[_destroy]"]');
+        if (destroyInput && destroyInput.value === 'true') return;
+
+        var total = lineTotal(row);
+        var totalEl = row.querySelector('.line-total');
+        if (totalEl) totalEl.textContent = formatCurrency(total);
+
+        if (isLabor(row)) {
+          laborTotal += total;
+        } else {
+          materialsTotal += total;
+        }
+      });
+
+      setText('total-materials', materialsTotal);
+      setText('total-labor', laborTotal);
+      setText('grand-total', materialsTotal + laborTotal);
+    }
+
+    function setText(id, value) {
+      var el = root.querySelector('#' + id);
+      if (el) el.textContent = formatCurrency(value);
+    }
+
+    function field(width, html) {
+      return '<div class="field" style="width: ' + width + 'px; margin-bottom: 0;">' + html + '</div>';
+    }
+
+    function addMaterialFields(isLabor) {
+      var container = root.querySelector('#materials-container');
+      if (!container) return;
+      var newIndex = materialIndex++;
+      var name = formPrefix + '[' + newIndex + ']';
+
+      var html = '<div class="material-row" data-index="' + newIndex + '" style="display: flex; gap: 0.5rem; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap;">' +
+        '<input type="hidden" name="' + name + '[_destroy]" value="false">' +
+        '<input type="hidden" name="' + name + '[is_labor]" value="' + (isLabor ? 'true' : 'false') + '">' +
+        field(200, '<label>' + (isLabor ? 'Labour Description' : 'Material Name') + '</label>' +
+          '<input type="text" name="' + name + '[material_name]" placeholder="' + (isLabor ? 'e.g. Plumber hours' : 'e.g. half inch elbow') + '" required>');
+
+      if (isLabor) {
+        html += field(80, '<label>Hours</label>' +
+          '<input type="number" name="' + name + '[hours_worked]" step="0.25" min="0" value="1" class="hours-input" style="width: 100%;">');
+        html += field(100, '<label>Labour Rate</label>' +
+          '<input type="number" name="' + name + '[labor_rate]" step="0.01" min="0" value="0" class="labor-rate-input" style="width: 100%;">');
+      } else {
+        html += '<div class="field" style="width: 200px; margin-bottom: 0;">' +
+          '<label>Inventory Item</label>' +
+          '<div class="inventory-search-wrapper" style="position: relative;">' +
+            '<input type="text" class="inventory-search-input" autocomplete="off" placeholder="Search by code or name..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--radius-sm);">' +
+            '<input type="hidden" name="' + name + '[inventory_item_id]" data-inventory-id-target="true" value="">' +
+            '<div class="inventory-dropdown-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: var(--radius-sm); max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: var(--shadow-md);"></div>' +
+          '</div>' +
+        '</div>';
+        html += field(80, '<label>Qty</label>' +
+          '<input type="number" name="' + name + '[quantity]" step="0.01" min="0" value="1" class="qty-input" style="width: 100%;">');
+        html += field(100, '<label>Unit Price</label>' +
+          '<input type="number" name="' + name + '[unit_price]" step="0.01" min="0" value="0" class="unit-price-input" style="width: 100%;">');
+        html += field(80, '<label>Markup %</label>' +
+          '<input type="number" name="' + name + '[markup]" step="1" min="0" value="30" class="markup-input" style="width: 100%;">');
+      }
+
+      html += field(100, '<label>Total</label>' +
+        '<div class="line-total" style="padding: 0.5rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-weight: 600; min-height: 38px; display: flex; align-items: center;">R 0.00</div>');
+
+      html += '<button type="button" class="btn btn-danger btn-sm remove-material" style="height: 38px; padding: 0 0.75rem;" title="Remove">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
+      '</button>';
+
+      container.insertAdjacentHTML('beforeend', html + '</div>');
+
+      var newRow = container.querySelector('.material-row[data-index="' + newIndex + '"]');
+      attachRemoveListener(newRow);
+      attachInputListeners(newRow);
+      setupInventorySearch(newRow);
+      recalculateTotals();
+    }
+
+    function setupInventorySearch(row) {
+      var searchInput = row.querySelector('.inventory-search-input');
+      var hiddenInput = row.querySelector('input[data-inventory-id-target]');
+      var resultsDiv = row.querySelector('.inventory-dropdown-results');
+      if (!searchInput || !hiddenInput || !resultsDiv) return;
+
+      function closeResults() {
+        resultsDiv.style.display = 'none';
+      }
+
+      function selectItem(id, code, name, price) {
+        hiddenInput.value = id;
+        searchInput.value = name;
+        closeResults();
+
+        var nameInput = row.querySelector('input[name$="[material_name]"]');
+        var unitPriceInput = row.querySelector('.unit-price-input');
+        var markupInput = row.querySelector('.markup-input');
+
+        if (nameInput && !nameInput.value) nameInput.value = name;
+        if (unitPriceInput && price > 0) unitPriceInput.value = price.toFixed(2);
+        if (markupInput && price > 0 && !markupInput.value) markupInput.value = '30';
+
+        recalculateTotals();
+      }
+
+      function renderResults(filter) {
+        var term = (filter || '').toLowerCase().trim();
+        var html = '';
+        var count = 0;
+
+        Object.keys(inventoryItems).forEach(function(id) {
+          var item = inventoryItems[id];
+          var price = parseFloat(item.list_price) || 0;
+          var searchText = (item.code + ' ' + item.name).toLowerCase();
+          if (term && searchText.indexOf(term) === -1) return;
+          count++;
+          html += '<div class="inventory-result-item" data-id="' + id + '" data-price="' + price + '" data-code="' + item.code + '" data-name="' + item.name.replace(/"/g, '&quot;') + '" style="padding: 0.5rem 0.75rem; cursor: pointer; border-bottom: 1px solid var(--border-light);">' +
+            '<div style="font-weight: 600; font-size: 0.85rem;">' + item.code + ' - ' + item.name + '</div>' +
+            '<div style="font-size: 0.75rem; color: var(--text-muted);">R ' + price.toFixed(2) + '</div>' +
+          '</div>';
+        });
+
+        if (!count) {
+          html = '<div style="padding: 0.75rem; color: var(--text-muted); font-size: 0.85rem;">No items found</div>';
+        }
+
+        resultsDiv.innerHTML = html;
+        resultsDiv.style.display = count > 0 ? 'block' : 'none';
+
+        resultsDiv.querySelectorAll('.inventory-result-item').forEach(function(option) {
+          option.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            selectItem(
+              this.getAttribute('data-id'),
+              this.getAttribute('data-code'),
+              this.getAttribute('data-name'),
+              parseFloat(this.getAttribute('data-price')) || 0
+            );
+          });
+        });
+      }
+
+      searchInput.addEventListener('input', function() { renderResults(this.value); });
+      searchInput.addEventListener('focus', function() { renderResults(this.value); });
+
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeResults();
+          this.blur();
+        } else if (e.key === 'Enter') {
+          var first = resultsDiv.querySelector('.inventory-result-item');
+          if (first) {
+            e.preventDefault();
+            first.dispatchEvent(new MouseEvent('mousedown'));
+          }
+        }
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) closeResults();
+      });
+    }
+
+    function attachInputListeners(row) {
+      row.querySelectorAll('input[type="number"]').forEach(function(input) {
+        input.addEventListener('input', recalculateTotals);
+        input.addEventListener('change', recalculateTotals);
+      });
+    }
+
+    function attachRemoveListener(row) {
+      var btn = row.querySelector('.remove-material');
+      if (!btn) return;
+      btn.onclick = function() {
+        var destroyInput = row.querySelector('input[name$="[_destroy]"]');
+        if (destroyInput) {
+          destroyInput.value = 'true';
+          row.style.display = 'none';
+        } else {
+          row.remove();
+        }
+        recalculateTotals();
+      };
+    }
+
+    function initLineItems() {
+      root.querySelectorAll('.material-row').forEach(function(row) {
+        attachRemoveListener(row);
+        attachInputListeners(row);
+        setupInventorySearch(row);
+      });
+
+      var addMaterialBtn = root.querySelector('#add-material-btn');
+      if (addMaterialBtn) addMaterialBtn.addEventListener('click', function() { addMaterialFields(false); });
+
+      var addLaborBtn = root.querySelector('#add-labor-btn');
+      if (addLaborBtn) addLaborBtn.addEventListener('click', function() { addMaterialFields(true); });
+
+      recalculateTotals();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLineItems);
+    } else {
+      initLineItems();
+    }
+  })();
+</script>

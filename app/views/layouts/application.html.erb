@@ -1337,10 +1337,15 @@
             <div class="sidebar-user">
               <div class="sidebar-user-avatar"><%= current_user.name.to_s[0].upcase %></div>
               <div class="sidebar-user-meta">
-                <div class="sidebar-user-name"><%= current_user.name %></div>
+                <div class="sidebar-user-name"><%= current_user.person&.name || current_user.name %></div>
                 <div class="sidebar-user-role"><%= current_user.role&.humanize || "User" %></div>
               </div>
             </div>
+            <% if current_user.admin? && (User.self_serviceable_roles - current_user.person.profiles.filter_map { |p| p.role.to_s }).any? %>
+              <div class="sidebar-role-switch">
+                <%= link_to "Add a role", new_account_role_path, class: "sidebar-role-add-link" %>
+              </div>
+            <% end %>
             <%= button_to destroy_user_session_path, method: :delete, class: "sidebar-logout" do %>
               <span>Logout</span>
             <% end %>

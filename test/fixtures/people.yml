@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: Michael
+  phone_number: "+27821234567"
+
+two:
+  name: Michelle
+  phone_number: "+27827654321"

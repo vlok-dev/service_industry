@@ -51,7 +51,7 @@
     <div class="section-card" style="margin-bottom: 1rem;">
       <header>Materials</header>
       <div class="body">
-        <% materials = @digital_job_card.materials.where(is_labor: false) %>
+        <% materials = @digital_job_card.material_lines %>
         <% if materials.any? %>
           <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
             <thead>
@@ -70,15 +70,15 @@
                   <td style="padding: 0.5rem;"><%= m.material_name %></td>
                   <td style="padding: 0.5rem;"><%= m.inventory_item&.code %></td>
                   <td style="text-align: right; padding: 0.5rem;"><%= number_with_precision(m.quantity, precision: 2, strip_insignificant_zeros: true) %></td>
-                  <td style="text-align: right; padding: 0.5rem;">R <%= number_with_precision(m.unit_price, precision: 2) %></td>
+                  <td style="text-align: right; padding: 0.5rem;"><%= format_currency(m.unit_price) %></td>
                   <td style="text-align: right; padding: 0.5rem;"><%= number_with_precision(m.markup, precision: 0, strip_insignificant_zeros: true) %>%</td>
-                  <td style="text-align: right; padding: 0.5rem; font-weight: 600;">R <%= number_with_precision(m.total_price, precision: 2) %></td>
+                  <td style="text-align: right; padding: 0.5rem; font-weight: 600;"><%= format_currency(m.total_price) %></td>
                 </tr>
               <% end %>
             </tbody>
           </table>
           <div style="text-align: right; margin-top: 0.5rem; font-weight: 600;">
-            Materials Total: R <%= number_with_precision(materials.sum(&:total_price), precision: 2) %>
+            Materials Cost: <%= format_currency(@digital_job_card.materials_total) %>
           </div>
         <% else %>
           <span style="color: var(--text-muted);">—</span>
@@ -89,12 +89,13 @@
     <div class="section-card" style="margin-bottom: 0;">
       <header>Labour</header>
       <div class="body">
-        <% labor_items = @digital_job_card.materials.where(is_labor: true) %>
+        <% labor_items = @digital_job_card.labor_lines %>
         <% if labor_items.any? %>
           <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
             <thead>
               <tr style="border-bottom: 1px solid var(--border);">
                 <th style="text-align: left; padding: 0.5rem;">Description</th>
+                <th style="text-align: right; padding: 0.5rem;">Hours</th>
                 <th style="text-align: right; padding: 0.5rem;">Rate</th>
                 <th style="text-align: right; padding: 0.5rem;">Total</th>
               </tr>
@@ -103,14 +104,15 @@
               <% labor_items.each do |l| %>
                 <tr style="border-bottom: 1px solid var(--border-light);">
                   <td style="padding: 0.5rem;"><%= l.material_name %></td>
-                  <td style="text-align: right; padding: 0.5rem;">R <%= number_with_precision(l.labor_rate, precision: 2) %></td>
-                  <td style="text-align: right; padding: 0.5rem; font-weight: 600;">R <%= number_with_precision(l.total_price, precision: 2) %></td>
+                  <td style="text-align: right; padding: 0.5rem;"><%= number_with_precision(l.hours_worked, precision: 2, strip_insignificant_zeros: true) %></td>
+                  <td style="text-align: right; padding: 0.5rem;"><%= format_currency(l.labor_rate) %></td>
+                  <td style="text-align: right; padding: 0.5rem; font-weight: 600;"><%= format_currency(l.total_price) %></td>
                 </tr>
               <% end %>
             </tbody>
           </table>
           <div style="text-align: right; margin-top: 0.5rem; font-weight: 600;">
-            Labour Total: R <%= number_with_precision(labor_items.sum(&:total_price), precision: 2) %>
+            Labour Cost: <%= format_currency(@digital_job_card.labor_total) %>
           </div>
         <% else %>
           <span style="color: var(--text-muted);">—</span>
@@ -119,7 +121,7 @@
     </div>
 
     <div style="margin-top: 1rem; padding: 1rem; background: var(--primary-light); border-radius: var(--radius-sm); text-align: right; font-size: 1.25rem; font-weight: 700; color: var(--primary);">
-      Grand Total (Excl. VAT): R <%= number_with_precision(@digital_job_card.materials.sum(&:total_price), precision: 2) %>
+      Total (Excl. VAT): <%= format_currency(@digital_job_card.grand_total) %>
     </div>
   </div>
   <div class="card-footer" style="padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; justify-content: flex-end;">

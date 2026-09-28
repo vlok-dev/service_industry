@@ -7,7 +7,6 @@ one:
   time_start: 2026-09-24 19:11:44
   time_finish: 2026-09-24 19:11:44
   description: MyText
-  materials_used: MyText
   user: one
 
 two:
@@ -17,5 +16,4 @@ two:
   time_start: 2026-09-24 19:11:44
   time_finish: 2026-09-24 19:11:44
   description: MyText
-  materials_used: MyText
   user: two

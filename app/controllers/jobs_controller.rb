@@ -234,20 +234,6 @@ class JobsController < ApplicationController
   def create_extras
     authorize @job, :show?
     @digital_job_card = @job.digital_job_cards.build(digital_job_card_params.merge(user: current_user))
-    
-    # Process materials to calculate totals
-    if @digital_job_card.materials.any?
-      @digital_job_card.materials.each do |material|
-        if material.inventory_item_id.present? && material.unit_price.zero?
-          inventory_item = InventoryItem.find(material.inventory_item_id)
-          material.unit_price = inventory_item.list_price || inventory_item.unit_price || inventory_item.cost_price || 0
-          material.material_name = inventory_item.name if material.material_name.blank?
-        end
-        # Apply 30% markup if not set
-        material.markup = 30 if material.markup.zero? && material.unit_price > 0
-        material.total_price = material.calculated_total
-      end
-    end
 
     if @digital_job_card.save
       redirect_to job_path(@job), notice: "Extra work added successfully."
@@ -275,7 +261,7 @@ class JobsController < ApplicationController
   def digital_job_card_params
     params.require(:digital_job_card).permit(
       :client_name, :address, :date, :time_start, :time_finish, :description,
-      materials_attributes: [:id, :inventory_item_id, :material_name, :quantity, :unit_price, :markup, :labor_rate, :is_labor, :_destroy]
+      materials_attributes: [:id, :inventory_item_id, :material_name, :quantity, :unit_price, :markup, :labor_rate, :hours_worked, :is_labor, :_destroy]
     )
   end
 
