@@ -40,9 +40,11 @@ class Job < ApplicationRecord
       date: date
     )
   }
-  # A job with no purchase order that is finished but not yet invoiced. Invoiced
-  # jobs carry their own status, so they drop out of this scope automatically.
-  scope :outstanding, -> { where.missing(:purchase_orders).where(status: :completed) }
+  # Outstanding means "the job is finished": every job whose status is
+  # completed, i.e. awaiting an invoice. This is deliberately the same set as
+  # the Completed filter so the two tabs can never disagree. Whether a job has
+  # been costed is a per-job detail, exposed by costed?, not a different list.
+  scope :outstanding, -> { where(status: :completed) }
 
   def self.next_job_number
     last_job = Job.order(:id).last

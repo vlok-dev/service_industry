@@ -173,7 +173,8 @@
     </div>
   </div>
 
-  <%= render "outstanding_jobs" %>
+  <%# No "outstanding" list here: it is now the same set as completed, and the
+      Completed Jobs table further down already renders it. %>
 
   <%= form_with url: dashboard_path, method: :get, local: true, style: "margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: center;" do |f| %>
     <%= f.text_field :q, value: @search_query, placeholder: "Search by Job Number, Address, or Invoice Number...", style: "padding: 0.625rem 0.875rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; flex: 1; max-width: 400px;" %>
