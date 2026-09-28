@@ -24,7 +24,7 @@ class DigitalJobCardPolicy < ApplicationPolicy
       case user&.role
       when "super_admin", "admin", "accountant", "scheduler"
         scope.all
-      when "reporter"
+      when "reporter", "project_manager"
         scope.where(user_id: user.id)
       else
         scope.none

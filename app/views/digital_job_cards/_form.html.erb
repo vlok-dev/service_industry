@@ -225,10 +225,16 @@
       if (destroyInput && destroyInput.value === 'true') return;
 
       var isLabor = row.querySelector('input[name$="[is_labor]"]').value === 'true';
-      var quantity = parseFloat(row.querySelector('input[name$="[quantity]"]').value) || 0;
-      var unitPrice = parseFloat(row.querySelector('input[name$="[unit_price]"]').value) || 0;
-      var markup = parseFloat(row.querySelector('input[name$="[markup]"]').value) || 0;
-      var laborRate = parseFloat(row.querySelector('input[name$="[labor_rate]"]').value) || 0;
+
+      var quantityInput = row.querySelector('input[name$="[quantity]"]');
+      var unitPriceInput = row.querySelector('input[name$="[unit_price]"]');
+      var markupInput = row.querySelector('input[name$="[markup]"]');
+      var laborRateInput = row.querySelector('input[name$="[labor_rate]"]');
+
+      var quantity = quantityInput ? parseFloat(quantityInput.value) || 0 : 0;
+      var unitPrice = unitPriceInput ? parseFloat(unitPriceInput.value) || 0 : 0;
+      var markup = markupInput ? parseFloat(markupInput.value) || 0 : 0;
+      var laborRate = laborRateInput ? parseFloat(laborRateInput.value) || 0 : 0;
 
       var total = (unitPrice * quantity * (1 + markup / 100)) + laborRate;
 
