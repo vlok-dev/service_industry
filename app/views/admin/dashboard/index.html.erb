@@ -31,6 +31,33 @@
   </div>
 </div>
 
+<div class="card" style="margin-bottom: 1.5rem;">
+  <div class="card-header">
+    <h2>Deletion Toggles</h2>
+  </div>
+  <div class="card-body">
+    <%= form_with model: [:admin, @settings], url: admin_settings_path, method: :patch, local: true do |f| %>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <%= f.check_box :allow_client_deletion, id: "setting_allow_client_deletion" %>
+          <%= f.label :allow_client_deletion, "Enable Client Data Deletion", id: "label_allow_client_deletion" %>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <%= f.check_box :allow_supplier_deletion, id: "setting_allow_supplier_deletion" %>
+          <%= f.label :allow_supplier_deletion, "Enable Supplier Data Deletion", id: "label_allow_supplier_deletion" %>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <%= f.check_box :allow_inventory_deletion, id: "setting_allow_inventory_deletion" %>
+          <%= f.label :allow_inventory_deletion, "Enable Inventory Data Deletion", id: "label_allow_inventory_deletion" %>
+        </div>
+      </div>
+      <div style="margin-top: 1rem;">
+        <%= f.submit "Save Toggles", class: "btn" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
   <div class="card">
     <div class="card-body">

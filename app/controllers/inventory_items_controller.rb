@@ -6,6 +6,7 @@ class InventoryItemsController < ApplicationController
 
   def index
     @inventory_items = InventoryItem.order(:code)
+    @settings = Setting.first_or_create
     if params[:q].present?
       term = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.strip)}%"
       @inventory_items = @inventory_items.where("LOWER(code) LIKE LOWER(:q) OR LOWER(name) LIKE LOWER(:q)", q: term)

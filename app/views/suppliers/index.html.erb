@@ -30,7 +30,9 @@
           <td><%= supplier.email %></td>
           <td>
             <%= link_to "Edit", edit_supplier_path(supplier), class: "btn btn-sm" %>
-            <%= button_to "Delete", supplier, method: :delete, data: { confirm: "Delete this supplier?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+            <% if @settings.allow_supplier_deletion %>
+              <%= button_to "Delete", supplier, method: :delete, data: { confirm: "Delete this supplier?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+            <% end %>
           </td>
         </tr>
       <% end %>

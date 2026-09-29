@@ -51,6 +51,29 @@
     <p style="color: #666; font-size: 0.875rem;">For daily reports and alerts</p>
   </div>
 
+  <h3 style="margin: 1.5rem 0 1rem; font-size: 1rem;">Deletion Toggles</h3>
+  <div style="margin-bottom: 1rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <%= f.check_box :allow_client_deletion, id: "setting_allow_client_deletion" %>
+      <%= f.label :allow_client_deletion, "Enable Client Data Deletion", id: "label_allow_client_deletion" %>
+    </div>
+    <p style="color: #666; font-size: 0.8rem; margin-left: 1.5rem;">Show delete buttons on Clients page</p>
+  </div>
+  <div style="margin-bottom: 1rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <%= f.check_box :allow_supplier_deletion, id: "setting_allow_supplier_deletion" %>
+      <%= f.label :allow_supplier_deletion, "Enable Supplier Data Deletion", id: "label_allow_supplier_deletion" %>
+    </div>
+    <p style="color: #666; font-size: 0.8rem; margin-left: 1.5rem;">Show delete buttons on Suppliers page</p>
+  </div>
+  <div style="margin-bottom: 1rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <%= f.check_box :allow_inventory_deletion, id: "setting_allow_inventory_deletion" %>
+      <%= f.label :allow_inventory_deletion, "Enable Inventory Data Deletion", id: "label_allow_inventory_deletion" %>
+    </div>
+    <p style="color: #666; font-size: 0.8rem; margin-left: 1.5rem;">Show delete buttons on Inventory page</p>
+  </div>
+
   <div style="margin-bottom: 1rem;">
     <%= f.submit "Save Settings", class: "btn" %>
   </div>

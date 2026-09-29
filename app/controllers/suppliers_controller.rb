@@ -4,6 +4,7 @@ class SuppliersController < ApplicationController
 
   def index
     @suppliers = Supplier.ordered
+    @settings = Setting.first_or_create
     if params[:q].present?
       term = "%#{Supplier.sanitize_sql_like(params[:q].to_s.strip)}%"
       @suppliers = @suppliers.where(

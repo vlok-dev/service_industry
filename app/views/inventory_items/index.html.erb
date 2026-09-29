@@ -51,7 +51,9 @@
             <td>
               <% if current_user.admin? || current_user.super_admin? || current_user.reporter? %>
                 <%= link_to "Edit", edit_inventory_item_path(item), class: "btn btn-sm" %>
-                <%= button_to "Delete", item, method: :delete, data: { confirm: "Delete this inventory item?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+                <% if @settings.allow_inventory_deletion %>
+                  <%= button_to "Delete", item, method: :delete, data: { confirm: "Delete this inventory item?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+                <% end %>
               <% end %>
             </td>
           </tr>

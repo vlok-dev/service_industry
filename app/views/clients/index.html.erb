@@ -47,7 +47,9 @@
           <td>
             <%= link_to "View", client, class: "btn btn-sm" %>
             <%= link_to "Edit", edit_client_path(client), class: "btn btn-sm" %>
-            <%= button_to "Delete", client, method: :delete, data: { confirm: "Delete this client?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+            <% if @settings.allow_client_deletion %>
+              <%= button_to "Delete", client, method: :delete, data: { confirm: "Delete this client?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+            <% end %>
           </td>
         </tr>
       <% end %>

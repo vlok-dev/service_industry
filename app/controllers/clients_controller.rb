@@ -77,9 +77,10 @@ class ClientsController < ApplicationController
     redirect_to clients_path, notice: "#{imported} clients imported successfully#{" (#{failed} failed)" if failed > 0}."
   end
 
-  def index
+def index
     @clients = Client.ordered.includes(:addresses)
-       if params[:q].present?
+    @settings = Setting.first_or_create
+    if params[:q].present?
        term = "%#{Client.sanitize_sql_like(params[:q].to_s.strip)}%"
        @clients = @clients.where(
          "LOWER(name) LIKE LOWER(:q) OR LOWER(contact_person) LIKE LOWER(:q) OR LOWER(primary_contact_mobile) LIKE LOWER(:q) OR LOWER(email) LIKE LOWER(:q) OR LOWER(customer_code) LIKE LOWER(:q)",

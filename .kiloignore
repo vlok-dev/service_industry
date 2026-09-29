@@ -1,0 +1,12 @@
+.kilo
+tmp
+node_modules
+log
+storage
+vendor
+test
+public/uploads
+public/assets
+public/system
+db/migrate
+config/locales

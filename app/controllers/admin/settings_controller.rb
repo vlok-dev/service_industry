@@ -26,7 +26,7 @@ module Admin
     end
 
     def setting_params
-      params.require(:setting).permit(:company_name, :whatsapp_api_key, :whatsapp_phone_id, :default_job_priority, :working_hours_start, :working_hours_end, :notification_email)
+      params.require(:setting).permit(:company_name, :whatsapp_api_key, :whatsapp_phone_id, :default_job_priority, :working_hours_start, :working_hours_end, :notification_email, :allow_client_deletion, :allow_supplier_deletion, :allow_inventory_deletion)
     end
 
     def require_admin
