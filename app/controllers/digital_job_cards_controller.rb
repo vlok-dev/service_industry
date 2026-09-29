@@ -1,4 +1,5 @@
 class DigitalJobCardsController < ApplicationController
+  include Pagy::Method
   before_action :authenticate_user!
   before_action :set_digital_job_card, only: %i[ show edit update destroy print ]
   before_action :authorize_access!, only: %i[ show edit update destroy print ]
@@ -6,6 +7,14 @@ class DigitalJobCardsController < ApplicationController
 
   def index
     @digital_job_cards = policy_scope(DigitalJobCard).recent
+    if params[:q].present?
+      term = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.strip)}%"
+      @digital_job_cards = @digital_job_cards.where(
+        "LOWER(client_name) LIKE LOWER(:q) OR LOWER(address) LIKE LOWER(:q) OR LOWER(description) LIKE LOWER(:q)",
+        q: term
+      )
+    end
+    @pagy, @digital_job_cards = pagy(@digital_job_cards, limit: 20)
     @digital_job_card = DigitalJobCard.new
   end
 
