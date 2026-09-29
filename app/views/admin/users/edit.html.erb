@@ -43,6 +43,11 @@
   </div>
 
   <div style="margin-bottom: 1rem;">
+    <%= f.label :theme, "Current Theme" %><br>
+    <%= @user.effective_theme.humanize %>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
     <%= f.label :password %> (leave blank to keep current)<br>
     <%= f.password_field :password %>
   </div>
