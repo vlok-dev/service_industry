@@ -73,21 +73,6 @@
   </div>
 <% end %>
 
-<div class="search-bar">
-  <%= form_with url: jobs_path, method: :get, local: true, style: "display: contents;" do |f| %>
-    <%= f.text_field :q, value: @search_query, placeholder: "Search by job #, address, customer, invoice..." %>
-    <% if current_filter.present? %>
-      <%= f.hidden_field :filter, value: current_filter %>
-    <% end %>
-    <% if current_filter == "scheduled" && params[:filter_date].present? %>
-      <%= f.hidden_field :filter_date, value: params[:filter_date] %>
-    <% end %>
-    <%= f.submit "Search", class: "btn" %>
-    <% if @search_query.present? || current_filter.present? %>
-      <%= link_to "Clear", jobs_path, class: "btn btn-secondary" %>
-    <% end %>
-  <% end %>
-</div>
 
 <div class="chip-row">
   <%= link_to "All", jobs_path, class: "chip #{current_filter.blank? ? 'active' : ''}" %>
