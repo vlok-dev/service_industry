@@ -81,6 +81,7 @@
             <th>Total (incl. VAT)</th>
             <th>Created By</th>
             <th>Created</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -96,6 +97,11 @@
               <td><%= number_to_currency(po.total_amount || po.total_including_vat, unit: "R", precision: 2) %></td>
               <td><%= po.created_by&.name %></td>
               <td><%= po.created_at&.strftime("%d %b %Y %H:%M") %></td>
+              <td>
+                <%= link_to print_job_purchase_order_path(po.job, po), class: "btn-icon btn-icon-primary", title: "Print", target: "_blank" do %>
+                  Print
+                <% end %>
+              </td>
             </tr>
           <% end %>
         </tbody>

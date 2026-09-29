@@ -1,0 +1,85 @@
+<div class="header">
+  <%= image_tag "INDUSTRO-PLUMBERS.png", alt: "Industro Plumbers" %>
+  <h1>Purchase Order</h1>
+  <p>PO #<%= @purchase_order.po_number %> | Order Date: <%= @purchase_order.order_date&.strftime("%d %B %Y") || "N/A" %></p>
+</div>
+
+<% content_for :back_link do %>
+  <a href="<%= job_purchase_order_path(@job, @purchase_order) %>" class="btn btn-secondary no-print" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; text-decoration: none;">← Back To Purchase Order</a>
+<% end %>
+
+<div class="info-grid">
+  <div class="info-item">
+    <div class="label">Job #</div>
+    <div class="value"><%= link_to @job.job_number, job_path(@job), style: "color: #1B2C65;" %></div>
+  </div>
+  <div class="info-item">
+    <div class="label">Customer</div>
+    <div class="value"><%= @job.customer_name %></div>
+  </div>
+  <div class="info-item">
+    <div class="label">Supplier</div>
+    <div class="value"><%= @purchase_order.supplier_display_name %></div>
+  </div>
+  <div class="info-item">
+    <div class="label">Order Date</div>
+    <div class="value"><%= @purchase_order.order_date&.strftime("%d %B %Y") || "N/A" %></div>
+  </div>
+  <div class="info-item">
+    <div class="label">Delivery Date</div>
+    <div class="value"><%= @purchase_order.expected_delivery&.strftime("%d %B %Y") || "N/A" %></div>
+  </div>
+  <div class="info-item">
+    <div class="label">Created By</div>
+    <div class="value"><%= @purchase_order.created_by&.name || "N/A" %></div>
+  </div>
+  <% if @purchase_order.notes.present? %>
+    <div class="description-box" style="grid-column: span 2;">
+      <h3>Notes</h3>
+      <p><%= @purchase_order.notes %></p>
+    </div>
+  <% end %>
+</div>
+
+<h3 style="color: #1B2C65; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 15px;">Line Items</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Description</th>
+      <th>Code</th>
+      <th>Qty</th>
+      <th>Unit Price</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @purchase_order.items.includes(:inventory_item).each do |item| %>
+      <tr>
+        <td><%= item.resolved_name %></td>
+        <td><%= item.inventory_item&.code || "" %></td>
+        <td><%= number_with_precision(item.quantity, precision: 2, strip_insignificant_zeros: true) %></td>
+        <td>R <%= number_with_precision(item.unit_price, precision: 2) %></td>
+        <td>R <%= number_with_precision(item.total, precision: 2) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<div class="totals">
+  <div class="total-row">
+    <span>Subtotal (excl. VAT):</span>
+    <span>R <%= number_with_precision(@purchase_order.subtotal, precision: 2) %></span>
+  </div>
+  <div class="total-row">
+    <span>VAT (<%= @purchase_order.vat_rate || 15 %>%):</span>
+    <span>R <%= number_with_precision(@purchase_order.vat_amount, precision: 2) %></span>
+  </div>
+  <div class="total-row grand">
+    <span>Total (incl. VAT):</span>
+    <span>R <%= number_with_precision(@purchase_order.total_including_vat, precision: 2) %></span>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Industro Plumbers - Purchase Order <%= @purchase_order.po_number %></p>
+</div>

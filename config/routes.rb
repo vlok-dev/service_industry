@@ -36,7 +36,11 @@ Rails.application.routes.draw do
       get :bulk_whatsapp
       get :print_tomorrow
     end
-    resources :purchase_orders, only: [:new, :create, :show, :edit, :update, :destroy]
+    resources :purchase_orders, only: [:new, :create, :show, :edit, :update, :destroy] do
+      member do
+        get :print
+      end
+    end
     resources :claims
   end
 

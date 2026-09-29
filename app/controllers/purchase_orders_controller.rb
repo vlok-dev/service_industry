@@ -1,7 +1,7 @@
 class PurchaseOrdersController < ApplicationController
   include Pagy::Method
-  before_action :set_job, only: [:new, :create, :show, :edit, :update, :destroy]
-  before_action :set_purchase_order, only: [:show, :edit, :update, :destroy]
+  before_action :set_job, only: [:new, :create, :show, :edit, :update, :destroy, :print]
+  before_action :set_purchase_order, only: [:show, :edit, :update, :destroy, :print]
   before_action :set_purchase_orders, only: [:index]
 
   def index
@@ -9,6 +9,10 @@ class PurchaseOrdersController < ApplicationController
   end
 
   def show
+  end
+
+  def print
+    render layout: "print"
   end
 
   def new

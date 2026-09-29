@@ -108,4 +108,62 @@ class SmokeNewFeaturesTest < ActionDispatch::IntegrationTest
     job.reload
     assert_equal (Date.new(2026, 9, 10) + 1.day), job.scheduled_end_date
   end
+
+  test "super admin defaults to dark theme" do
+    sign_in @user
+    assert_equal "dark", @user.effective_theme
+    get dashboard_path
+    assert_response :success
+    assert_includes response.body, 'data-theme="dark"'
+  end
+
+  test "theme preference persists across sessions" do
+    sign_in @user
+    assert_equal "dark", @user.effective_theme
+
+    patch theme_path, params: { theme: "light" }, as: :json
+    assert_response :success
+
+    @user.reload
+    assert_equal "light", @user.theme_preference
+    assert_equal "light", @user.effective_theme
+
+    get dashboard_path
+    assert_response :success
+    assert_includes response.body, 'data-theme="light"'
+  end
+
+  test "theme toggle rejects invalid values" do
+    sign_in @user
+    patch theme_path, params: { theme: "purple" }, as: :json
+    assert_response :success
+    @user.reload
+    assert_nil @user.theme_preference
+  end
+
+  test "purchase order print page renders" do
+    sign_in @user
+    job = valid_job
+    po = job.purchase_orders.create!(
+      supplier_name: "Test Supplier",
+      order_date: Date.today,
+      created_by: @user
+    )
+    po.items.create!(description: "Test Item", quantity: 2, unit_price: 10.00)
+
+    get print_job_purchase_order_path(job, po)
+    assert_response :success
+    assert_includes response.body, po.po_number
+    assert_includes response.body, "Purchase Order"
+  end
+
+  test "non-super-admin user defaults to light theme" do
+    plumber = User.find_or_create_by!(email: "plumber@test.com") do |u|
+      u.name = "Test Plumber"
+      u.password = "password123"
+      u.role = :plumber
+    end
+    sign_in plumber
+    assert_equal "light", plumber.effective_theme
+  end
 end
