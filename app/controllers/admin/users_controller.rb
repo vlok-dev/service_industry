@@ -105,7 +105,11 @@ module Admin
     # Someone cannot hold the same role twice, so once they have a profile we
     # stop offering the roles they already have.
     def assign_available_roles
-      taken = @person&.profiles&.where.not(id: @user.id)&.filter_map(&:role) || []
+      taken = if @person && @user.persisted?
+                @person.profiles.where.not(id: @user.id).filter_map(&:role)
+              else
+                @person&.profiles&.filter_map(&:role) || []
+              end
       @taken_roles = taken
       @available_roles = User.roles.keys - taken.map(&:to_s)
     end
