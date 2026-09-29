@@ -201,9 +201,9 @@
                       <%= form_with url: schedule_job_path(job), method: :patch, local: true do |f| %>
                         <%= f.hidden_field :status, value: "scheduled" %>
                         <div style="display: flex; flex-direction: column; gap: 0.375rem;">
-                          <%= f.date_field :scheduled_date, value: job.scheduled_date || Date.today, required: true, style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" %>
-                          <%= f.time_field :scheduled_time, value: (job.scheduled_time&.strftime("%H:%M") || ""), style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" %>
-                          <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, job.assigned_to_id), { include_blank: "Plumber" }, { style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" } %>
+                           <%= f.date_field :scheduled_date, value: job.scheduled_date || Date.today, required: true, style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; background: var(--surface); color: var(--text);" %>
+                           <%= f.time_field :scheduled_time, value: (job.scheduled_time&.strftime("%H:%M") || ""), style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; background: var(--surface); color: var(--text);" %>
+                           <%= f.select :assigned_to_id, options_from_collection_for_select(User.plumber, :id, :name, job.assigned_to_id), { include_blank: "Plumber" }, { style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; background: var(--surface); color: var(--text);" } %>
                           <div style="display: flex; gap: 0.5rem;">
                             <%= f.submit "Save", class: "btn btn-sm btn-success" %>
                             <button type="button" class="btn btn-sm btn-secondary btn-cancel-schedule" data-job-id="<%= job.id %>">Cancel</button>

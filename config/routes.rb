@@ -3,6 +3,7 @@ Rails.application.routes.draw do
     sessions: "users/sessions"
   }
   get "/stop_stay_logged_in" => "users/sessions#stop_stay_logged_in", as: :stop_stay_logged_in
+  resource :theme, only: [:update]
 
   get "up" => "rails/health#show", as: :rails_health_check
 

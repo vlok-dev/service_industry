@@ -21,7 +21,7 @@ class ApplicationController < ActionController::Base
     devise_parameter_sanitizer.permit(:account_update, keys: [:name, :role, :phone_number])
   end
 
-  helper_method :sort_job_list, :force_desktop_layout?
+  helper_method :sort_job_list, :force_desktop_layout?, :current_theme
 
   SORTABLE_JOB_COLUMNS = {
     "job_number" => "jobs.job_number",
@@ -79,6 +79,12 @@ class ApplicationController < ActionController::Base
   def user_not_authorized
     flash[:alert] = "You are not authorized to perform this action."
     redirect_to(request.referrer || root_path)
+  end
+
+  def current_theme
+    return "light" unless user_signed_in?
+
+    current_user.effective_theme
   end
 
   def track_last_login

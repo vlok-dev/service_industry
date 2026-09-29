@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+  <html data-theme="<%= current_theme %>">
   <head>
     <title><%= content_for(:title) || "Industro Plumbers" %></title>
     <meta name="viewport" content="<%= force_desktop_layout? ? "width=1024" : "width=device-width,initial-scale=1" %>">
@@ -1663,33 +1663,52 @@
 </body>
 </html>
 
-<script>
-  (function() {
-    var html = document.documentElement;
-    var themeToggle = document.getElementById('themeToggle');
-    var themeToggleText = document.getElementById('themeToggleText');
+    <script>
+      (function() {
+        var html = document.documentElement;
 
-    function applyTheme(theme) {
-      html.setAttribute('data-theme', theme);
-      if (themeToggleText) {
-        themeToggleText.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
-      }
-    }
+        function applyTheme(theme) {
+          html.setAttribute('data-theme', theme);
+          var toggleText = document.getElementById('themeToggleText');
+          if (toggleText) {
+            toggleText.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+          }
+        }
 
-    var saved = localStorage.getItem('theme');
-    if (saved) {
-      applyTheme(saved);
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      applyTheme('dark');
-    }
+        function syncTheme() {
+          // The active theme is chosen server-side per profile (see <html data-theme>).
+          // The localStorage fallback only fills in for anonymous visits.
+          var activeTheme = html.getAttribute('data-theme') || (function() {
+            var saved = localStorage.getItem('theme');
+            return (saved === 'dark' || saved === 'light') ? saved : 'light';
+          })();
+          applyTheme(activeTheme);
+        }
 
-    if (themeToggle) {
-      themeToggle.addEventListener('click', function() {
-        var current = html.getAttribute('data-theme') || 'light';
-        var next = current === 'dark' ? 'light' : 'dark';
-        applyTheme(next);
-        localStorage.setItem('theme', next);
-      });
-    }
-  })();
-</script>
+        function bindToggle() {
+          var toggle = document.getElementById('themeToggle');
+          if (toggle && !toggle.__themeBound) {
+            toggle.__themeBound = true;
+            toggle.addEventListener('click', function() {
+              var next = (html.getAttribute('data-theme') || 'light') === 'dark' ? 'light' : 'dark';
+              applyTheme(next);
+              localStorage.setItem('theme', next);
+              // Persist the choice against the signed-in user's profile
+              var xhr = new XMLHttpRequest();
+              xhr.open('PATCH', '<%= theme_path %>');
+              xhr.setRequestHeader('Content-Type', 'application/json');
+              xhr.setRequestHeader('X-CSRF-Token', '<%= form_authenticity_token %>');
+              xhr.send(JSON.stringify({ theme: next }));
+            });
+          }
+        }
+
+        syncTheme();
+        bindToggle();
+        // Re-bind on Turbo navigations (body is replaced, so re-find the toggle)
+        document.addEventListener('turbo:load', function() {
+          syncTheme();
+          bindToggle();
+        });
+      })();
+    </script>

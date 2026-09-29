@@ -23,6 +23,13 @@ class User < ApplicationRecord
 
   before_validation :normalize_email, :ensure_person
 
+  # Roles that default to dark mode. Everyone else defaults to light.
+  DARK_MODE_ROLES = %w[super_admin scheduler admin].freeze
+
+  def self.role_default_theme(role)
+    DARK_MODE_ROLES.include?(role.to_s) ? "dark" : "light"
+  end
+
   validates :email, uniqueness: { allow_nil: true }, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
   validates :email, presence: true, if: :secondary_profile?
   validates :name, presence: true
@@ -66,7 +73,16 @@ class User < ApplicationRecord
   end
 
   def reminder_dismissed_today?
-    reminder_dismissed_at && reminder_dismissed_at >= Time.current.beginning_of_day
+    reminder_dismissed_at && reminder_dismissed_at >= Time.current.begin_of_day
+  end
+
+  # The persisted theme ("light"/"dark"), falling back to a role-based default
+  # when the user hasn't picked one. This lets each profile (role) have its own
+  # preferred theme.
+  def effective_theme
+    return theme_preference if %w[light dark].include?(theme_preference)
+
+    User.role_default_theme(role)
   end
 
   private
