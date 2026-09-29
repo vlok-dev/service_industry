@@ -1,7 +1,15 @@
 <% content_for :full_page do %>
   <div class="login-page">
+    <div class="login-bg-effects">
+      <div class="login-bg-orb orb-1"></div>
+      <div class="login-bg-orb orb-2"></div>
+      <div class="login-bg-orb orb-3"></div>
+    </div>
     <div class="login-card">
       <div class="login-header">
+        <div class="login-logo">
+          <%= image_tag "INDUSTRO-PLUMBERS.png", alt: "Industro Plumbers", class: "logo-img" %>
+        </div>
         <h1>Industro Plumbers</h1>
         <p>Sign in to your account</p>
       </div>
@@ -14,28 +22,28 @@
       <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
         <div class="field">
           <%= f.label :email, "Email" %>
-          <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "you@company.com", value: @remembered_email %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "you@company.com", value: @remembered_email, class: "login-input" %>
         </div>
         <div class="field" style="position: relative;">
           <%= f.label :password, "Password" %>
           <div style="position: relative;">
-            <%= f.password_field :password, autocomplete: "current-password", placeholder: "Password", style: "padding-right: 2.5rem;", id: "login_password" %>
-            <button type="button" onclick="togglePasswordVisibility()" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0.25rem; display: flex; align-items: center; justify-content: center;" aria-label="Toggle password visibility">
+            <%= f.password_field :password, autocomplete: "current-password", placeholder: "Password", class: "login-input", id: "login_password" %>
+            <button type="button" onclick="togglePasswordVisibility()" class="toggle-password" aria-label="Toggle password visibility">
               <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #6b7280;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
           </div>
         </div>
         <div class="field remember-me">
-          <%= check_box_tag :stay_logged_in, "1", false, style: "width: 18px; height: 18px; margin-right: 0.5rem; accent-color: #B2D33E; cursor: pointer;" %>
-          <%= label_tag :stay_logged_in, "Stay Logged In", style: "font-weight: 600; color: #fff; cursor: pointer;" %>
+          <%= check_box_tag :stay_logged_in, "1", false, class: "remember-checkbox" %>
+          <%= label_tag :stay_logged_in, "Stay Logged In", class: "remember-label" %>
         </div>
         <div class="actions">
           <%= f.submit "Sign In", class: "btn-login" %>
         </div>
       <% end %>
       <% if @remembered_email.present? %>
-        <div style="text-align: center; margin-top: 1rem;">
-          <%= link_to "Clear remembered email", stop_stay_logged_in_path, style: "color: rgba(255,255,255,0.7); font-size: 0.8rem; text-decoration: none;" %>
+        <div class="clear-remembered">
+          <%= link_to "Clear remembered email", stop_stay_logged_in_path %>
         </div>
       <% end %>
       <div class="devise-links">

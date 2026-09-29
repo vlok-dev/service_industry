@@ -74,7 +74,7 @@ class DigitalJobCardsController < ApplicationController
   end
 
   def authorize_access!
-    unless @digital_job_card.user == current_user || current_user.super_admin? || current_user.admin? || current_user.reporter?
+    unless @digital_job_card.user == current_user || current_user.super_admin? || current_user.admin? || current_user.reporter? || current_user.scheduler?
       redirect_to dashboard_path, alert: "Not authorized."
     end
   end

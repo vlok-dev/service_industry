@@ -2,7 +2,7 @@
 
 <h1>Purchase Order <%= @purchase_order.po_number %></h1>
 
-<div style="background: #f9fafb; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+<div style="background: var(--surface); padding: 1rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border);">
   <p><strong>Job:</strong> <%= link_to @job.job_number, job_path(@job) %> — <%= @job.customer_name %></p>
   <p><strong>Supplier:</strong> <%= @purchase_order.supplier_display_name %></p>
   <p><strong>Order Date:</strong> <%= @purchase_order.order_date&.strftime("%d %B %Y") || "N/A" %></p>

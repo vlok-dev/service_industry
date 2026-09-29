@@ -14,24 +14,24 @@
     <%= f.label :supplier_id, "Supplier" %><br>
     <%= f.collection_select :supplier_id, Supplier.order(:name), :id, :name,
           { include_blank: "Select a supplier" },
-          style: "padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; width: 100%; max-width: 400px;" %>
-    <p style="color: #666; font-size: 0.875rem;">Pick a supplier from the list, or type a name below if it isn't here.</p>
-    <%= f.text_field :supplier_name, placeholder: "Supplier name (fallback if not in list)", style: "padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; width: 100%; max-width: 400px; margin-top: 0.5rem;" %>
+          style: "padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; width: 100%; max-width: 400px; background: var(--surface); color: var(--text);" %>
+    <p style="color: var(--text-muted); font-size: 0.875rem;">Pick a supplier from the list, or type a name below if it isn't here.</p>
+    <%= f.text_field :supplier_name, placeholder: "Supplier name (fallback if not in list)", style: "padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; width: 100%; max-width: 400px; margin-top: 0.5rem; background: var(--surface); color: var(--text);" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :order_date, "Date Bought" %><br>
-    <%= f.date_field :order_date, value: (@purchase_order.order_date || Date.today), required: true, style: "padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;" %>
+    <%= f.date_field :order_date, value: (@purchase_order.order_date || Date.today), required: true, style: "padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; background: var(--surface); color: var(--text);" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :expected_delivery, "Expected Delivery" %><br>
-    <%= f.date_field :expected_delivery, value: @purchase_order.expected_delivery, style: "padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;" %>
+    <%= f.date_field :expected_delivery, value: @purchase_order.expected_delivery, style: "padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; background: var(--surface); color: var(--text);" %>
   </div>
 
   <div style="margin-bottom: 1rem;">
     <%= f.label :notes %><br>
-    <%= f.text_area :notes, placeholder: "Any additional notes..." %>
+    <%= f.text_area :notes, placeholder: "Any additional notes...", style: "padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; width: 100%; background: var(--surface); color: var(--text);" %>
   </div>
 
   <h3>Line Items</h3>
@@ -62,7 +62,7 @@
       <ul class="code-results" style="display:none; max-height:160px; overflow-y:auto; margin:0; padding:0; border:1px solid var(--border); border-top:none; border-radius:0 0 6px 6px; list-style:none; background:var(--surface);"></ul>
     </td>
     <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">
-      <input type="text" class="item-description" readonly placeholder="Auto-filled from inventory" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; background:var(--bg);" />
+      <input type="text" class="item-description" readonly placeholder="Auto-filled from inventory" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; background: var(--surface); color: var(--text);" />
     </td>
     <td style="padding: 0.75rem; border-bottom: 1px solid var(--border);">
       <input type="number" min="0.01" step="0.01" class="qty" placeholder="Qty" style="width: 100px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;" />

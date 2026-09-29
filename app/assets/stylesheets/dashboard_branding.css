@@ -1188,3 +1188,182 @@ nav .brand {
   background: #2d2d3a;
   color: var(--text);
 }
+
+/* ===== Calendar view ===== */
+.calendar-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.calendar-toolbar .btn { margin: 0; }
+
+.calendar-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.calendar-table th,
+.calendar-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.calendar-table th {
+  background: var(--border-light);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+.calendar-table tr:last-child td { border-bottom: none; }
+.calendar-table tbody tr:hover { background: var(--border-light); }
+
+.calendar-day-heading {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 1.5rem 0 0.5rem;
+  padding-bottom: 0.375rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.calendar-week-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 1rem;
+}
+.calendar-week-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.calendar-week-list li:last-child { border-bottom: none; }
+.calendar-week-list strong { color: var(--primary); }
+
+.calendar-empty {
+  color: var(--text-muted);
+  margin-left: 1rem;
+  font-style: italic;
+}
+
+.calendar-month-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 6px;
+  background: var(--border-light);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.calendar-month-table th,
+.calendar-month-table td {
+  border: none;
+  padding: 0;
+  text-align: left;
+  vertical-align: top;
+}
+.calendar-month-table th {
+  background: var(--surface);
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  border-radius: 6px 6px 0 0;
+}
+.calendar-month-cell {
+  width: 14.28%;
+  min-height: 150px;
+  padding: 0.5rem 0.5rem 0.35rem;
+  background: var(--surface);
+  border-radius: 8px;
+  vertical-align: top;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: box-shadow 0.15s;
+}
+.calendar-month-cell:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.calendar-month-cell[data-outside="true"] {
+  background: var(--border-light);
+  opacity: 0.4;
+}
+.calendar-month-day {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+  text-align: right;
+  padding-right: 0.5rem;
+}
+.calendar-month-day.today {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 0.5rem;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.calendar-month-job {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 0.3rem 0.5rem;
+  margin-top: 3px;
+  border-radius: 5px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.calendar-month-time {
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.calendar-month-link {
+  color: var(--primary-dark);
+  text-decoration: none;
+}
+.calendar-month-link:hover { text-decoration: underline; }
+.calendar-month-more {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+  padding-left: 0.5rem;
+}
+
+/* ===== Dark mode: Calendar ===== */
+[data-theme="dark"] .calendar-month-job {
+  background: #1e3a5f;
+  color: #bfdbfe;
+}
+[data-theme="dark"] .calendar-month-link {
+  color: #bfdbfe;
+}
+[data-theme="dark"] .calendar-week-list strong {
+  color: var(--primary);
+}

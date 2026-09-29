@@ -1,46 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
   <head>
     <title><%= content_for(:title) || "Industro Plumbers - Print" %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <%= csrf_meta_tags %>
     <style>
+      :root {
+        --print-bg: #f5f5f5;
+        --print-container-bg: white;
+        --print-text: #333;
+        --print-text-muted: #666;
+        --print-border: #ddd;
+        --print-border-light: #eee;
+        --print-primary: #1B2C65;
+        --print-accent: #2563eb;
+        --print-info-bg: #f8f9fa;
+        --print-table-alt: #f9f9f9;
+        --print-shadow: rgba(0,0,0,0.1);
+      }
+      
+      [data-theme="dark"] {
+        --print-bg: #1a1a2e;
+        --print-container-bg: #1f1f35;
+        --print-text: #e5e7eb;
+        --print-text-muted: #9ca3af;
+        --print-border: #374151;
+        --print-border-light: #2d2d3a;
+        --print-primary: #B2D33E;
+        --print-accent: #3b82f6;
+        --print-info-bg: #2d2d3a;
+        --print-table-alt: #25252f;
+        --print-shadow: rgba(0,0,0,0.4);
+      }
+      
       @media print {
-        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; font-size: 12px; }
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; font-size: 12px; color: var(--print-text); }
         .no-print { display: none !important; }
         .print-only { display: block !important; }
         @page { margin: 15mm; }
       }
       @media screen {
         .print-only { display: none; }
-        body { margin: 20px; padding: 20px; font-family: Arial, sans-serif; font-size: 12px; background: #f5f5f5; }
-        .print-container { background: white; padding: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
+        body { margin: 20px; padding: 20px; font-family: Arial, sans-serif; font-size: 12px; background: var(--print-bg); color: var(--print-text); }
+        .print-container { background: var(--print-container-bg); padding: 30px; box-shadow: 0 0 10px var(--print-shadow); max-width: 800px; margin: 0 auto; }
       }
-      .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #1B2C65; padding-bottom: 15px; }
+      .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--print-primary); padding-bottom: 15px; }
       .header img { max-height: 80px; margin-bottom: 10px; }
-      .header h1 { margin: 0; font-size: 24px; color: #1B2C65; }
-      .header p { margin: 5px 0; color: #666; }
+      .header h1 { margin: 0; font-size: 24px; color: var(--print-primary); }
+      .header p { margin: 5px 0; color: var(--print-text-muted); }
       .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
-      .info-item { padding: 10px; background: #f8f9fa; border-radius: 4px; }
-      .info-item .label { font-size: 10px; text-transform: uppercase; color: #666; font-weight: bold; }
-      .info-item .value { font-size: 13px; font-weight: 600; color: #333; }
+      .info-item { padding: 10px; background: var(--print-info-bg); border-radius: 4px; }
+      .info-item .label { font-size: 10px; text-transform: uppercase; color: var(--print-text-muted); font-weight: bold; }
+      .info-item .value { font-size: 13px; font-weight: 600; color: var(--print-text); }
       table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-      th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 11px; }
-      th { background: #1B2C65; color: white; font-weight: 600; text-transform: uppercase; font-size: 10px; }
-      tr:nth-child(even) { background: #f9f9f9; }
+      th, td { border: 1px solid var(--print-border); padding: 8px; text-align: left; font-size: 11px; color: var(--print-text); }
+      th { background: var(--print-primary); color: white; font-weight: 600; text-transform: uppercase; font-size: 10px; }
+      tr:nth-child(even) { background: var(--print-table-alt); }
       .totals { text-align: right; margin-top: 20px; }
-      .total-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-      .total-row.grand { border-top: 2px solid #1B2C65; border-bottom: 2px solid #1B2C65; font-weight: bold; font-size: 14px; color: #1B2C65; }
-      .description-box { padding: 15px; background: #f8f9fa; border-radius: 4px; }
-      .description-box h3 { margin: 0 0 10px; font-size: 14px; color: #1B2C65; }
-      .description-box p { margin: 0; white-space: pre-wrap; font-size: 12px; }
-      .footer { margin-top: 30px; text-align: center; font-size: 10px; color: #999; border-top: 1px solid #eee; padding-top: 15px; }
-      .btn-print { position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; z-index: 1000; }
+      .total-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--print-border-light); color: var(--print-text); }
+      .total-row.grand { border-top: 2px solid var(--print-primary); border-bottom: 2px solid var(--print-primary); font-weight: bold; font-size: 14px; color: var(--print-primary); }
+      .description-box { padding: 15px; background: var(--print-info-bg); border-radius: 4px; }
+      .description-box h3 { margin: 0 0 10px; font-size: 14px; color: var(--print-primary); }
+      .description-box p { margin: 0; white-space: pre-wrap; font-size: 12px; color: var(--print-text); }
+      .footer { margin-top: 30px; text-align: center; font-size: 10px; color: var(--print-text-muted); border-top: 1px solid var(--print-border-light); padding-top: 15px; }
+      .btn-print { position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: var(--print-accent); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; z-index: 1000; }
       .btn-print:hover { background: #1d4ed8; }
     </style>
   </head>
   <body>
-    <button class="btn-print no-print" onclick="window.print()" style="position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; z-index: 1000;">Print</button>
+    <button class="btn-print no-print" onclick="window.print()">Print</button>
     <% if content_for?(:back_link) %>
       <div style="position: fixed; top: 20px; left: 20px; z-index: 1000;">
         <%= content_for(:back_link) %>

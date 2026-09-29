@@ -80,21 +80,68 @@
         overflow: hidden;
       }
 
-      .login-watermark {
+      .login-bg-effects {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        inset: 0;
         pointer-events: none;
         z-index: 0;
       }
 
-      .login-watermark img {
-        width: 90vmin;
-        height: 90vmin;
-        object-fit: contain;
-        opacity: 0.10;
-        filter: brightness(0) invert(1);
+      .login-bg-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.15;
+        animation: orb-float 20s ease-in-out infinite;
+      }
+
+      .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: #B2D33E;
+        top: -100px;
+        left: -100px;
+        animation-delay: 0s;
+      }
+
+      .orb-2 {
+        width: 300px;
+        height: 300px;
+        background: #1B2C65;
+        bottom: -50px;
+        right: -50px;
+        animation-delay: -7s;
+      }
+
+      .orb-3 {
+        width: 200px;
+        height: 200px;
+        background: #9BC72E;
+        top: 50%;
+        left: 50%;
+        animation-delay: -14s;
+      }
+
+      @keyframes orb-float {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -30px) scale(1.05); }
+        66% { transform: translate(-20px, 40px) scale(0.95); }
+      }
+
+      .login-logo {
+        margin-bottom: 1rem;
+      }
+
+      .login-logo .logo-img {
+        max-width: 140px;
+        height: auto;
+        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+        animation: logo-pulse 3s ease-in-out infinite;
+      }
+
+      @keyframes logo-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
       }
 
       .login-card {
@@ -145,8 +192,8 @@
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
       }
 
-      .field input[type="email"],
-      .field input[type="password"] {
+      .login-card .field input[type="email"],
+      .login-card .field input[type="password"] {
         width: 100%;
         padding: 0.875rem 1rem;
         background: rgba(255, 255, 255, 0.35);
@@ -161,20 +208,20 @@
         box-sizing: border-box;
       }
 
-      .field input[type="email"]::placeholder,
-      .field input[type="password"]::placeholder {
+      .login-card .field input[type="email"]::placeholder,
+      .login-card .field input[type="password"]::placeholder {
         color: rgba(27, 44, 101, 0.5);
       }
 
-      .field input[type="email"]:focus,
-      .field input[type="password"]:focus {
+      .login-card .field input[type="email"]:focus,
+      .login-card .field input[type="password"]:focus {
         outline: none;
         border-color: #B2D33E;
         background: rgba(255, 255, 255, 0.5);
         box-shadow: 0 0 0 3px rgba(178, 211, 62, 0.3);
       }
 
-      .field .remember-me {
+      .login-card .field .remember-me {
         background: rgba(255, 255, 255, 0.12);
         padding: 0.75rem;
         border-radius: 12px;
@@ -182,7 +229,7 @@
         border: 1px solid rgba(255, 255, 255, 0.2);
       }
 
-      .field .remember-me input[type="checkbox"] {
+      .login-card .field .remember-me input[type="checkbox"] {
         width: 18px;
         height: 18px;
         margin-right: 0.5rem;
@@ -190,7 +237,7 @@
         cursor: pointer;
       }
 
-      .field .remember-me label {
+      .login-card .field .remember-me label {
         color: #ffffff;
         font-weight: 600;
         font-size: 0.9rem;
@@ -198,11 +245,11 @@
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
       }
 
-      .actions {
+      .login-card .actions {
         margin-top: 1.5rem;
       }
 
-      .btn-login {
+      .login-card .btn-login {
         width: 100%;
         display: flex;
         align-items: center;
@@ -222,16 +269,17 @@
         letter-spacing: 0.05em;
       }
 
-      .btn-login:hover {
+      .login-card .btn-login:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(178, 211, 62, 0.5);
       }
 
-      .btn-login:active {
+      .login-card .btn-login:active {
         transform: translateY(0);
       }
 
-      .notice, .alert {
+      .login-card .notice, 
+      .login-card .alert {
         background: rgba(255, 255, 255, 0.15);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
@@ -245,12 +293,12 @@
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
       }
 
-      .devise-links {
+      .login-card .devise-links {
         text-align: center;
         margin-top: 1.5rem;
       }
 
-      .devise-links a {
+      .login-card .devise-links a {
         color: rgba(255, 255, 255, 0.9);
         text-decoration: none;
         font-size: 0.875rem;
@@ -258,12 +306,96 @@
         transition: color 0.2s;
       }
 
-      .devise-links a:hover {
+      .login-card .devise-links a:hover {
         color: #B2D33E;
         text-decoration: underline;
       }
 
-      .login-footer {
+      .login-card .clear-remembered {
+        text-align: center;
+        margin-top: 1rem;
+      }
+
+      .login-card .clear-remembered a {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.8rem;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      .login-card .clear-remembered a:hover {
+        color: #B2D33E;
+        text-decoration: underline;
+      }
+
+      .login-card .login-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background: rgba(255, 255, 255, 0.35);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 12px;
+        font-size: 0.95rem;
+        color: #1B2C65;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+      }
+
+      .login-card .login-input::placeholder {
+        color: rgba(27, 44, 101, 0.5);
+      }
+
+      .login-card .login-input:focus {
+        outline: none;
+        border-color: #B2D33E;
+        background: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 0 0 3px rgba(178, 211, 62, 0.3);
+      }
+
+      .login-card .toggle-password {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+        transition: color 0.2s;
+      }
+
+      .login-card .toggle-password:hover {
+        color: #B2D33E;
+      }
+
+      .login-card .remember-me {
+        display: flex;
+        align-items: center;
+      }
+
+      .login-card .remember-checkbox {
+        width: 18px;
+        height: 18px;
+        margin-right: 0.5rem;
+        accent-color: #B2D33E;
+        cursor: pointer;
+      }
+
+      .login-card .remember-label {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+
+      .login-card .login-footer {
         text-align: center;
         margin-top: 2rem;
         color: rgba(255, 255, 255, 0.6);
@@ -545,7 +677,33 @@
         border-radius: var(--radius-sm);
         font-size: 0.9rem;
         background: var(--surface);
+        color: var(--text);
         transition: border-color 0.2s, box-shadow 0.2s;
+      }
+
+      /* Make date pickers white/readable in dark mode */
+      [data-theme="dark"] .field input[type="date"],
+      [data-theme="dark"] .field input[type="time"],
+      [data-theme="dark"] .field input[type="datetime-local"] {
+        background: #ffffff;
+        color: #0f172a;
+        border-color: #e2e8f0;
+      }
+
+      [data-theme="dark"] .field input[type="date"]:focus,
+      [data-theme="dark"] .field input[type="time"]:focus,
+      [data-theme="dark"] .field input[type="datetime-local"]:focus {
+        background: #ffffff;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      /* Style the date picker calendar icon in dark mode */
+      [data-theme="dark"] .field input[type="date"]::-webkit-calendar-picker-indicator,
+      [data-theme="dark"] .field input[type="time"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 0.8;
+        cursor: pointer;
       }
 
       .field input:focus,
@@ -1244,12 +1402,13 @@
         padding: 0.25rem 0.5rem;
         border-radius: 4px;
         font-size: 0.75rem;
-        background: #f1f5f9;
-        border: 1px solid #e2e8f0;
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
         cursor: pointer;
         transition: all 0.2s;
       }
-      .row-colour-btn:hover { background: #e2e8f0; }
+      .row-colour-btn:hover { background: var(--border-light); }
       .row-colour-modal {
         display: none;
         position: fixed;
@@ -1264,21 +1423,22 @@
       }
       .row-colour-modal.show { display: flex; }
       .row-colour-modal-content {
-        background: white;
+        background: var(--surface);
+        border: 1px solid var(--border);
         border-radius: 10px;
         padding: 1.5rem;
         text-align: center;
         max-width: 320px;
         width: 90%;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
       }
-      .row-colour-modal h4 { margin: 0 0 1rem 0; font-size: 1.1rem; }
+      .row-colour-modal h4 { margin: 0 0 1rem 0; font-size: 1.1rem; color: var(--text); }
       .row-colour-option {
         display: inline-block;
         width: 36px;
         height: 36px;
         margin: 6px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border);
         border-radius: 6px;
         cursor: pointer;
         padding: 0;
@@ -1289,10 +1449,27 @@
       .row-colour-option[data-colour="#dcfce8"] { background: #dcfce8; border-color: #4ade80; }
       .row-colour-option[data-colour="#dbeafe"] { background: #dbeafe; border-color: #60a5fa; }
       .row-colour-option[data-colour="#f3e8ff"] { background: #f3e8ff; border-color: #c084fc; }
-      .row-colour-clear { background: #f8fafc; border-color: #e2e8f0; }
-      .row-colour-clear::after { content: "✕"; display: block; text-align: center; line-height: 36px; color: #94a3b8; font-size: 16px; }
+      .row-colour-clear { background: var(--surface); border-color: var(--border); }
+      .row-colour-clear::after { content: "✕"; display: block; text-align: center; line-height: 36px; color: var(--text-muted); font-size: 16px; }
       .row-colour-modal-actions { margin-top: 1rem; }
       .row-colour-modal-actions .btn { margin: 0 4px; }
+
+      /* Dark mode: row colour modal swatches - darker, readable colours */
+      [data-theme="dark"] .row-colour-option[data-colour="#fffbeb"] { background: #78350f; border-color: #f59e0b; }
+      [data-theme="dark"] .row-colour-option[data-colour="#fee2e2"] { background: #7f1d1d; border-color: #ef4444; }
+      [data-theme="dark"] .row-colour-option[data-colour="#dcfce8"] { background: #14532d; border-color: #22c55e; }
+      [data-theme="dark"] .row-colour-option[data-colour="#dbeafe"] { background: #1e3a5f; border-color: #3b82f6; }
+      [data-theme="dark"] .row-colour-option[data-colour="#f3e8ff"] { background: #4c1d95; border-color: #8b5cf6; }
+
+      /* Dark mode: row highlight colours - dark enough to keep light text readable */
+      [data-theme="dark"] tr.row-highlight td {
+        color: #ffffff !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      }
+      [data-theme="dark"] tr.row-highlight:hover td {
+        color: #ffffff !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      }
     </style>
     <%= stylesheet_link_tag "dashboard_branding", "data-turbo-track": "reload" %>
   </head>
@@ -1572,13 +1749,35 @@
         localStorage.setItem(highlightStorageKey, JSON.stringify(highlights));
       }
 
+      /* Map colour choice to a theme-aware value.
+         In dark mode the pastel swatches would be invisible against the
+         dark table, so we swap in darker tints that keep light text readable. */
+      var darkModeColors = {
+        '#fffbeb': '#78350f',   /* deep amber */
+        '#fee2e2': '#7f1d1d',   /* deep red */
+        '#dcfce8': '#14532d',   /* deep green */
+        '#dbeafe': '#1e3a5f',   /* deep blue */
+        '#f3e8ff': '#4c1d95'    /* deep purple */
+      };
+
+      function isDarkMode() {
+        return document.documentElement.getAttribute('data-theme') === 'dark';
+      }
+
+      function resolveHighlightColor(storedColor) {
+        if (isDarkMode() && darkModeColors[storedColor]) {
+          return darkModeColors[storedColor];
+        }
+        return storedColor;
+      }
+
       function applyHighlights() {
         var highlights = getHighlights();
         Object.keys(highlights).forEach(function(jobId) {
           var row = document.querySelector('tr[data-job-id="' + jobId + '"]');
           if (row) {
             row.classList.add('row-highlight');
-            row.style.setProperty('--row-highlight-color', highlights[jobId]);
+            row.style.setProperty('--row-highlight-color', resolveHighlightColor(highlights[jobId]));
           }
         });
       }
@@ -1631,13 +1830,22 @@
           } else {
             highlights[currentJobId] = color;
             row.classList.add('row-highlight');
-            row.style.setProperty('--row-highlight-color', color);
+            row.style.setProperty('--row-highlight-color', resolveHighlightColor(color));
           }
           saveHighlights(highlights);
           var modal = document.getElementById('row-colour-modal');
           if (modal) modal.classList.remove('show');
         }
       });
+
+      /* Re-apply highlight colours when the user toggles dark/light mode */
+      var themeToggle = document.getElementById('themeToggle');
+      if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+          // wait a tick so data-theme has already been flipped by applyTheme
+          setTimeout(applyHighlights, 50);
+        });
+      }
 
       document.addEventListener('click', function(e) {
         if (e.target.id === 'row-colour-cancel') {

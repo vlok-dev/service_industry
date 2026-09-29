@@ -5,13 +5,13 @@
 </div>
 
 <% content_for :back_link do %>
-  <a href="<%= job_purchase_order_path(@job, @purchase_order) %>" class="btn btn-secondary no-print" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; text-decoration: none;">← Back To Purchase Order</a>
+  <a href="<%= job_purchase_order_path(@job, @purchase_order) %>" class="btn btn-secondary no-print" style="padding: 10px 20px; background: var(--print-accent); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; text-decoration: none;">← Back To Purchase Order</a>
 <% end %>
 
 <div class="info-grid">
   <div class="info-item">
     <div class="label">Job #</div>
-    <div class="value"><%= link_to @job.job_number, job_path(@job), style: "color: #1B2C65;" %></div>
+    <div class="value"><%= link_to @job.job_number, job_path(@job) %></div>
   </div>
   <div class="info-item">
     <div class="label">Customer</div>
@@ -41,7 +41,7 @@
   <% end %>
 </div>
 
-<h3 style="color: #1B2C65; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 15px;">Line Items</h3>
+<h3 style="color: var(--print-primary); border-bottom: 1px solid var(--print-border); padding-bottom: 5px; margin-bottom: 15px;">Line Items</h3>
 <table>
   <thead>
     <tr>

@@ -128,7 +128,7 @@
     <div class="no-print" style="display: flex; align-items: center; gap: 0.5rem;">
       <label for="print_date" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Print jobs for:</label>
       <%= form_with url: print_tomorrow_jobs_path, method: :get, local: true, style: "display: flex; align-items: center; gap: 0.5rem;" do |f| %>
-        <%= f.date_field :scheduled_date, value: @print_date, style: "padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem;", onchange: "this.form.requestSubmit();" %>
+        <%= f.date_field :scheduled_date, value: @print_date, style: "padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; background: var(--surface); color: var(--text);", onchange: "this.form.requestSubmit();" %>
       <% end %>
     </div>
     <button class="btn-print no-print" onclick="window.print()">

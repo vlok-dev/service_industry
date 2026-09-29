@@ -18,7 +18,7 @@ class CalendarsController < ApplicationController
       @month_start = @date.beginning_of_month
     else
       @view = "month"
-      redirect_to calendars_path(view: "month") and return
+      redirect_to calendar_path(view: "month") and return
     end
 
     @jobs_by_date = @jobs.group_by(&:scheduled_date)
