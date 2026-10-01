@@ -1668,6 +1668,22 @@
 
             var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+            // The wa.me link only comes back from the POST below, but browsers
+            // only honour window.open during the user gesture that started it.
+            // Opening a blank tab synchronously here and pointing it at the real
+            // URL once the response lands keeps repeat sends from being blocked.
+            var tab = window.open('', '_blank');
+
+            whatsappYesBtn.disabled = true;
+
+            function openWhatsApp(whatsappUrl) {
+              if (tab) {
+                tab.location = whatsappUrl;
+              } else {
+                window.open(whatsappUrl, '_blank');
+              }
+            }
+
             fetch(url, {
               method: 'POST',
               headers: {
@@ -1685,17 +1701,21 @@
               var cell = cellId ? document.getElementById(cellId) : null;
               if (cell && data.timestamp && data.whatsapp_url) {
                 cell.innerHTML = 'Sent Via WhatsApp on ' + data.timestamp + ' at ' + data.time;
-                window.open(data.whatsapp_url, '_blank');
               } else if (cell && data.whatsapp_url) {
                 cell.innerHTML = 'Sent Via WhatsApp';
-                window.open(data.whatsapp_url, '_blank');
               }
+              openWhatsApp(data.whatsapp_url);
               whatsappModal.classList.remove('active');
             })
             .catch(function(error) {
               console.error('Error:', error);
+              // Nothing was recorded, so the job stays unsent and can be retried.
+              if (tab) tab.close();
               alert(error.message || 'Failed to send WhatsApp. Please try again.');
               whatsappModal.classList.remove('active');
+            })
+            .then(function() {
+              whatsappYesBtn.disabled = false;
             });
           });
         }

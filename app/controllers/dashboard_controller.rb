@@ -91,6 +91,7 @@
     if @scheduled_jobs
       @scheduled_jobs = sort_job_list(@scheduled_jobs)
       @scheduled_jobs = @scheduled_jobs.order(scheduled_date: :asc, scheduled_time: :asc) unless params[:sort].present?
+      build_whatsapp_daily_groups
     end
   end
 
@@ -124,6 +125,21 @@
   end
 
   private
+
+  # The schedule view can span a week or a month, but a bulk WhatsApp run is
+  # scoped to one day: each day's queue opens and closes against that day's
+  # jobs. Grouping here keeps the view dumb and guarantees the "Send Bulk
+  # WhatsApps (N)" count matches the rows underneath it. Days with nothing left
+  # to send are dropped so no button ever opens an empty queue.
+  def build_whatsapp_daily_groups
+    @whatsapp_daily_groups = @scheduled_jobs
+      .group_by { |job| job.scheduled_date }
+      .sort_by { |date, _| date || Date.new(9999, 12, 31) }
+      .map do |date, jobs|
+        { date: date, jobs: jobs, pending_count: jobs.count { |job| job_whatsapp_sendable?(job) } }
+      end
+      .select { |group| group[:pending_count].positive? }
+  end
 
   def filter_jobs_for(scope)
     @search_query.present? ? scope.search(@search_query) : scope

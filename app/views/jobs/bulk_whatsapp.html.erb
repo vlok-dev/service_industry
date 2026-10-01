@@ -1,36 +1,261 @@
-<h1>Send WhatsApp Messages</h1>
+<% content_for :title, "Send Bulk WhatsApps" %>
 
-<p>Click each link below to open WhatsApp with the job details pre-filled for the assigned plumber.</p>
-
-<% if @jobs.present? %>
-  <table>
-    <thead>
-      <tr>
-        <th>Time</th>
-        <th>Customer</th>
-        <th>Address</th>
-        <th>Plumber</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @jobs.each do |job| %>
-        <tr>
-          <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip %></td>
-          <td><%= job.customer_name %></td>
-          <td><%= job.address %></td>
-          <td><%= job.assigned_to.name %></td>
-          <td>
-            <% message = "New Job Assigned:\nCustomer: #{job.customer_name}\nAddress: #{job.address}\nDescription: #{job.description}\nScheduled: #{job.scheduled_date&.strftime('%d %B %Y')} at #{job.scheduled_time&.strftime('%I:%M %p')&.strip || 'TBD'}\nPriority: #{job.priority.humanize}\nStatus: #{job.display_status}" %>
-            <% phone = job.assigned_to.phone_number.gsub(/[^0-9]/, '') %>
-            <a href="https://wa.me/<%= phone %>?text=<%= CGI.escape(message) %>" target="_blank" rel="noopener" class="btn">Send WhatsApp</a>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-<% else %>
-  <p>No scheduled jobs with assigned plumbers for <%= @date.strftime('%Y-%m-%d') %>.</p>
+<% queue_json = @queue.map do |job| %>
+  <% {
+      id: job.id,
+      time: job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD",
+      customer: job.customer_name,
+      address: job.address,
+      description: job.description,
+      plumber: job.assigned_to.name,
+      phone: job.assigned_to.phone_number,
+      jobNumber: job.job_number,
+      message: job_whatsapp_message(job),
+      waUrl: wa_me_link(job.assigned_to.phone_number, job_whatsapp_message(job))
+    } %>
 <% end %>
 
-<p><%= link_to "Back to Dashboard", root_path %></p>
+<div class="page-header">
+  <h2>Send Bulk WhatsApps</h2>
+  <p>
+    <%= @date.strftime("%A, %d %B %Y") %> &mdash;
+    <strong><%= @queue.size %></strong> message<%= "s" unless @queue.size == 1 %> waiting.
+  </p>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="alert" style="margin-bottom: 1rem;">
+      WhatsApp opens with each message pre-filled &mdash; you still press Send in WhatsApp yourself.
+      Messages go out <strong>one at a time</strong>, in order, so WhatsApp is never asked to open several chats at once.
+    </div>
+
+      <% if @queue.empty? %>
+        <div class="empty-state">
+          <% if @skipped.any? %>
+            Nothing left to send for <%= @date.strftime("%d %b %Y") %>.
+            All <%= @skipped.size %> scheduled job<%= "s" unless @skipped.size == 1 %> either already had WhatsApp sent or have no plumber number.
+          <% else %>
+            No scheduled jobs with an assigned plumber for <%= @date.strftime("%d %b %Y") %>.
+          <% end %>
+        </div>
+      <% else %>
+        <div class="alert" style="margin-bottom: 1.25rem;">
+          <strong>Quickly send all messages:</strong> Click each "Open WhatsApp" button below. After sending in WhatsApp, come back and click the next one.
+          Check the box to mark as sent, or use "Mark All Sent" at the end.
+        </div>
+
+        <div id="bulk-list" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+
+        <div style="margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <span style="font-weight: 600;">Finished sending?</span>
+            <span style="color: var(--text-muted);" id="bulk-count"></span>
+          </div>
+          <div style="display: flex; gap: 0.75rem;">
+            <button type="button" class="btn btn-secondary" id="bulk-refresh-btn">Refresh Status</button>
+            <button type="button" class="btn btn-success" id="bulk-mark-all-btn">Mark All as Sent</button>
+          </div>
+        </div>
+
+      <% if @skipped.any? %>
+        <details style="margin-top: 1rem;">
+          <summary style="cursor: pointer; color: var(--text-muted);">Not queued (<%= @skipped.size %>)</summary>
+          <table style="width: 100%; margin-top: 0.75rem; font-size: 0.85rem;">
+            <thead>
+              <tr><th style="text-align: left;">Time</th><th style="text-align: left;">Customer</th><th style="text-align: left;">Reason</th></tr>
+            </thead>
+            <tbody>
+              <% @skipped.each do |job| %>
+                <tr>
+                  <td><%= job.scheduled_time&.strftime("%I:%M %p")&.strip || "TBD" %></td>
+                  <td><%= job.customer_name %></td>
+                  <td><%= job.whatsapp_sent_at ? "Already sent #{whatsapp_sent_at_display(job)}" : "No plumber phone number" %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </details>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script type="application/json" id="bulk-queue-data"><%= raw queue_json.to_json %></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var dataEl = document.getElementById('bulk-queue-data');
+  var sendBtn = document.getElementById('bulk-send-btn');
+  if (!dataEl || !sendBtn) return;
+
+  var queue = JSON.parse(dataEl.textContent);
+  var total = queue.length;
+  var STORAGE_KEY = 'bulkWhatsappQueue:' + <%= raw @date.iso8601.to_json %>;
+
+  var index = 0;
+  var sentCount = 0;
+  var skippedIds = [];
+  var busy = false;
+
+  // Resume across a refresh so a half-finished run is not lost, and so the
+  // scheduler cannot accidentally re-send messages already marked as sent.
+  try {
+    var saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || 'null');
+    if (saved && saved.total === total) {
+      index = saved.index || 0;
+      sentCount = saved.sentCount || 0;
+      skippedIds = saved.skippedIds || [];
+    }
+  } catch (e) { /* corrupt state, start fresh */ }
+
+  function persist() {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+        total: total, index: index, sentCount: sentCount, skippedIds: skippedIds
+      }));
+    } catch (e) { /* storage unavailable, queue still works in-memory */ }
+  }
+
+  var $current = document.getElementById('bulk-current');
+  var $label = document.getElementById('bulk-progress-label');
+  var $bar = document.getElementById('bulk-progress-bar');
+  var $error = document.getElementById('bulk-error');
+  var $list = document.getElementById('bulk-list');
+  var $remaining = document.getElementById('bulk-remaining-count');
+
+  function clearStorage() {
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) { /* no-op */ }
+  }
+
+  function renderList() {
+    if (!$list) return;
+    var html = '';
+    for (var i = 0; i < queue.length; i++) {
+      var job = queue[i];
+      var state = i < index ? (skippedIds.indexOf(job.id) >= 0 ? 'skipped' : 'sent') : 'pending';
+      var badge = state === 'sent'
+        ? '<span style="color: #16a34a; font-weight: 600;">Sent</span>'
+        : state === 'skipped'
+          ? '<span style="color: var(--text-muted);">Skipped</span>'
+          : '<span style="color: var(--text-muted);">Waiting</span>';
+      html += '<div style="display: flex; justify-content: space-between; gap: 1rem; padding: 0.35rem 0.5rem; border-radius: 6px; background: ' +
+        (i === index ? '#f0fdf4' : 'transparent') + ';">' +
+        '<span><strong>' + (job.time || 'TBD') + '</strong> &middot; ' + escapeHtml(job.customer) + ' &rarr; ' + escapeHtml(job.plumber) + '</span>' +
+        '<span>' + badge + '</span></div>';
+    }
+    $list.innerHTML = html;
+    if ($remaining) $remaining.textContent = String(total - index);
+  }
+
+  function escapeHtml(value) {
+    var div = document.createElement('div');
+    div.textContent = value == null ? '' : value;
+    return div.innerHTML;
+  }
+
+  function showError(message) {
+    if (!$error) return;
+    if (message) {
+      $error.textContent = message;
+      $error.style.display = 'block';
+    } else {
+      $error.style.display = 'none';
+    }
+  }
+
+  function render() {
+    if (index >= total) {
+      $current.style.display = 'none';
+      document.getElementById('bulk-progress-wrap').style.display = 'none';
+      var done = document.getElementById('bulk-done');
+      var summary = document.getElementById('bulk-done-summary');
+      var remainingSkips = skippedIds.length;
+      summary.textContent = 'Sent ' + sentCount + ' of ' + total + ' message' + (total === 1 ? '' : 's') +
+        (remainingSkips ? ', skipped ' + remainingSkips + '.' : '.');
+      done.style.display = 'block';
+      clearStorage();
+      renderList();
+      return;
+    }
+
+    var job = queue[index];
+    document.getElementById('bulk-customer').textContent = job.customer;
+    document.getElementById('bulk-meta').textContent =
+      (job.time || 'TBD') + ' · ' + (job.jobNumber || 'No job #') + ' · ' + job.address;
+    document.getElementById('bulk-plumber').textContent = job.plumber;
+    document.getElementById('bulk-phone').textContent = job.phone;
+    document.getElementById('bulk-message').textContent = job.message;
+
+    $label.textContent = 'Message ' + (index + 1) + ' of ' + total;
+    $bar.style.width = Math.round((index / total) * 100) + '%';
+    showError(null);
+    renderList();
+  }
+
+  sendBtn.addEventListener('click', function() {
+    if (busy) return;
+    var job = queue[index];
+
+    // Browsers only allow one window.open per user gesture, and the POST that
+    // produces the wa.me link is async. Opening a blank tab synchronously here
+    // and pointing it at the URL afterwards is what keeps the second and later
+    // messages from being silently popup-blocked.
+    var tab = window.open('', '_blank');
+    busy = true;
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Opening WhatsApp…';
+
+    var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch(job.confirmUrl, {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': csrf, 'Accept': 'application/json' }
+    })
+      .then(function(response) {
+        return response.json().then(function(data) {
+          if (!response.ok) throw new Error(data.error || 'Could not record the send.');
+          return data;
+        });
+      })
+      .then(function(data) {
+        if (tab) {
+          tab.location = data.whatsapp_url;
+        } else {
+          window.open(data.whatsapp_url, '_blank');
+        }
+        sentCount += 1;
+        index += 1;
+        persist();
+        render();
+      })
+      .catch(function(error) {
+        if (tab) tab.close();
+        showError(error.message + ' The message was not marked as sent, so you can retry it.');
+      })
+      .then(function() {
+        busy = false;
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Open WhatsApp & Mark Sent';
+      });
+  });
+
+  document.getElementById('bulk-skip-btn').addEventListener('click', function() {
+    if (busy || index >= total) return;
+    // Skip leaves whatsapp_sent_at untouched on purpose: skipping means "not
+    // right now", and the job stays in the queue for the next run.
+    skippedIds.push(queue[index].id);
+    index += 1;
+    persist();
+    render();
+  });
+
+  document.getElementById('bulk-stop-btn').addEventListener('click', function() {
+    if (busy) return;
+    clearStorage();
+    window.location.href = <%= raw dashboard_path.to_json %>;
+  });
+
+  render();
+});
+</script>

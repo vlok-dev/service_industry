@@ -239,6 +239,9 @@
               <th>Job Type</th>
               <th>Assigned To</th>
               <th>Invoice #</th>
+              <% if current_user.accountant? %>
+                <th>Send WhatsApp</th>
+              <% end %>
             </tr>
           </thead>
           <tbody>
@@ -253,6 +256,9 @@
                 <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= render "assigned_to_dropdown", job: job %></td>
                 <td><%= job.invoice_number || "—" %></td>
+                <% if current_user.accountant? %>
+                  <td><%= render "whatsapp_cell", job: job %></td>
+                <% end %>
               </tr>
             <% end %>
           </tbody>
@@ -279,6 +285,9 @@
               <th>Job Type</th>
               <th>Assigned To</th>
               <th>Invoice #</th>
+              <% if current_user.accountant? %>
+                <th>Send WhatsApp</th>
+              <% end %>
             </tr>
           </thead>
           <tbody>
@@ -293,6 +302,9 @@
                 <td><%= render "job_type_dropdown", job: job %></td>
                 <td><%= render "assigned_to_dropdown", job: job %></td>
                 <td><%= job.invoice_number || "—" %></td>
+                <% if current_user.accountant? %>
+                  <td><%= render "whatsapp_cell", job: job %></td>
+                <% end %>
               </tr>
             <% end %>
           </tbody>

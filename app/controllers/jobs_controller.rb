@@ -168,10 +168,9 @@ class JobsController < ApplicationController
   def whatsapp
     authorize @job, :show?
 
-    phone = @job.assigned_to&.phone_number
-    if phone.present?
-      message = "New Job Assigned:\n\nCustomer: #{@job.customer_name}\n\nAddress: #{@job.address}\n\nDescription: #{@job.description}\n\nTomorrow#{@job.scheduled_time&.strftime(' at %I:%M %p')}"
-      redirect_to "https://wa.me/#{phone.gsub(/[^0-9]/, '')}?text=#{CGI.escape(message)}", allow_other_host: true
+    url = job_whatsapp_url(@job)
+    if url
+      redirect_to url, allow_other_host: true
     else
       redirect_to @job, alert: "No phone number available for the assigned plumber."
     end
@@ -180,41 +179,57 @@ class JobsController < ApplicationController
   def schedule_whatsapp
     authorize @job, :show?
 
-    phone = @job.assigned_to&.phone_number
-    if phone.present?
-      service_type = @job.project? ? "Project" : "Car Service"
-      message = "For Your Attention\n\n#{service_type}\n\nDate: #{@job.scheduled_date&.strftime('%d %B %Y')}\n\nTime: #{@job.scheduled_time&.strftime('%I:%M %p')}\n\nCustomer: #{@job.customer_name}\n\nAddress: #{@job.address}\n\nDescription: #{@job.description}"
-      redirect_to "https://wa.me/#{phone.gsub(/[^0-9]/, '')}?text=#{CGI.escape(message)}", allow_other_host: true
+    url = job_whatsapp_url(@job)
+    if url
+      redirect_to url, allow_other_host: true
     else
       redirect_to dashboard_path, alert: "No phone number available for the assigned plumber."
     end
   end
 
+  # Stamps the send and hands back the wa.me link. This is the single write
+  # path for every WhatsApp send, single or bulk: the bulk queue calls it once
+  # per message so each recipient keeps their own audit trail, and so a failure
+  # halfway through a bulk run never marks the unsent jobs as done.
   def confirm_whatsapp
     authorize @job, :show?
+
+    url = job_whatsapp_url(@job)
+    if url.blank?
+      render json: { error: "No phone number available" }, status: :unprocessable_entity
+      return
+    end
+
     @job.update(whatsapp_sent_at: Time.current.in_time_zone('Africa/Johannesburg'))
 
-    phone = @job.assigned_to&.phone_number
-    if phone.present?
-      message = "New Job Assigned:\n\nCustomer: #{@job.customer_name}\n\nAddress: #{@job.address}\n\nDescription: #{@job.description}\n\nTomorrow#{@job.scheduled_time&.strftime(' at %I:%M %p')}"
-      whatsapp_url = "https://wa.me/#{phone.gsub(/[^0-9]/, '')}?text=#{CGI.escape(message)}"
-      render json: {
-        timestamp: (@job.whatsapp_sent_at + 2.hours).strftime('%d %b %Y'),
-        time: (@job.whatsapp_sent_at + 2.hours).strftime('%I:%M %p'),
-        whatsapp_url: whatsapp_url
-      }
-    else
-      render json: { error: "No phone number available" }, status: :unprocessable_entity
-    end
+    render json: {
+      timestamp: (@job.whatsapp_sent_at + 2.hours).strftime('%d %b %Y'),
+      time: (@job.whatsapp_sent_at + 2.hours).strftime('%I:%M %p'),
+      whatsapp_url: url
+    }
   end
 
+  # Sequential send queue. wa.me is a click-to-chat deep link, not an API: it
+  # opens WhatsApp with the text pre-filled and a human still presses Send, so
+  # there is no way to deliver N messages unattended. Browsers also block the
+  # second window.open in a burst. Bulk sending therefore has to be one message
+  # at a time, driven by the scheduler clicking through the queue.
   def bulk_whatsapp
-    authorize Job, :schedule?
+    authorize Job, :bulk_whatsapp?
 
-    date = Date.parse(params[:scheduled_date]) rescue Date.tomorrow
-    jobs = policy_scope(Job).scheduled.on_date(date)
-    @jobs = jobs.select { |job| job.assigned_to&.phone_number.present? }
-    @date = date
+    @date = params[:scheduled_date].present? ? Date.parse(params[:scheduled_date]) : Date.tomorrow
+
+    day_jobs = policy_scope(Job)
+                    .scheduled
+                    .on_date(@date)
+                    .includes(:assigned_to)
+                    .order(:scheduled_time, :id)
+
+    # Already-sent and un-numbered jobs are shown for context but never queued,
+    # so the scheduler cannot "send" a message that has nowhere to go or
+    # double-send one that already went out.
+    @queue = day_jobs.select { |job| job_whatsapp_url(job).present? && job.whatsapp_sent_at.nil? }
+    @skipped = day_jobs.reject { |job| @queue.include?(job) }
   end
 
   def print_tomorrow

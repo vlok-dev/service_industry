@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
   /ix
 
   include Pundit::Authorization
+  include WhatsappHelper
   allow_browser versions: :modern
   stale_when_importmap_changes
 

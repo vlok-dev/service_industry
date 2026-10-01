@@ -1,0 +1,12 @@
+<%# One row's WhatsApp control. The button carries data-job-id so the shared
+    modal in the layout can find confirm_whatsapp_job_path and the
+    whatsapp-cell-<id> span to update on success. %>
+<span id="whatsapp-cell-<%= job.id %>">
+  <% if job.whatsapp_sent_at %>
+    <span style="font-size: 0.8rem; color: var(--text-muted);">Sent WhatsApp on <%= whatsapp_sent_at_display(job) %></span>
+  <% elsif job_whatsapp_recipient(job).present? %>
+    <%= link_to "Send WhatsApp", "#", class: "btn btn-sm whatsapp-confirm-btn", data: { job_id: job.id } %>
+  <% else %>
+    <span style="font-size: 0.8rem; color: var(--text-muted);" title="Assign a plumber with a phone number to send WhatsApp">No plumber number</span>
+  <% end %>
+</span>
