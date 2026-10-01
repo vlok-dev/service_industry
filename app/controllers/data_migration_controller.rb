@@ -47,8 +47,16 @@ class DataMigrationController < ApplicationController
 
         log << "#{table}: #{count} rows"
 
+        # Check if target already has data - skip TRUNCATE if empty
+        target_count = tgt.exec("SELECT COUNT(*) FROM \"#{table}\"").first['count'].to_i
+
         if only_tables
-          tgt.exec("TRUNCATE TABLE \"#{table}\" RESTART IDENTITY;")
+          if target_count > 0
+            tgt.exec("DELETE FROM \"#{table}\"")
+            log << "  Cleared #{target_count} existing rows"
+          else
+            log << "  Target already empty, skipping clear"
+          end
         else
           tgt.exec("TRUNCATE TABLE \"#{table}\" CASCADE;")
         end
