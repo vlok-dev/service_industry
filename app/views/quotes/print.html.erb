@@ -1,0 +1,379 @@
+<%# ===== Dynamic variables - change these to customize the estimate ===== %>
+<% company = @quote.company_name %>
+<% attention = @quote.customer_attention %>
+<% email_address = @quote.customer_email %>
+<% estimate_date = @quote.formatted_date %>
+<% property = @quote.property_address %>
+<% subject = @quote.subject.presence || @quote.job_subject %>
+<% scope_description = (@quote.notes.presence || @quote.job_subject.presence || "To replace the geyserwise complete including the necessary components, including all materials and labour.") %>
+<% price = @quote.total_including_vat %>
+<% subtotal = @quote.subtotal %>
+<% formatted_subtotal = sprintf('%.2f', subtotal.to_f).gsub('.', ',') %>
+<% formatted_vat = sprintf('%.2f', @quote.vat_amount.to_f).gsub('.', ',') %>
+<% formatted_price = sprintf('%.2f', price.to_f).gsub('.', ',') %>
+<% signer_name = (current_user&.name.presence || "Michael Bennett") %>
+
+<style>
+  * { box-sizing: border-box; }
+
+  .quote-print-container {
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    padding: 20px;
+  }
+
+  .quote-print-container .page {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 30px;
+    position: relative;
+    background: var(--surface);
+  }
+
+  .logo {
+    position: absolute;
+    top: 14px;
+    right: 24px;
+    width: 180px;
+    height: auto;
+    z-index: 0;
+  }
+
+  .logo img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .title {
+    text-align: center;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 18px;
+    letter-spacing: 0.15em;
+    margin: 30px 0 30px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .details-block {
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .detail-row {
+    display: flex;
+    align-items: center;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  .detail-label {
+    width: 140px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .detail-colon {
+    margin-left: 12px;
+    font-weight: bold;
+    width: 16px;
+  }
+
+  .detail-value {
+    margin-left: 12px;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .detail-value-bold {
+    font-weight: bold;
+  }
+
+  .subject-line {
+    font-weight: bold;
+    margin: 20px 0 10px 0;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: baseline;
+    white-space: nowrap;
+  }
+
+  .scope-block {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .scope-text {
+    margin: 0 0 0.5rem 0;
+  }
+
+  .scope-text::before {
+    content: "\2022";
+    margin-right: 0.5em;
+  }
+
+  .price-line {
+    text-align: right;
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 15px;
+  }
+
+  .vat-note {
+    font-weight: bold;
+    margin-top: 2px;
+    text-transform: lowercase;
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+.line-items-container {
+    margin: 16px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .line-item-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .line-item-header .desc-col {
+    flex: 1;
+  }
+
+  .line-item-header .total-col {
+    width: 140px;
+    text-align: right;
+  }
+
+  .line-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+
+  .line-item-row .desc-col {
+    flex: 1;
+    font-size: 13px;
+  }
+
+  .line-item-row .total-col {
+    width: 140px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .totals-table {
+    width: 100%;
+    margin-top: 16px;
+    border-collapse: collapse;
+    position: relative;
+    z-index: 1;
+  }
+
+  .totals-table td {
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  .totals-table td.label {
+    text-align: right;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .totals-table td.value {
+    text-align: right;
+    font-weight: 600;
+    color: var(--text-muted);
+    width: 120px;
+  }
+
+  .totals-table td.total-label {
+    text-align: right;
+    font-weight: 700;
+    font-size: 15px;
+    border-top: 2px solid var(--border);
+  }
+
+  .totals-table td.total-value {
+    text-align: right;
+    font-weight: 700;
+    font-size: 15px;
+    border-top: 2px solid var(--border);
+  }
+
+  .terms-block {
+    margin-top: 32px;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .terms-title {
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 13px;
+    margin-bottom: 10px;
+    color: var(--text-muted);
+  }
+
+  .terms-list {
+    list-style: disc;
+    margin: 0 0 8px 0;
+    padding-left: 20px;
+  }
+
+  .terms-list li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+    font-size: 13px;
+  }
+
+  .closing-block {
+    margin-top: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .closing-block p,
+  .closing-block .signature-line {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+  }
+
+  .footer {
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    margin-top: 32px;
+    padding-top: 12px;
+    border-top: 2px solid var(--border);
+    z-index: 0;
+  }
+
+  .footer div {
+    margin: 0;
+    line-height: 1.4;
+  }
+</style>
+
+<div class="quote-print-container">
+  <div class="page">
+    <div class="logo">
+      <%= image_tag "IndustroTopRightLogo.png", alt: "Industro Plumbers Logo" %>
+    </div>
+
+    <h1 class="title">ESTIMATE</h1>
+
+    <div class="details-block">
+      <div class="detail-row">
+        <span class="detail-label">QUOTE #</span>
+        <span class="detail-colon" style="font-weight: bold;">:</span>
+        <span class="detail-value detail-value-bold" style="font-weight: bold;"><%= @quote.quote_number %></span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">COMPANY</span>
+        <span class="detail-colon" style="font-weight: bold;">:</span>
+        <span class="detail-value detail-value-bold"><%= company %></span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">ATTENTION</span>
+        <span class="detail-colon">:</span>
+        <span class="detail-value"><%= attention %></span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">EMAIL ADDRESS</span>
+        <span class="detail-colon">:</span>
+        <span class="detail-value"><%= email_address %></span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">DATE</span>
+        <span class="detail-colon">:</span>
+        <span class="detail-value"><%= estimate_date %></span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">PROPERTY</span>
+        <span class="detail-colon" style="font-weight: bold;">:</span>
+        <span class="detail-value detail-value-bold"><%= property %></span>
+      </div>
+    </div>
+
+    <div class="subject-line">
+      RE: <span style="font-weight: normal; text-decoration: none; margin-left: 0.5rem;"><%= subject %></span>
+    </div>
+
+    <div class="line-items-container">
+      <div class="line-item-header">
+        <span class="desc-col">DESCRIPTION</span>
+        <span class="total-col">LINE ITEM TOTAL (R)</span>
+      </div>
+      <% @quote.items.each do |item| %>
+        <div class="line-item-row">
+          <span class="desc-col"><%= item.description.presence || "No description" %></span>
+          <span class="total-col"><%= number_to_currency(item.line_total, unit: "R", precision: 2) %></span>
+        </div>
+      <% end %>
+    </div>
+
+    <table class="totals-table">
+      <tfoot>
+        <tr>
+          <td colspan="2" class="label">Total (excl. VAT):</td>
+          <td class="value">R <%= sprintf('%.2f', @quote.subtotal.to_f).gsub('.', ',') %></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="terms-block">
+      <div class="terms-title">TERMS AND CONDITIONS</div>
+      <ul class="terms-list">
+        <li>This estimate is valid for 30 days and excludes VAT.</li>
+        <li>Defective workmanship will be rectified free of charge if reported within 7 days after completion of work</li>
+        <li>We also reserve the right to re-quote and then recharge should additional work be required which was not in the original estimate</li>
+        <li>Ownership of goods does not pass on to the client until full payment has been received. Industro Services reserves the right to remove the goods no matter where the location, in lieu of payment. All cost to remove said goods and any subsequent legal costs, will be borne by the client</li>
+      </ul>
+    </div>
+
+    <div class="closing-block">
+      <p>Should you require any additional information, please contact me on 071 988 1196</p>
+      <p class="signature-line">Kind Regards,</p>
+      <p class="signature-line"><%= signer_name %></p>
+    </div>
+
+    <div class="footer">
+      <div>041 205 0846 | info@industroplumbers.co.za | 105 Main Road, Walmer, Port Elizabeth, 6001</div>
+      <div>| Vat No: 4610277099 | Registration No: 2014 | 186021 | 07</div>
+    </div>
+  </div>
+</div>

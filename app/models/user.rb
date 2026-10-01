@@ -20,6 +20,7 @@ class User < ApplicationRecord
   has_many :jobs, dependent: :nullify
   has_many :reports, dependent: :destroy
   has_many :digital_job_cards, dependent: :destroy
+  has_many :quotes, foreign_key: :created_by_id, dependent: :destroy
 
   before_validation :normalize_email, :ensure_person
 
@@ -61,7 +62,8 @@ class User < ApplicationRecord
 
   def dismiss_reminder!(entry_id)
     pairs = dismissed_pairs
-    pairs << "#{entry_id}:#{Date.today.to_s}" unless pairs.include?("#{entry_id}:#{Date.today.to_s}")
+    today = Date.today
+    pairs << "#{entry_id}:#{today}" unless pairs.include?("#{entry_id}:#{today}")
     update(dismissed_reminder_ids_raw: JSON.generate(pairs))
   end
 

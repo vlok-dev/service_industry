@@ -6,7 +6,7 @@ class DigitalJobCardsController < ApplicationController
   before_action :set_inventory_items, only: %i[ index new create edit update ]
 
   def index
-    @digital_job_cards = policy_scope(DigitalJobCard).recent
+    @digital_job_cards = policy_scope(DigitalJobCard).recent.includes(:materials)
     if params[:q].present?
       term = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.strip)}%"
       @digital_job_cards = @digital_job_cards.where(

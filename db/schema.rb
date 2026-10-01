@@ -10,10 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_29_120001) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_01_212656) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
   create_table "addresses", force: :cascade do |t|
     t.text "address"
-    t.integer "client_id", null: false
+    t.bigint "client_id", null: false
     t.datetime "created_at", null: false
     t.boolean "is_default", default: false
     t.string "label", default: "Other"
@@ -55,9 +58,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_120001) do
 
   create_table "digital_job_card_materials", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.integer "digital_job_card_id", null: false
+    t.bigint "digital_job_card_id", null: false
     t.decimal "hours_worked", default: "1.0", null: false
-    t.integer "inventory_item_id"
+    t.bigint "inventory_item_id"
     t.boolean "is_labor", default: false
     t.decimal "labor_rate", precision: 10, scale: 2, default: "0.0"
     t.decimal "markup", precision: 5, scale: 2, default: "0.0"
@@ -77,11 +80,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_120001) do
     t.datetime "created_at", null: false
     t.date "date"
     t.text "description"
-    t.integer "job_id"
+    t.bigint "job_id"
     t.time "time_finish"
     t.time "time_start"
     t.datetime "updated_at", null: false
-    t.integer "user_id", null: false
+    t.bigint "user_id", null: false
     t.index ["client_id"], name: "index_digital_job_cards_on_client_id"
     t.index ["job_id"], name: "index_digital_job_cards_on_job_id"
     t.index ["user_id"], name: "index_digital_job_cards_on_user_id"
@@ -106,6 +109,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_120001) do
     t.decimal "unit_price", precision: 10, scale: 2
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_inventory_items_on_code", unique: true
+    t.index ["is_active"], name: "index_inventory_items_on_is_active"
   end
 
   create_table "jobs", force: :cascade do |t|
@@ -148,10 +152,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_120001) do
   end
 
   create_table "planner_entries", force: :cascade do |t|
-    t.integer "assigned_to_id"
+    t.bigint "assigned_to_id"
     t.string "category", default: "other"
     t.datetime "created_at", null: false
-    t.integer "created_by_id", null: false
+    t.bigint "created_by_id", null: false
     t.text "description"
     t.date "entry_date", null: false
     t.time "entry_time"
@@ -207,85 +211,3 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_120001) do
     t.index ["job_id"], name: "index_purchase_orders_on_job_id"
     t.index ["supplier_id"], name: "index_purchase_orders_on_supplier_id"
   end
-
-  create_table "reports", force: :cascade do |t|
-    t.integer "category", null: false
-    t.datetime "created_at", null: false
-    t.text "description"
-    t.string "role", null: false
-    t.integer "status", default: 0, null: false
-    t.string "title", null: false
-    t.datetime "updated_at", null: false
-    t.integer "user_id", null: false
-    t.index ["user_id"], name: "index_reports_on_user_id"
-  end
-
-  create_table "settings", force: :cascade do |t|
-    t.boolean "allow_client_deletion", default: true
-    t.boolean "allow_inventory_deletion", default: true
-    t.boolean "allow_supplier_deletion", default: true
-    t.string "company_name"
-    t.datetime "created_at", null: false
-    t.string "default_job_priority"
-    t.string "notification_email"
-    t.datetime "updated_at", null: false
-    t.string "whatsapp_api_key"
-    t.string "whatsapp_phone_id"
-    t.time "working_hours_end"
-    t.time "working_hours_start"
-  end
-
-  create_table "suppliers", force: :cascade do |t|
-    t.text "address"
-    t.string "contact_person"
-    t.datetime "created_at", null: false
-    t.string "email"
-    t.string "name", null: false
-    t.string "phone"
-    t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_suppliers_on_name"
-  end
-
-  create_table "users", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.text "dismissed_reminder_ids_raw"
-    t.string "email"
-    t.string "encrypted_password", default: "", null: false
-    t.datetime "last_logged_in_at"
-    t.string "name"
-    t.integer "person_id", null: false
-    t.string "phone_number"
-    t.datetime "remember_created_at"
-    t.datetime "reminder_dismissed_at"
-    t.datetime "reset_password_sent_at"
-    t.string "reset_password_token"
-    t.integer "role"
-    t.string "theme_preference", default: "light"
-    t.datetime "updated_at", null: false
-    t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["last_logged_in_at"], name: "index_users_on_last_logged_in_at"
-    t.index ["person_id", "role"], name: "index_users_on_person_id_and_role", unique: true
-    t.index ["person_id"], name: "index_users_on_person_id"
-    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
-  end
-
-  add_foreign_key "addresses", "clients"
-  add_foreign_key "claims", "jobs"
-  add_foreign_key "digital_job_card_materials", "digital_job_cards"
-  add_foreign_key "digital_job_card_materials", "inventory_items"
-  add_foreign_key "digital_job_cards", "clients"
-  add_foreign_key "digital_job_cards", "jobs"
-  add_foreign_key "digital_job_cards", "users"
-  add_foreign_key "jobs", "clients"
-  add_foreign_key "jobs", "users"
-  add_foreign_key "jobs", "users", column: "assigned_to_id"
-  add_foreign_key "planner_entries", "users", column: "assigned_to_id"
-  add_foreign_key "planner_entries", "users", column: "created_by_id"
-  add_foreign_key "purchase_order_items", "inventory_items"
-  add_foreign_key "purchase_order_items", "purchase_orders"
-  add_foreign_key "purchase_orders", "jobs"
-  add_foreign_key "purchase_orders", "suppliers"
-  add_foreign_key "purchase_orders", "users", column: "created_by_id"
-  add_foreign_key "reports", "users"
-  add_foreign_key "users", "people"
-end
