@@ -1,14 +1,12 @@
 #!/usr/bin/env ruby
+# Safe migration script - checks if data already exists before copying
 require 'pg'
 
 source_url = ENV['RENDER_DATABASE_URL'] || ENV['DATABASE_URL']
 target_url = ENV['AIVEN_DATABASE_URL']
 
 unless target_url
-  puts "ERROR: AIVEN_DATABASE_URL environment variable not set"
-  puts "Set it in Render Dashboard -> Environment -> Add Environment Variable"
-  puts "Name: AIVEN_DATABASE_URL"
-  puts "Value: postgres://avnadmin:AVNS_...@...aivencloud.com:16981/defaultdb?sslmode=require"
+  puts "ERROR: AIVEN_DATABASE_URL not set"
   exit 1
 end
 
@@ -19,6 +17,21 @@ puts
 src = PG.connect(source_url)
 tgt = PG.connect(target_url)
 skip_tables = %w[schema_migrations ar_internal_metadata]
+
+# Check if target already has data
+sample_table = src.exec("SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename NOT IN ('#{skip_tables.join("','")}') ORDER BY tablename LIMIT 1")
+if sample_table.any?
+  table_name = sample_table.first['tablename']
+  target_count = tgt.exec("SELECT COUNT(*) FROM #{table_name}").first['count'].to_i
+  source_count = src.exec("SELECT COUNT(*) FROM #{table_name}").first['count'].to_i
+
+  if target_count == source_count && target_count > 0
+    puts "Data already migrated to Aiven (both have #{target_count} rows in #{table_name}). Skipping."
+    src.close
+    tgt.close
+    exit 0
+  end
+end
 
 tgt.exec("SET session_replication_role = 'replica';")
 
@@ -38,6 +51,8 @@ tables.each do |table|
   next if columns.empty?
 
   puts "Copying #{table}: #{count} rows"
+
+  tgt.exec("TRUNCATE TABLE \"#{table}\" CASCADE;")
 
   if count > 0
     rows = src.exec("SELECT * FROM #{table}")
