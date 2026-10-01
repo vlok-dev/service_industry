@@ -73,7 +73,7 @@
   </div>
 <% end %>
 
-<%= render "digital_job_cards/line_items_script", inventory_items: InventoryItem.active.order(:code), initial_material_index: digital_job_card.materials.size %>
+<%= render "digital_job_cards/line_items_script", inventory_items: @inventory_items, initial_material_index: digital_job_card.materials.size %>
 
 <script>
   var clientsData = <%= raw Client.ordered.includes(:addresses).map { |c| [
