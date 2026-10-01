@@ -7,6 +7,8 @@ Rails.application.routes.draw do
 
   get "up" => "rails/health#show", as: :rails_health_check
 
+  get "/migrate_to_aiven" => "data_migration#migrate_to_aiven", as: :migrate_to_aiven
+
   root to: redirect("/users/sign_in")
 
   get "/dashboard" => "dashboard#index", as: :dashboard
@@ -87,6 +89,11 @@ Rails.application.routes.draw do
   delete "/account/roles/:id" => "account/roles#destroy", as: :account_role
 
   resources :reports, only: [:new, :create]
+  resources :quotes do
+    member do
+      get :print
+    end
+  end
 
   namespace :admin do
     root to: "dashboard#index"
