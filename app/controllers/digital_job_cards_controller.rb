@@ -31,8 +31,7 @@ class DigitalJobCardsController < ApplicationController
     if @digital_job_card.save
       redirect_to digital_job_cards_path, notice: "Digital job card created successfully."
     else
-      @digital_job_cards = current_user.digital_job_cards.recent
-      render :index, status: :unprocessable_entity
+      render :new, status: :unprocessable_entity
     end
   end
 
