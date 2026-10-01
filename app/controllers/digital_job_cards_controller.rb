@@ -3,7 +3,7 @@ class DigitalJobCardsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_digital_job_card, only: %i[ show edit update destroy print ]
   before_action :authorize_access!, only: %i[ show edit update destroy print ]
-  before_action :set_inventory_items, only: %i[ index new create edit update ]
+  before_action :set_inventory_items, only: %i[ new create edit update ]
 
   def index
     @digital_job_cards = policy_scope(DigitalJobCard).recent.includes(:materials)

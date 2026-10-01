@@ -4,20 +4,20 @@
 </div>
 
 <div class="action-bar">
-  <div class="actions">
-    <%= form_with url: digital_job_cards_path, method: :get, local: true, style: "display: flex; gap: 0.5rem; align-items: center;" do |f| %>
-      <%= f.text_field :q, value: params[:q], placeholder: "Search by Client Name, Address, or Description...", style: "padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; width: 320px;" %>
-      <%= f.submit "Search", class: "btn" %>
-      <% if params[:q].present? %>
-        <%= link_to "Clear", digital_job_cards_path, class: "btn btn-sm btn-secondary" %>
-      <% end %>
-    <% end %>
-    <% unless current_user.scheduler? %>
-      <button type="button" class="btn btn-success" id="newDigitalJobCardBtn" style="margin-left: 0.5rem;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        Create New Digital Job Card
-      </button>
-    <% end %>
+     <div class="actions">
+       <%= form_with url: digital_job_cards_path, method: :get, local: true, style: "display: flex; gap: 0.5rem; align-items: center;" do |f| %>
+         <%= f.text_field :q, value: params[:q], placeholder: "Search by Client Name, Address, or Description...", style: "padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; width: 320px;" %>
+         <%= f.submit "Search", class: "btn" %>
+         <% if params[:q].present? %>
+           <%= link_to "Clear", digital_job_cards_path, class: "btn btn-sm btn-secondary" %>
+         <% end %>
+       <% end %>
+      <% unless current_user.scheduler? %>
+         <%= link_to new_digital_job_card_path, class: "btn btn-success", style: "margin-left: 0.5rem;" do %>
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+           Create New Digital Job Card
+         <% end %>
+     <% end %>
   </div>
 </div>
 
@@ -63,7 +63,7 @@
                       Print
                     <% end %>
                     <% unless current_user.scheduler? %>
-                      <%= link_to edit_digital_job_card_path(card), class: "btn-icon btn-icon-edit", title: "Edit" do %>
+        <%= link_to edit_digital_job_card_path(card), class: "btn-icon btn-icon-edit", title: "Edit" do %>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                       <% end %>
                       <%= button_to digital_job_card_path(card), method: :delete, data: { confirm: "Delete this digital job card?" }, class: "btn-icon btn-icon-danger", title: "Delete" do %>
@@ -95,40 +95,4 @@
   </div>
 <% end %>
 
-<div id="flash"></div>
-
-<div class="modal-overlay" id="digitalJobCardModal" style="z-index: 10000; display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 2rem;">
-  <div class="modal-dialog" style="background: var(--surface); border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border: 1px solid var(--border); max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;">
-    <div class="modal-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-      <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: var(--text);">Create New Digital Job Card</h3>
-      <button type="button" class="btn btn-secondary" id="closeDigitalJobCardModal" style="background: transparent; border: none; font-size: 1.5rem; line-height: 1; color: var(--text-muted); cursor: pointer;">&times;</button>
-    </div>
-    <div class="modal-body" style="padding: 1.5rem;" id="new_digital_job_card_form">
-      <%= render "form", digital_job_card: @digital_job_card %>
-    </div>
-  </div>
-</div>
-
-<script>
-  (function() {
-    var modal = document.getElementById('digitalJobCardModal');
-    var openBtn = document.getElementById('newDigitalJobCardBtn');
-    var closeBtn = document.getElementById('closeDigitalJobCardModal');
-    var cancelBtn = document.getElementById('cancelDigitalJobCardBtn');
-
-    function show() { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
-    function hide() { modal.style.display = 'none'; document.body.style.overflow = ''; }
-
-    if (openBtn) openBtn.addEventListener('click', show);
-    if (closeBtn) closeBtn.addEventListener('click', hide);
-    if (cancelBtn) cancelBtn.addEventListener('click', hide);
-
-    modal.addEventListener('click', function(e) {
-      if (e.target === modal) hide();
-    });
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && modal.style.display === 'flex') hide();
-    });
-  })();
-</script>
+  <div id="flash"></div>
