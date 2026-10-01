@@ -27,6 +27,10 @@ class DataMigrationController < ApplicationController
       tgt = PG.connect(target_url)
 
       skip_tables = %w[schema_migrations ar_internal_metadata]
+
+      # Disable FK checks during bulk copy
+      tgt.exec("SET session_replication_role = 'replica';")
+
       tables = src.exec("SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename NOT IN ('#{skip_tables.join("','")}') ORDER BY tablename").map { |r| r['tablename'] }
 
       log << "Found #{tables.size} tables"
@@ -57,6 +61,10 @@ class DataMigrationController < ApplicationController
       end
 
       log << "Done! #{tables.size} tables copied"
+
+      # Re-enable FK checks
+      tgt.exec("SET session_replication_role = 'origin';")
+
       src.close
       tgt.close
       render plain: log.join("\n"), status: :ok
