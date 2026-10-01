@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   get "/migrate_to_aiven" => "data_migration#migrate_to_aiven", as: :migrate_to_aiven
-  get "/export_sql" => "data_migration#export_sql", as: :export_sql
+  get "/run_migration" => "data_migration#run", as: :run_migration
 
   root to: redirect("/users/sign_in")
 
