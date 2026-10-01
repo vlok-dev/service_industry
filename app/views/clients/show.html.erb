@@ -2,7 +2,7 @@
 
 <h1><%= @client.name %></h1>
 
-<div style="background: #f9fafb; padding: 1.5rem; margin-bottom: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border-light);">
+<div style="background: var(--surface); padding: 1.5rem; margin-bottom: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border);">
   <p><strong>Customer Code:</strong> <%= @client.customer_code || "—" %></p>
   <p><strong>Customer Name:</strong> <%= @client.company.present? ? @client.company : [ @client.first_name, @client.last_name ].reject(&:blank?).join(" ") %></p>
   <p><strong>Primary Contact:</strong> <%= @client.contact_person || "—" %></p>

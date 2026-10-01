@@ -4,7 +4,7 @@
 <h1>Clients</h1>
 
 <%= form_with url: clients_path, method: :get, local: true, style: "margin-bottom: 1rem;" do |f| %>
-  <%= f.text_field :q, value: params[:q], placeholder: "Search clients...", style: "padding: 0.5rem; width: 300px;" %>
+  <%= f.text_field :q, value: params[:q], placeholder: "Search clients...", class: "search-input" %>
   <%= f.submit "Search", class: "btn" %>
   <% if params[:q].present? %>
     <%= link_to "Clear", clients_path, class: "btn" %>

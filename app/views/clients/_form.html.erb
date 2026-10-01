@@ -10,63 +10,65 @@
     </div>
   <% end %>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :customer_code, "Customer Code" %><br>
+  <div class="field">
+    <%= f.label :customer_code, "Customer Code" %>
     <%= f.text_field :customer_code, placeholder: "e.g. CUS-001" %>
   </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :first_name, "Customer Name" %><br>
+  <div class="field">
+    <%= f.label :first_name, "Customer Name" %>
     <%= f.text_field :first_name, placeholder: "First name (if individual)" %>
   </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :last_name, "Surname" %><br>
+  <div class="field">
+    <%= f.label :last_name, "Surname" %>
     <%= f.text_field :last_name, placeholder: "Last name (if individual)" %>
   </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :company, "Company" %><br>
+  <div class="field">
+    <%= f.label :company, "Company" %>
     <%= f.text_field :company, placeholder: "Company name (if business)" %>
-    <p style="color: #666; font-size: 0.875rem;">If this is a company, provide the company name. Otherwise use customer name fields above.</p>
+    <p class="form-hint">If this is a company, provide the company name. Otherwise use customer name fields above.</p>
   </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :contact_person, "Primary Contact" %><br>
+  <div class="field">
+    <%= f.label :contact_person, "Primary Contact" %>
     <%= f.text_field :contact_person, placeholder: "Person to contact" %>
-    <p style="color: #666; font-size: 0.875rem;">Name of the primary contact person for this client.</p>
+    <p class="form-hint">Name of the primary contact person for this client.</p>
   </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :email, "Primary Contact Email" %><br>
+  <div class="field">
+    <%= f.label :email, "Primary Contact Email" %>
     <%= f.email_field :email, placeholder: "contact@company.com" %>
   </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :primary_contact_mobile, "Primary Contact Mobile" %><br>
+  <div class="field">
+    <%= f.label :primary_contact_mobile, "Primary Contact Mobile" %>
     <%= f.text_field :primary_contact_mobile, placeholder: "+27 11 123 4567" %>
   </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :delivery_address, "Primary Delivery Address" %><br>
+  <div class="field">
+    <%= f.label :delivery_address, "Primary Delivery Address" %>
     <%= f.text_area :delivery_address, rows: 2 %>
   </div>
 
-  <div style="margin-bottom: 1rem;">
-    <%= f.label :postal_address, "Primary Postal Address" %><br>
+  <div class="field">
+    <%= f.label :postal_address, "Primary Postal Address" %>
     <%= f.text_area :postal_address, rows: 2 %>
-    <p style="color: #666; font-size: 0.875rem;">Leave blank if same as delivery address.</p>
+    <p class="form-hint">Leave blank if same as delivery address.</p>
   </div>
 
-  <div style="margin-bottom: 1rem;">
+  <div class="field">
     <h3 style="margin-bottom: 0.5rem;">Addresses</h3>
-    <p style="color: #666; font-size: 0.875rem; margin-top: 0;">Add additional addresses for this client. You can pick one when creating a job.</p>
+    <p class="form-hint" style="margin-top: 0;">Add additional addresses for this client. You can pick one when creating a job.</p>
     <div id="client_addresses">
       <%= f.fields_for :addresses do |address_form| %>
-        <div class="address-row" style="border-left: 4px solid <%= address_form.object&.label == "Delivery" ? "#1b2c65" : "#b2d33e" %>; border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem; background: var(--bg);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-            <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.2rem 0.6rem; border-radius: 4px; color: <%= address_form.object&.label == "Delivery" ? "white" : "#1b2c65" %>; background: <%= address_form.object&.label == "Delivery" ? "#1b2c65" : "#b2d33e" %>;">
-              <%= address_form.object&.label || "Delivery" %>
+        <% address_label = address_form.object&.label.presence || "Delivery" %>
+        <% address_kind = address_label.downcase == "postal" ? "postal" : "delivery" %>
+        <div class="address-row address-row--<%= address_kind %>">
+          <div class="address-row-head">
+            <span class="address-label-badge address-label-badge--<%= address_kind %>">
+              <%= address_label %>
             </span>
             <% if address_form.object.persisted? %>
               <%= address_form.hidden_field :_destroy, class: "address-destroy" %>
@@ -75,14 +77,14 @@
               <button type="button" class="btn btn-sm btn-secondary remove-address">Remove</button>
             <% end %>
           </div>
-          <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.5rem; align-items: end;">
+          <div class="address-row-grid">
             <div>
               <%= address_form.label :label, style: "font-size: 0.75rem; font-weight: 600;" %>
-              <%= address_form.select :label, ["Delivery", "Postal"], { include_blank: false }, { class: "address-label-select", style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; width: 100%;" } %>
+              <%= address_form.select :label, ["Delivery", "Postal"], { include_blank: false }, { class: "address-label-select" } %>
             </div>
             <div>
               <%= address_form.label :address, style: "font-size: 0.75rem; font-weight: 600;" %>
-              <%= address_form.text_area :address, rows: 2, style: "padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; width: 100%; box-sizing: border-box;" %>
+              <%= address_form.text_area :address, rows: 2, class: "address-input" %>
             </div>
           </div>
         </div>
@@ -96,42 +98,45 @@
 
 <script>
   var addressTemplate = `
-    <div class="address-row" style="border-left: 4px solid #1b2c65; border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem; background: var(--bg);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-        <span class="address-label-badge" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.2rem 0.6rem; border-radius: 4px; color: white; background: #1b2c65;">Delivery</span>
+    <div class="address-row address-row--delivery">
+      <div class="address-row-head">
+        <span class="address-label-badge address-label-badge--delivery">Delivery</span>
         <button type="button" class="btn btn-sm btn-secondary remove-address">Remove</button>
       </div>
-      <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.5rem; align-items: end;">
+      <div class="address-row-grid">
         <div>
           <label style="font-size: 0.75rem; font-weight: 600;">Label</label>
-          <select name="client[addresses_attributes][NEW_INDEX][label]" class="address-label-select" style="padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; width: 100%;">
+          <select name="client[addresses_attributes][NEW_INDEX][label]" class="address-label-select">
             <option value="Delivery">Delivery</option>
             <option value="Postal">Postal</option>
           </select>
         </div>
         <div>
           <label style="font-size: 0.75rem; font-weight: 600;">Address</label>
-          <textarea name="client[addresses_attributes][NEW_INDEX][address]" rows="2" style="padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; width: 100%; box-sizing: border-box;"></textarea>
+          <textarea name="client[addresses_attributes][NEW_INDEX][address]" rows="2" class="address-input"></textarea>
         </div>
       </div>
     </div>
   `;
 
+  function paintAddressRow(row) {
+    if (!row) return;
+    var isDelivery = row.querySelector('.address-label-select')?.value === "Delivery";
+    row.classList.toggle("address-row--delivery", isDelivery);
+    row.classList.toggle("address-row--postal", !isDelivery);
+    var badge = row.querySelector('.address-label-badge');
+    if (badge) {
+      badge.classList.toggle("address-label-badge--delivery", isDelivery);
+      badge.classList.toggle("address-label-badge--postal", !isDelivery);
+    }
+  }
+
   document.addEventListener('change', function(e) {
     if (!e.target || !e.target.classList.contains('address-label-select')) return;
-    var select = e.target;
-    var row = select.closest('.address-row');
+    var row = e.target.closest('.address-row');
     var badge = row?.querySelector('.address-label-badge');
-    if (badge) {
-      var value = select.value;
-      badge.textContent = value;
-      badge.style.color = value === "Delivery" ? "white" : "#1b2c65";
-      badge.style.background = value === "Delivery" ? "#1b2c65" : "#b2d33e";
-    }
-    var rowDiv = row?.querySelector('.address-row, div[style*="border-left"]');
-    if (rowDiv) {
-      rowDiv.style.borderLeftColor = select.value === "Delivery" ? "#1b2c65" : "#b2d33e";
-    }
+    if (badge) badge.textContent = e.target.value;
+    paintAddressRow(row);
   });
 
   function nextAddressIndex() {

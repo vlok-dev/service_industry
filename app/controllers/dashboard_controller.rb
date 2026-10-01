@@ -40,8 +40,6 @@
       @scheduled_jobs = jobs_for_schedule_view
       @scheduled_tomorrow = @jobs.where(scheduled_date: Date.tomorrow)
     when "reporter"
-      @all_jobs = @jobs.order(created_at: :desc)
-      @today_jobs = @jobs.where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day)
       @outstanding_jobs = @jobs.outstanding
     when "admin"
       @pending_jobs = @jobs.pending
@@ -90,8 +88,6 @@
       @outstanding_jobs = sort_job_list(@outstanding_jobs) if @outstanding_jobs
     end
 
-    @all_jobs = sort_job_list(@all_jobs) if @all_jobs
-    @today_jobs = sort_job_list(@today_jobs) if @today_jobs
     if @scheduled_jobs
       @scheduled_jobs = sort_job_list(@scheduled_jobs)
       @scheduled_jobs = @scheduled_jobs.order(scheduled_date: :asc, scheduled_time: :asc) unless params[:sort].present?
