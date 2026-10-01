@@ -15,13 +15,14 @@ class DataMigrationController < ApplicationController
 
     require 'pg'
     log = []
+
     begin
       log << "Connecting to source (Render Postgres)..."
-      src = PG.connect(source_url + "&connect_timeout=10&application_name=render_migration")
+      src = PG.connect(add_query_params(source_url, 'connect_timeout=10&application_name=render_migration'))
       log << "Source connected."
 
       log << "Connecting to target (Aiven)..."
-      tgt = PG.connect(target_url + "&connect_timeout=10&application_name=render_migration")
+      tgt = PG.connect(add_query_params(target_url, 'connect_timeout=10&application_name=render_migration'))
       log << "Target connected."
 
       skip_tables = %w[schema_migrations ar_internal_metadata]
@@ -82,6 +83,14 @@ class DataMigrationController < ApplicationController
     expected = ENV['MIGRATION_SECRET'] || 'migrate2026'
     unless params[:secret] == expected
       render plain: "Unauthorized", status: :unauthorized
+    end
+  end
+
+  def add_query_params(url, params_str)
+    if url.include?('?')
+      "#{url}&#{params_str}"
+    else
+      "#{url}?#{params_str}"
     end
   end
 end
