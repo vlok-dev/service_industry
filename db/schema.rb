@@ -211,3 +211,125 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_212656) do
     t.index ["job_id"], name: "index_purchase_orders_on_job_id"
     t.index ["supplier_id"], name: "index_purchase_orders_on_supplier_id"
   end
+
+  create_table "quote_items", force: :cascade do |t|
+    t.string "code"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.integer "inventory_item_id"
+    t.decimal "quantity", precision: 12, scale: 4, default: "0.0", null: false
+    t.integer "quote_id", null: false
+    t.decimal "total_price", precision: 10, scale: 2, default: "0.0", null: false
+    t.decimal "unit_price", precision: 10, scale: 2, default: "0.0", null: false
+    t.datetime "updated_at", null: false
+    t.index ["inventory_item_id"], name: "index_quote_items_on_inventory_item_id"
+    t.index ["quote_id"], name: "index_quote_items_on_quote_id"
+  end
+
+  create_table "quotes", force: :cascade do |t|
+    t.string "attention"
+    t.string "company"
+    t.datetime "created_at", null: false
+    t.integer "created_by_id"
+    t.string "email_address"
+    t.integer "job_id"
+    t.text "notes"
+    t.string "property"
+    t.date "quote_date"
+    t.string "quote_number", null: false
+    t.integer "status", default: 0, null: false
+    t.string "subject"
+    t.text "terms"
+    t.datetime "updated_at", null: false
+    t.date "valid_until"
+    t.decimal "vat_rate", precision: 5, scale: 2, default: "15.0", null: false
+    t.index ["created_by_id"], name: "index_quotes_on_created_by_id"
+    t.index ["job_id"], name: "index_quotes_on_job_id"
+    t.index ["quote_number"], name: "index_quotes_on_quote_number", unique: true
+  end
+
+  create_table "reports", force: :cascade do |t|
+    t.integer "category", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "role", null: false
+    t.integer "status", default: 0, null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_reports_on_user_id"
+  end
+
+  create_table "settings", force: :cascade do |t|
+    t.boolean "allow_client_deletion", default: true
+    t.boolean "allow_inventory_deletion", default: true
+    t.boolean "allow_supplier_deletion", default: true
+    t.string "company_name"
+    t.datetime "created_at", null: false
+    t.string "default_job_priority"
+    t.string "notification_email"
+    t.datetime "updated_at", null: false
+    t.string "whatsapp_api_key"
+    t.string "whatsapp_phone_id"
+    t.time "working_hours_end"
+    t.time "working_hours_start"
+  end
+
+  create_table "suppliers", force: :cascade do |t|
+    t.text "address"
+    t.string "contact_person"
+    t.datetime "created_at", null: false
+    t.string "email"
+    t.string "name", null: false
+    t.string "phone"
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_suppliers_on_name"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "dismissed_reminder_ids_raw"
+    t.string "email"
+    t.string "encrypted_password", default: "", null: false
+    t.datetime "last_logged_in_at"
+    t.string "name"
+    t.bigint "person_id", null: false
+    t.string "phone_number"
+    t.datetime "remember_created_at"
+    t.datetime "reminder_dismissed_at"
+    t.datetime "reset_password_sent_at"
+    t.string "reset_password_token"
+    t.integer "role"
+    t.string "theme_preference", default: "light"
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["last_logged_in_at"], name: "index_users_on_last_logged_in_at"
+    t.index ["person_id", "role"], name: "index_users_on_person_id_and_role", unique: true
+    t.index ["person_id"], name: "index_users_on_person_id"
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  end
+
+  add_foreign_key "addresses", "clients"
+  add_foreign_key "claims", "jobs"
+  add_foreign_key "digital_job_card_materials", "digital_job_cards"
+  add_foreign_key "digital_job_card_materials", "inventory_items"
+  add_foreign_key "digital_job_cards", "clients"
+  add_foreign_key "digital_job_cards", "jobs"
+  add_foreign_key "digital_job_cards", "users"
+  add_foreign_key "jobs", "clients"
+  add_foreign_key "jobs", "users"
+  add_foreign_key "jobs", "users", column: "assigned_to_id"
+  add_foreign_key "planner_entries", "users", column: "assigned_to_id"
+  add_foreign_key "planner_entries", "users", column: "created_by_id"
+  add_foreign_key "purchase_order_items", "inventory_items"
+  add_foreign_key "purchase_order_items", "purchase_orders"
+  add_foreign_key "purchase_orders", "jobs"
+  add_foreign_key "purchase_orders", "suppliers"
+  add_foreign_key "purchase_orders", "users", column: "created_by_id"
+  add_foreign_key "quote_items", "inventory_items"
+  add_foreign_key "quote_items", "quotes"
+  add_foreign_key "quotes", "jobs"
+  add_foreign_key "quotes", "users", column: "created_by_id"
+  add_foreign_key "reports", "users"
+  add_foreign_key "users", "people"
+end
