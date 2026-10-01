@@ -11,17 +11,13 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.1].define(version: 2026_10_01_212656) do
-  # These are extensions that must be enabled in order to support this database
-  enable_extension "pg_catalog.plpgsql"
-
   create_table "addresses", force: :cascade do |t|
     t.text "address"
-    t.bigint "client_id", null: false
-    t.datetime "created_at", null: false
+    t.integer "client_id", null: false
+    t.datetime "created_at", precision: nil, null: false
     t.boolean "is_default", default: false
-    t.string "label", default: "Other"
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_addresses_on_client_id"
+    t.string "label", limit: 255, default: "Other"
+    t.datetime "updated_at", precision: nil, null: false
   end
 
   create_table "claims", force: :cascade do |t|
@@ -58,9 +54,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_212656) do
 
   create_table "digital_job_card_materials", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.bigint "digital_job_card_id", null: false
+    t.integer "digital_job_card_id", null: false
     t.decimal "hours_worked", default: "1.0", null: false
-    t.bigint "inventory_item_id"
+    t.integer "inventory_item_id"
     t.boolean "is_labor", default: false
     t.decimal "labor_rate", precision: 10, scale: 2, default: "0.0"
     t.decimal "markup", precision: 5, scale: 2, default: "0.0"
@@ -80,11 +76,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_212656) do
     t.datetime "created_at", null: false
     t.date "date"
     t.text "description"
-    t.bigint "job_id"
+    t.integer "job_id"
     t.time "time_finish"
     t.time "time_start"
     t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
+    t.integer "user_id", null: false
     t.index ["client_id"], name: "index_digital_job_cards_on_client_id"
     t.index ["job_id"], name: "index_digital_job_cards_on_job_id"
     t.index ["user_id"], name: "index_digital_job_cards_on_user_id"
@@ -144,6 +140,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_212656) do
     t.index ["user_id"], name: "index_jobs_on_user_id"
   end
 
+  create_table "maintenance_subscriptions", force: :cascade do |t|
+    t.integer "client_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "created_by_id", null: false
+    t.date "end_date"
+    t.date "next_service_date"
+    t.text "notes"
+    t.string "plan", default: "quarterly"
+    t.decimal "price", precision: 10, scale: 2
+    t.date "start_date", null: false
+    t.string "status", default: "active"
+    t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_maintenance_subscriptions_on_client_id"
+    t.index ["created_by_id"], name: "index_maintenance_subscriptions_on_created_by_id"
+    t.index ["next_service_date"], name: "index_maintenance_subscriptions_on_next_service_date"
+    t.index ["plan"], name: "index_maintenance_subscriptions_on_plan"
+    t.index ["status"], name: "index_maintenance_subscriptions_on_status"
+  end
+
   create_table "people", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", null: false
@@ -152,10 +167,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_212656) do
   end
 
   create_table "planner_entries", force: :cascade do |t|
-    t.bigint "assigned_to_id"
+    t.integer "assigned_to_id"
     t.string "category", default: "other"
     t.datetime "created_at", null: false
-    t.bigint "created_by_id", null: false
+    t.integer "created_by_id", null: false
     t.text "description"
     t.date "entry_date", null: false
     t.time "entry_time"
@@ -256,7 +271,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_212656) do
     t.integer "status", default: 0, null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
+    t.integer "user_id", null: false
     t.index ["user_id"], name: "index_reports_on_user_id"
   end
 
@@ -293,7 +308,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_212656) do
     t.string "encrypted_password", default: "", null: false
     t.datetime "last_logged_in_at"
     t.string "name"
-    t.bigint "person_id", null: false
+    t.integer "person_id", null: false
     t.string "phone_number"
     t.datetime "remember_created_at"
     t.datetime "reminder_dismissed_at"
@@ -319,6 +334,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_212656) do
   add_foreign_key "jobs", "clients"
   add_foreign_key "jobs", "users"
   add_foreign_key "jobs", "users", column: "assigned_to_id"
+  add_foreign_key "maintenance_subscriptions", "clients"
+  add_foreign_key "maintenance_subscriptions", "users", column: "created_by_id"
   add_foreign_key "planner_entries", "users", column: "assigned_to_id"
   add_foreign_key "planner_entries", "users", column: "created_by_id"
   add_foreign_key "purchase_order_items", "inventory_items"

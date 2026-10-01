@@ -18,7 +18,8 @@ aiven_url = ENV['AIVEN_DATABASE_URL'] || ENV['DATABASE_URL']
 
 if aiven_url.nil? && File.exist?('.env')
   File.foreach('.env') do |line|
-    aiven_url = $1.strip if line =~ /^DATABASE_URL=(.+)$/
+    aiven_url = $1.strip if line =~ /^AIVEN_DATABASE_URL=(.+)$/
+    aiven_url ||= $1.strip if line =~ /^DATABASE_URL=(.+)$/
   end
 end
 
