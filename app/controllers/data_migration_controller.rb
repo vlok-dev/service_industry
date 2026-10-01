@@ -1,80 +1,64 @@
 class DataMigrationController < ApplicationController
   skip_before_action :authenticate_user!
-  before_action :verify_migration_secret, only: [:migrate_to_aiven]
+  before_action :verify_migration_secret, only: [:migrate_to_aiven, :export_sql]
 
-  def migrate_to_aiven
-    source_url = ENV['DATABASE_URL']
-    target_url = ENV['AIVEN_DATABASE_URL']
-
-    Rails.logger.info "Migration source: #{source_url&.gsub(/:\/\/.*:.*@/, '://***:***@')}"
-    Rails.logger.info "Migration target: #{target_url&.gsub(/:\/\/.*:.*@/, '://***:***@')}"
-
-    if target_url.blank?
-      render plain: "ERROR: AIVEN_DATABASE_URL not set. Check Render Dashboard -> Environment.", status: :internal_server_error and return
-    end
-
-    require 'pg'
+  # Export Render Postgres data as a downloadable SQL file
+  def export_sql
+    conn = ActiveRecord::Base.connection
     log = []
+    sql_lines = []
 
-    begin
-      log << "Connecting to source (Render Postgres)..."
-      src = PG.connect(add_query_params(source_url, 'connect_timeout=10&application_name=render_migration'))
-      log << "Source connected."
+    tables = conn.exec_query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename NOT IN ('schema_migrations', 'ar_internal_metadata') ORDER BY tablename")
 
-      log << "Connecting to target (Aiven)..."
-      tgt = PG.connect(add_query_params(target_url, 'connect_timeout=10&application_name=render_migration'))
-      log << "Target connected."
+    sql_lines << "-- Data export from Render Postgres"
+    sql_lines << "-- Generated at: #{Time.current}"
+    sql_lines << "SET session_replication_role = 'replica';"
+    sql_lines << ""
 
-      skip_tables = %w[schema_migrations ar_internal_metadata]
-      tgt.exec("SET session_replication_role = 'replica';")
+    tables.each do |t|
+      table = t['tablename']
+      count = conn.exec_query("SELECT COUNT(*) as c FROM #{table}").first['c']
+      cols = conn.columns(table).map { |c| c.name }
 
-      tables_result = src.exec("SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename NOT IN ('#{skip_tables.join("','")}') ORDER BY tablename")
-      tables = tables_result.map { |r| r['tablename'] }
+      log << "#{table}: #{count} rows, columns: #{cols.join(', ')}"
 
-      log << "Found #{tables.size} tables: #{tables.join(', ')}"
+      sql_lines << "-- Table: #{table} (#{count} rows)"
+      sql_lines << "TRUNCATE TABLE \"#{table}\" CASCADE;"
 
-      tables.each do |table|
-        count = src.exec("SELECT COUNT(*) FROM #{table}").first['count'].to_i
-        cols = src.exec("SELECT column_name FROM information_schema.columns WHERE table_name = '#{table}' ORDER BY ordinal_position").map { |r| r['column_name'] }
-
-        next if cols.empty?
-
-        log << "Copying #{table}: #{count} rows"
-        tgt.exec("TRUNCATE TABLE \"#{table}\" CASCADE;")
-
-        if count > 0
-          rows = src.exec("SELECT * FROM #{table}")
+      if count > 0
+        offset = 0
+        batch_size = 50
+        while offset < count
+          rows = conn.exec_query("SELECT * FROM #{table} ORDER BY id LIMIT #{batch_size} OFFSET #{offset}")
           rows.each do |row|
+            values = cols.map do |col|
+              val = row[col]
+              val.nil? ? 'NULL' : "'#{val.to_s.gsub("'", "''")}'"
+            end
             col_names = cols.map { |c| "\"#{c}\"" }.join(', ')
-            placeholders = cols.map.with_index { |_, i| "$#{i + 1}" }.join(', ')
-            values = cols.map { |c| row[c] }
-            tgt.exec_params("INSERT INTO \"#{table}\" (#{col_names}) VALUES (#{placeholders}) ON CONFLICT DO NOTHING", values)
+            vals = values.join(', ')
+            sql_lines << "INSERT INTO \"#{table}\" (#{col_names}) VALUES (#{vals});"
           end
-          log << "  Copied #{count} rows to #{table}"
-        else
-          log << "  Empty table (#{table})"
+          offset += batch_size
         end
       end
-
-      tgt.exec("SET session_replication_role = 'DEFAULT';")
-
-      src_migrations = src.exec("SELECT * FROM schema_migrations")
-      src_migrations.each do |row|
-        tgt.exec_params("INSERT INTO schema_migrations (version) VALUES ($1) ON CONFLICT (version) DO NOTHING", [row['version']])
-      end
-
-      log << "Done! #{tables.size} tables processed."
-      src.close
-      tgt.close
-
-      render plain: log.join("\n"), status: :ok
-    rescue => e
-      log << "ERROR: #{e.class}: #{e.message}"
-      log << e.backtrace.first(5).join("\n") if e.backtrace
-      Rails.logger.error "Migration failed: #{e.message}"
-      Rails.logger.error e.backtrace.join("\n") if e.backtrace
-      render plain: log.join("\n"), status: :internal_server_error
+      sql_lines << ""
     end
+
+    sql_lines << "SET session_replication_role = 'DEFAULT';"
+
+    # Also include schema_migrations
+    sql_lines << "-- schema_migrations"
+    migrations = conn.exec_query("SELECT version FROM schema_migrations").map { |r| r['version'] }
+    migrations.each do |v|
+      sql_lines << "INSERT INTO schema_migrations (version) VALUES ('#{v}') ON CONFLICT (version) DO NOTHING;"
+    end
+
+    send_data sql_lines.join("\n"), filename: "render_to_aiven_#{Time.current.to_i}.sql", type: 'text/sql'
+  end
+
+  def migrate_to_aiven
+    render plain: "Use /export_sql?secret=migrate2026 to download SQL, then import to Aiven console", status: :ok
   end
 
   private
@@ -83,14 +67,6 @@ class DataMigrationController < ApplicationController
     expected = ENV['MIGRATION_SECRET'] || 'migrate2026'
     unless params[:secret] == expected
       render plain: "Unauthorized", status: :unauthorized
-    end
-  end
-
-  def add_query_params(url, params_str)
-    if url.include?('?')
-      "#{url}&#{params_str}"
-    else
-      "#{url}?#{params_str}"
     end
   end
 end
