@@ -31,8 +31,8 @@ class JobsController < ApplicationController
       @pipeline_scope = @pipeline_scope.order(scheduled_date: :desc, scheduled_time: :desc, created_at: :desc)
     end
 
-    # Paginate the pipeline - 100 per page
-    @pagy, @pipeline_jobs = pagy(:offset, @pipeline_scope, limit: 100)
+    # Paginate the pipeline - 20 per page
+    @pagy, @pipeline_jobs = pagy(:offset, @pipeline_scope, limit: 20)
 
     # For backwards compat with other roles
     @jobs = @pipeline_jobs

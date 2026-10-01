@@ -29,3 +29,11 @@
 
 en:
   hello: "Hello world"
+
+  # Pagy renders "<" and ">" by default; use readable labels instead.
+  pagy:
+    previous: "Previous Page"
+    next: "Next Page"
+    aria_label:
+      previous: "Go to previous page"
+      next: "Go to next page"
