@@ -17,11 +17,11 @@ class DataMigrationController < ApplicationController
     log = []
     begin
       log << "Connecting to source (Render Postgres)..."
-      src = PG.connect(source_url, connect_timeout: 10)
+      src = PG.connect(source_url + "&connect_timeout=10&application_name=render_migration")
       log << "Source connected."
 
       log << "Connecting to target (Aiven)..."
-      tgt = PG.connect(target_url, connect_timeout: 10, sslmode: 'require')
+      tgt = PG.connect(target_url + "&connect_timeout=10&application_name=render_migration")
       log << "Target connected."
 
       skip_tables = %w[schema_migrations ar_internal_metadata]
