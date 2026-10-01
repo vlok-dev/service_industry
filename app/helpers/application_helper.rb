@@ -1,4 +1,21 @@
 module ApplicationHelper
+  # Params that describe the active list context and must survive
+  # pagination, sorting, searching and date filtering.
+  JOBS_CONTEXT_PARAMS = %w[filter filter_date sort direction q].freeze
+
+  # Builds a jobs_path that keeps the currently active filter/search/sort.
+  # `page` is always dropped so navigation starts back at page 1.
+  # Pass an explicit nil to clear an inherited param, e.g. jobs_context_path(filter: nil).
+  def jobs_context_path(**overrides)
+    preserved = request.query_parameters.slice(*JOBS_CONTEXT_PARAMS).except("page")
+    merged = preserved.merge(overrides.stringify_keys).compact_blank
+
+    # filter_date only applies to the scheduled filter; drop it otherwise
+    merged = merged.except("filter_date") unless merged["filter"] == "scheduled"
+
+    jobs_path(merged)
+  end
+
   def filter_display_name(filter)
     case filter
     when "pending" then "Pending"

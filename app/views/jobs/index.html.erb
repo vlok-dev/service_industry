@@ -75,28 +75,28 @@
 
 
 <div class="chip-row">
-  <%= link_to "All", jobs_path, class: "chip #{current_filter.blank? ? 'active' : ''}" %>
-  <%= link_to jobs_path(filter: "outstanding"), class: "chip #{current_filter == 'outstanding' ? 'active' : ''}" do %>
+  <%= link_to "All", jobs_context_path(filter: nil), class: "chip #{current_filter.blank? ? 'active' : ''}" %>
+  <%= link_to jobs_context_path(filter: "outstanding"), class: "chip #{current_filter == 'outstanding' ? 'active' : ''}" do %>
     Outstanding
     <span class="count"><%= counts[:outstanding] %></span>
   <% end %>
-  <%= link_to jobs_path(filter: "pending"), class: "chip #{current_filter == 'pending' ? 'active' : ''}" do %>
+  <%= link_to jobs_context_path(filter: "pending"), class: "chip #{current_filter == 'pending' ? 'active' : ''}" do %>
     Pending
     <span class="count"><%= counts[:pending] %></span>
   <% end %>
-  <%= link_to jobs_path(filter: "scheduled"), class: "chip #{current_filter == 'scheduled' ? 'active' : ''}" do %>
+  <%= link_to jobs_context_path(filter: "scheduled", filter_date: nil), class: "chip #{current_filter == 'scheduled' ? 'active' : ''}" do %>
     Scheduled
     <span class="count"><%= counts[:scheduled] %></span>
   <% end %>
-  <%= link_to jobs_path(filter: "in_progress"), class: "chip #{current_filter == 'in_progress' ? 'active' : ''}" do %>
+  <%= link_to jobs_context_path(filter: "in_progress"), class: "chip #{current_filter == 'in_progress' ? 'active' : ''}" do %>
     In Progress
     <span class="count"><%= counts[:in_progress] %></span>
   <% end %>
-  <%= link_to jobs_path(filter: "completed"), class: "chip #{current_filter == 'completed' ? 'active' : ''}" do %>
+  <%= link_to jobs_context_path(filter: "completed"), class: "chip #{current_filter == 'completed' ? 'active' : ''}" do %>
     Completed
     <span class="count"><%= counts[:completed] %></span>
   <% end %>
-  <%= link_to jobs_path(filter: "invoiced"), class: "chip #{current_filter == 'invoiced' ? 'active' : ''}" do %>
+  <%= link_to jobs_context_path(filter: "invoiced"), class: "chip #{current_filter == 'invoiced' ? 'active' : ''}" do %>
     Invoiced
     <span class="count"><%= counts[:invoiced] %></span>
   <% end %>
@@ -105,12 +105,15 @@
 <% if current_filter == "scheduled" %>
   <div class="scheduled-date-picker" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); box-shadow: var(--shadow);">
     <label for="filter_date" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin: 0;">Show scheduled jobs for:</label>
-    <%= form_with url: jobs_path(filter: "scheduled"), method: :get, local: true, style: "display: flex; align-items: center; gap: 0.5rem;" do |f| %>
+    <%= form_with url: jobs_context_path(filter: "scheduled", filter_date: nil), method: :get, local: true, style: "display: flex; align-items: center; gap: 0.5rem;" do |f| %>
       <%= f.hidden_field :filter, value: "scheduled" %>
+      <%= hidden_field_tag :q, params[:q] if params[:q].present? %>
+      <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
+      <%= hidden_field_tag :direction, params[:direction] if params[:direction].present? %>
       <%= f.date_field :filter_date, value: filter_date || Date.tomorrow, id: "filter_date", style: "padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem;", onchange: "this.form.requestSubmit();" %>
-      <%= link_to "View All", jobs_path(filter: "scheduled"), class: "btn btn-sm btn-secondary" %>
+      <%= link_to "View All", jobs_context_path(filter: "scheduled", filter_date: nil), class: "btn btn-sm btn-secondary" %>
       <% if filter_date.present? %>
-        <%= link_to "Clear date", jobs_path(filter: "scheduled"), class: "btn btn-sm btn-secondary" %>
+        <%= link_to "Clear date", jobs_context_path(filter: "scheduled", filter_date: nil), class: "btn btn-sm btn-secondary" %>
       <% end %>
     <% end %>
   </div>
@@ -121,11 +124,15 @@
     <div class="card-header">
       <h2><%= filter_display_name(current_filter) %> Jobs</h2>
       <div style="display: flex; gap: 0.75rem; align-items: center;">
-        <%= form_with url: jobs_path, method: :get, local: true, style: "display: flex; gap: 0.5rem;" do |f| %>
+        <%= form_with url: jobs_context_path(q: nil), method: :get, local: true, style: "display: flex; gap: 0.5rem;" do |f| %>
+          <%= hidden_field_tag :filter, params[:filter] if params[:filter].present? %>
+          <%= hidden_field_tag :filter_date, params[:filter_date] if params[:filter_date].present? %>
+          <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
+          <%= hidden_field_tag :direction, params[:direction] if params[:direction].present? %>
           <%= f.text_field :q, value: @search_query, placeholder: "Search by job #, customer, address...", style: "padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; width: 280px;" %>
           <%= f.submit "Search", class: "btn btn-sm" %>
           <% if @search_query.present? %>
-            <%= link_to "Clear", jobs_path, class: "btn btn-sm btn-secondary" %>
+            <%= link_to "Clear", jobs_context_path(q: nil), class: "btn btn-sm btn-secondary" %>
           <% end %>
         <% end %>
       </div>

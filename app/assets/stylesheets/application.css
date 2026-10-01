@@ -9,16 +9,18 @@
  * Consider organizing styles into separate files for maintainability.
  */
 
-.pagy-nav {
+/* Pagy 43 renders <nav class="pagy series-nav"> with bare <a> elements
+   styled through [aria-current] / [aria-disabled] / [role="separator"]. */
+.pagy {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 0.25rem;
   flex-wrap: wrap;
   margin: 1rem 0;
 }
 
-.pagy-nav a,
-.pagy-nav span {
+.pagy a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -27,6 +29,7 @@
   padding: 0 0.5rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+  background: var(--surface);
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text);
@@ -34,23 +37,29 @@
   transition: all 0.15s;
 }
 
-.pagy-nav a:hover {
+.pagy a[href]:hover {
   background: var(--primary);
   border-color: var(--primary);
   color: white;
 }
 
-.pagy-nav .page.active {
+.pagy a[aria-current="page"] {
   background: var(--primary);
   border-color: var(--primary);
   color: white;
+  cursor: default;
 }
 
-.pagy-nav .page.disabled {
+.pagy a:not([href]) {
   opacity: 0.5;
-  pointer-events: none;
+  cursor: default;
 }
 
-.pagy-nav .gap {
+.pagy a[role="separator"] {
+  min-width: auto;
+  padding: 0 0.25rem;
+  border: none;
+  background: none;
   color: var(--text-muted);
+  opacity: 1;
 }

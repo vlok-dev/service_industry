@@ -26,9 +26,9 @@ class JobsController < ApplicationController
     @search_query = params[:q]
     @pipeline_scope = sort_job_list(@pipeline_scope)
 
-    # Default to newest-first by scheduled date for scheduler/super_admin/accountant
-    if (current_user.super_admin? || current_user.scheduler? || current_user.accountant?) && params[:sort].blank?
-      @pipeline_scope = @pipeline_scope.order(scheduled_date: :desc, scheduled_time: :desc)
+    # Default to newest-first by scheduled date for scheduler/super_admin/accountant/reporter
+    if (current_user.super_admin? || current_user.scheduler? || current_user.accountant? || current_user.reporter?) && params[:sort].blank?
+      @pipeline_scope = @pipeline_scope.order(scheduled_date: :desc, scheduled_time: :desc, created_at: :desc)
     end
 
     # Paginate the pipeline - 100 per page
