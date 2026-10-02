@@ -3,10 +3,10 @@ class DigitalJobCardsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_digital_job_card, only: %i[ show edit update destroy print ]
   before_action :authorize_access!, only: %i[ show edit update destroy print ]
-  before_action :set_inventory_items, only: %i[ index new create edit update ]
+  before_action :set_inventory_items, only: %i[ new create edit update ]
 
   def index
-    @digital_job_cards = policy_scope(DigitalJobCard).recent
+    @digital_job_cards = policy_scope(DigitalJobCard).recent.includes(:materials)
     if params[:q].present?
       term = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.strip)}%"
       @digital_job_cards = @digital_job_cards.where(
@@ -31,8 +31,7 @@ class DigitalJobCardsController < ApplicationController
     if @digital_job_card.save
       redirect_to digital_job_cards_path, notice: "Digital job card created successfully."
     else
-      @digital_job_cards = current_user.digital_job_cards.recent
-      render :index, status: :unprocessable_entity
+      render :new, status: :unprocessable_entity
     end
   end
 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= current_theme %>">
+  <head>
+    <title><%= content_for(:title) || "Industro Plumbers - Estimate" %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+    <style id="dm-vars">
+      :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --primary-light: #eff6ff;
+        --bg: #f8fafc;
+        --surface: #ffffff;
+        --text: #0f172a;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+        --border-light: #f1f5f9;
+      }
+      [data-theme="dark"] {
+        --primary: #60a5fa;
+        --primary-dark: #3b82f6;
+        --primary-light: #1e3a5f;
+        --bg: #0a0a0e;
+        --surface: #1a1a22;
+        --text: #e5e7eb;
+        --text-muted: #9ca3af;
+        --border: #2d2d3a;
+        --border-light: #2d2d3a;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="printBtn" class="no-print" style="position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; z-index: 1000;" onclick="window.print(); return false;">Print</button>
+    <%= yield %>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var printBtn = document.getElementById('printBtn');
+        if (printBtn) {
+          printBtn.addEventListener('click', function(e) { e.preventDefault(); window.print(); });
+        }
+      });
+    </script>
+    <style>
+      @media print {
+        .no-print { display: none !important; }
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,73 @@
+<div class="page-header">
+  <h1>Quote #<%= @quote.quote_number %></h1>
+</div>
+
+<div class="info-grid">
+  <div class="info-tile">
+    <div class="label">Company</div>
+    <div class="value"><%= @quote.company %></div>
+  </div>
+  <div class="info-tile">
+    <div class="label">Created By</div>
+    <div class="value"><%= @quote.created_by&.name %></div>
+  </div>
+</div>
+
+<div class="section-card">
+  <header>
+    <span>Line Items</span>
+  </header>
+  <div class="body">
+    <% if @quote.items.any? %>
+      <table>
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @quote.items.each do |item| %>
+            <tr>
+              <td><%= item.description %></td>
+              <td><%= number_to_currency(item.total_price, unit: "R", precision: 2) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p style="color: var(--text-muted);">No line items.</p>
+    <% end %>
+  </div>
+</div>
+
+<div class="section-card">
+  <header>
+    <span>Totals</span>
+  </header>
+  <div class="body">
+    <table style="width: 100%; max-width: 500px;">
+      <tfoot>
+        <tr>
+          <td style="text-align: left; padding: 0.5rem; font-weight: 600;">Total (excl. VAT):</td>
+          <td style="padding: 0.5rem; font-weight: 600;"><%= number_to_currency(@quote.subtotal, unit: "R", precision: 2) %></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+  <%= link_to print_quote_path(@quote), class: "btn", target: "_blank" do %>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 21 18 21 18 9"></polyline><path d="M6 11H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"></path><rect x="9" y="6" width="6" height="4" rx="1"></rect></svg>
+    Print
+  <% end %>
+  <% if policy(:quote).update? %>
+    <%= link_to edit_quote_path(@quote), class: "btn btn-secondary" do %>
+      Edit
+    <% end %>
+  <% end %>
+  <%= link_to quotes_path, class: "btn btn-secondary" do %>
+    Back
+  <% end %>
+</div>

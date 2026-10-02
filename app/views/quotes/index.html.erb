@@ -1,0 +1,99 @@
+<div class="action-bar">
+  <div>
+    <h1>Quotes</h1>
+    <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem;">
+      <%= pluralize(@quotes.count, "quote") %>
+    </p>
+  </div>
+  <div class="actions">
+    <% if policy(:quote).create? %>
+      <%= link_to new_quote_path, class: "btn" do %>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Create New Quote
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<div class="search-bar">
+  <%= form_with url: quotes_path, method: :get, local: true, style: "display: contents;" do |f| %>
+    <%= f.text_field :q, value: params[:q], placeholder: "Search by Quote #, Job #, Customer..." %>
+    <%= f.submit "Search", class: "btn" %>
+    <% if params[:q].present? %>
+      <%= link_to "Clear", quotes_path, class: "btn btn-secondary" %>
+    <% end %>
+  <% end %>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem;">
+  <div class="card-header">
+    <h2>Quotes</h2>
+  </div>
+  <div class="card-body no-padding">
+    <% if @quotes.present? %>
+      <div class="modern-table" style="border: none; box-shadow: none; border-radius: 0;">
+      <table>
+        <thead>
+          <tr>
+            <th>Quote #</th>
+            <th>Company</th>
+            <th>Email</th>
+            <th>Quote Date</th>
+            <th>Property</th>
+            <th>Items</th>
+            <th>Total (excl. VAT)</th>
+            <th>Created By</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @quotes.each do |quote| %>
+            <tr>
+              <td><%= link_to quote.quote_number, quote_path(quote), class: "job-number", title: "View Quote" %></td>
+              <td><%= quote.company %></td>
+              <td><%= quote.email_address %></td>
+              <td><%= quote.quote_date %></td>
+              <td><%= quote.property %></td>
+              <td><%= quote.items.count %></td>
+              <td><%= number_to_currency(quote.subtotal, unit: "R", precision: 2) %></td>
+              <td><%= quote.created_by&.name %></td>
+              <td>
+                <div class="row-actions">
+                  <%= link_to print_quote_path(quote), class: "btn-icon btn-icon-primary", title: "Print", target: "_blank" do %>
+                    Print
+                  <% end %>
+                  <% if policy(:quote).update? %>
+                    <%= link_to edit_quote_path(quote), class: "btn-icon btn-icon-secondary", title: "Edit" do %>
+                      Edit
+                    <% end %>
+                  <% end %>
+                  <% if policy(:quote).destroy? %>
+                  <%= button_to quote_path(quote), method: :delete, class: "btn-icon btn-icon-danger", title: "Delete", data: { confirm: "Are you sure?" } do %>
+                    Delete
+                  <% end %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      </div>
+
+      <% if @pagy.pages > 1 %>
+        <div class="pagination-nav" style="padding: 1rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+          <%= @pagy.series_nav %>
+        </div>
+      <% end %>
+
+    <% else %>
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem; opacity: 0.4;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="13" x2="15" y2="13"></line><line x1="9" y1="17" x2="15" y2="17"></line></svg>
+        <p>No quotes found.</p>
+        <% if policy(:quote).create? %>
+          <p style="margin-top: 1rem;"><%= link_to "Create the first quote", new_quote_path, class: "btn" %></p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

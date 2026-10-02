@@ -166,4 +166,34 @@ class SmokeNewFeaturesTest < ActionDispatch::IntegrationTest
     sign_in plumber
     assert_equal "light", plumber.effective_theme
   end
+
+  test "quote form renders with template layout" do
+    sign_in @user
+    get new_quote_path
+    assert_response :success, "Quote new failed: #{response.body[0, 500]}"
+    assert_includes response.body, "ESTIMATE"
+    assert_includes response.body, "COMPANY"
+    assert_includes response.body, "ATTENTION"
+    assert_includes response.body, "EMAIL ADDRESS"
+  end
+
+  test "quote can be created without a job" do
+    sign_in @user
+    post quotes_path, params: { quote: { company: "Test Company", attention: "Test Person", email_address: "test@example.com", quote_date: Date.current, property: "123 Test St", subject: "Test Subject", vat_rate: 15.0, notes: "Test scope", items_attributes: { "0": { description: "Labour and Materials", unit_price: 4620.00 } } } }
+    assert_response :redirect, "Quote create failed: #{response.body[0, 500]}"
+    follow_redirect!
+    assert_response :success
+    assert_includes response.body, "was created"
+  end
+
+  test "quote print page renders with template fields" do
+    sign_in @user
+    quote = Quote.create!(vat_rate: 15.0, created_by: @user, company: "TestCo", attention: "John", email_address: "test@test.com", quote_date: Date.current, property: "123 St", subject: "Test")
+    quote.items.create!(description: "Labour and Materials", unit_price: 4620.00)
+
+    get print_quote_path(quote)
+    assert_response :success, "Quote print failed: #{response.body[0, 500]}"
+    assert_includes response.body, "ESTIMATE"
+    assert_includes response.body, quote.quote_number
+  end
 end

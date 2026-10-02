@@ -1,0 +1,714 @@
+<%= form_with model: @quote, local: true do |f| %>
+  <% if @quote.errors.any? %>
+    <div class="alert" style="margin-bottom: 1rem;">
+      <h2><%= pluralize(@quote.errors.count, "error") %> prohibited this quote from being saved:</h2>
+      <ul>
+        <% @quote.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <% if params[:job_id].present? %>
+    <%= f.hidden_field :job_id, value: params[:job_id] %>
+  <% end %>
+  <%= f.hidden_field :vat_rate, value: (@quote.vat_rate || 15.0) %>
+  <%= f.hidden_field :valid_until, value: @quote.valid_until %>
+  <%= f.hidden_field :valid_until, value: @quote.valid_until %>
+  <%= f.hidden_field :quote_number, value: @quote.quote_number %>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    .quote-form-container {
+      max-width: 900px;
+      margin: 0 auto;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    .quote-form-container .page {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 30px;
+      position: relative;
+      background: var(--surface);
+    }
+
+    .logo {
+      position: absolute;
+      top: 14px;
+      right: 24px;
+      width: 180px;
+      height: auto;
+      z-index: 0;
+    }
+
+    .logo img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .title {
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 18px;
+      letter-spacing: 0.15em;
+      margin: 30px 0 30px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .details-block {
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .detail-row {
+      display: flex;
+      align-items: center;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .detail-label {
+      width: 140px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .detail-colon {
+      margin-left: 12px;
+      font-weight: bold;
+      width: 16px;
+    }
+
+    .detail-value {
+      margin-left: 12px;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .detail-input {
+      width: 100%;
+      padding: 0.625rem 0.875rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .detail-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .subject-line {
+      font-weight: bold;
+      margin: 20px 0 10px 0;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: baseline;
+      white-space: nowrap;
+      font-size: 20px;
+      text-decoration: underline;
+    }
+
+    .subject-input {
+      width: 70%;
+      padding: 0.625rem 0.875rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: bold;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .subject-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .scope-block {
+      margin-top: 24px;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .scope-textarea {
+      width: 100%;
+      padding: 0.625rem 0.875rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.9rem;
+      min-height: 100px;
+      resize: vertical;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .scope-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .price-line {
+      text-align: right;
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .vat-note {
+      font-weight: bold;
+      margin-top: 2px;
+      text-transform: lowercase;
+      text-align: right;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .line-items-table {
+      width: 100%;
+      margin: 16px 0;
+      border-collapse: collapse;
+      position: relative;
+      z-index: 1;
+    }
+
+    .line-items-table th,
+    .line-items-table td {
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .line-items-table th {
+      text-align: left;
+      border-bottom: 2px solid var(--border);
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .line-items-table td.total-cell {
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .qty-input, .price-input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: right;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .qty-input:focus, .price-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .desc-input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .desc-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .remove-link {
+      color: #dc2626;
+      font-size: 12px;
+      text-decoration: none;
+    }
+
+    .remove-link:hover {
+      text-decoration: underline;
+    }
+
+    .totals-table {
+      width: 100%;
+      margin-top: 16px;
+      border-collapse: collapse;
+      position: relative;
+      z-index: 1;
+    }
+
+    .totals-table td {
+      padding: 8px;
+      font-size: 13px;
+    }
+
+    .totals-table td.label {
+      text-align: right;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .totals-table td.value {
+      text-align: right;
+      font-weight: 600;
+      color: var(--text-muted);
+      width: 120px;
+    }
+
+    .totals-table td.total-label {
+      text-align: right;
+      font-weight: 700;
+      font-size: 15px;
+      border-top: 2px solid var(--border);
+    }
+
+    .totals-table td.total-value {
+      text-align: right;
+      font-weight: 700;
+      font-size: 15px;
+      border-top: 2px solid var(--border);
+    }
+
+    .terms-block {
+      margin-top: 32px;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .terms-title {
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 13px;
+      margin-bottom: 10px;
+      color: var(--text-muted);
+    }
+
+    .terms-list {
+      list-style: disc;
+      margin: 0 0 8px 0;
+      padding-left: 20px;
+    }
+
+    .terms-list li {
+      margin-bottom: 8px;
+      line-height: 1.4;
+      font-size: 13px;
+    }
+
+    .terms-textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 13px;
+      min-height: 100px;
+      resize: vertical;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .closing-block {
+      margin-top: 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .closing-block p,
+    .closing-block .signature-line {
+      margin: 0 0 12px 0;
+      font-size: 13px;
+    }
+
+    .footer {
+      text-align: center;
+      font-weight: bold;
+      font-size: 12px;
+      margin-top: 32px;
+      padding-top: 12px;
+      border-top: 2px solid var(--border);
+      z-index: 0;
+    }
+
+    .footer div {
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .form-actions {
+      margin-top: 40px;
+      text-align: right;
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-actions .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.625rem 1.5rem;
+      margin-left: 10px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .form-actions .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .form-actions .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .form-actions .btn-secondary {
+      background: var(--border-light);
+      color: var(--text);
+    }
+
+    .form-actions .btn-secondary:hover {
+      background: var(--border);
+      transform: translateY(-1px);
+    }
+
+    .btn-add-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      margin: 8px 0 16px;
+      padding: 0.625rem 1rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--primary);
+      color: white;
+      transition: all 0.2s;
+    }
+
+    .btn-add-item:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .remove-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.375rem 0.875rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: white;
+      background: #dc2626;
+      transition: background 0.2s;
+    }
+
+    .remove-link:hover {
+      background: #b91c1c;
+      transform: translateY(-1px);
+    }
+  </style>
+
+  <div class="quote-form-container">
+    <div class="page">
+      <div class="logo">
+        <%= image_tag "IndustroTopRightLogo.png", alt: "Industro Plumbers Logo" %>
+      </div>
+
+      <h1 class="title">ESTIMATE</h1>
+
+      <div class="details-block">
+        <div class="detail-row">
+          <span class="detail-label">COMPANY</span>
+          <span class="detail-colon">:</span>
+          <span class="detail-value">
+            <%= f.text_field :company, class: "detail-input", value: @quote.company, placeholder: "Enter company name" %>
+          </span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">ATTENTION</span>
+          <span class="detail-colon">:</span>
+          <span class="detail-value">
+            <%= f.text_field :attention, class: "detail-input", value: @quote.attention, placeholder: "Enter attention name" %>
+          </span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">EMAIL ADDRESS</span>
+          <span class="detail-colon">:</span>
+          <span class="detail-value">
+            <%= f.text_field :email_address, class: "detail-input", value: @quote.email_address, placeholder: "Enter email address" %>
+          </span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">DATE</span>
+          <span class="detail-colon">:</span>
+          <span class="detail-value">
+            <%= f.date_field :quote_date, class: "detail-input", value: (@quote.quote_date || Date.current) %>
+          </span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">PROPERTY</span>
+          <span class="detail-colon" style="font-weight: bold;">:</span>
+          <span class="detail-value">
+            <%= f.text_field :property, class: "detail-input", value: @quote.property, placeholder: "Enter property address" %>
+          </span>
+        </div>
+      </div>
+
+      <div class="subject-line">
+        RE: <%= f.text_field :subject, class: "subject-input", value: @quote.subject, placeholder: "Enter subject line" %>
+      </div>
+
+      <table class="line-items-table">
+        <thead>
+          <tr>
+            <th style="width: 60%;">DESCRIPTION</th>
+            <th style="width: 25%;">LINE ITEM TOTAL (R)</th>
+            <th style="width: 15%;"></th>
+          </tr>
+        </thead>
+        <tbody id="items">
+          <%= f.fields_for :items do |item_form| %>
+            <%= render "item_fields", f: item_form %>
+          <% end %>
+        </tbody>
+      </table>
+
+      <button type="button" id="add-item" class="btn-add-item">Add Item</button>
+
+      <table class="totals-table">
+        <tfoot>
+          <tr>
+            <td colspan="3" class="label">Total (excl. VAT):</td>
+            <td class="value" id="subtotal">R 0.00</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="terms-block">
+        <div class="terms-title">TERMS AND CONDITIONS</div>
+        <ul class="terms-list">
+          <li>This estimate is valid for 30 days and excludes VAT.</li>
+          <li>Defective workmanship will be rectified free of charge if reported within 7 days after completion of work.</li>
+          <li>We also reserve the right to re-quote and then recharge should additional work be required which was not in the original estimate.</li>
+          <li>Ownership of goods does not pass on to the client until full payment has been received. Industro Services reserves the right to remove the goods no matter where the location, in lieu of payment. All cost to remove said goods and any subsequent legal costs, will be borne by the client.</li>
+        </ul>
+      </div>
+
+      <div class="closing-block">
+        <p>Should you require any additional information, please contact me on 071 988 1196</p>
+        <br/>
+        <p class="signature-line">Kind Regards,</p>
+        <p class="signature-line">Michael Bennett</p>
+      </div>
+
+      <div class="footer">
+        <div>041 205 0846 | info@industroplumbers.co.za | 105 Main Road, Walmer, Port Elizabeth, 6001</div>
+        <div>| Vat No: 4610277099 | Registration No: 2014 | 186021 | 07</div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <%= f.submit (@quote.persisted? ? "Update Quote" : "Create Quote"), class: "btn btn-primary" %>
+      <%= link_to "Cancel", quotes_path, class: "btn btn-secondary" %>
+    </div>
+  </div>
+<% end %>
+
+<table style="display:none;"><tbody>
+  <tr class="item-row item-template" data-template="true">
+    <td style="padding: 8px; border-bottom: 1px solid var(--border);">
+      <input type="hidden" data-inventory-id="" class="inventory-id" />
+      <input type="hidden" class="destroy-field" value="0" />
+      <input type="text" class="code-search" placeholder="Type to search codes..." autocomplete="off" style="display:none;" />
+      <input type="text" class="item-description desc-input" placeholder="Type description..." />
+      <ul class="code-results" style="display:none; max-height:160px; overflow-y:auto; margin:0; padding:0; border:1px solid var(--border-light); border-top:none; border-radius:4px; list-style:none; background:var(--bg);"></ul>
+    </td>
+    <td class="total-cell" style="padding: 8px; border-bottom: 1px solid var(--border);">
+      <input type="number" min="0" step="0.01" class="price" placeholder="R 0.00" />
+    </td>
+    <td style="padding: 8px; border-bottom: 1px solid var(--border);">
+      <button type="button" class="remove-link">Remove</button>
+    </td>
+  </tr>
+</tbody></table>
+
+<script>
+const ITEM_NESTED_PREFIX = "quote[items_attributes]";
+
+function applyItemNames(row, index) {
+  const inputs = row.querySelectorAll('input[data-inventory-id], input.code-search, input.item-description, input.price, input.destroy-field');
+  inputs.forEach((input) => {
+    let key = null;
+    if (input.hasAttribute('data-inventory-id')) key = 'inventory_item_id';
+    else if (input.classList.contains('code-search')) key = 'code';
+    else if (input.classList.contains('item-description')) key = 'description';
+    else if (input.classList.contains('price')) key = 'unit_price';
+    else if (input.classList.contains('destroy-field')) key = '_destroy';
+    if (key) input.name = `${ITEM_NESTED_PREFIX}[${index}][${key}]`;
+  });
+}
+
+function recalc() {
+  let subtotal = 0;
+  document.querySelectorAll('#items .item-row').forEach(row => {
+    const price = parseFloat(row.querySelector('.price').value) || 0;
+    subtotal += price;
+  });
+  const vatRate = <%= @quote.vat_rate || 15 %>;
+  const vatAmount = subtotal * (vatRate / 100.0);
+  const total = subtotal + vatAmount;
+  document.getElementById('subtotal').textContent = 'R ' + subtotal.toFixed(2);
+  document.getElementById('vat-amount').textContent = 'R ' + vatAmount.toFixed(2);
+  document.getElementById('grand-total').textContent = 'R ' + total.toFixed(2);
+  document.getElementById('grand-total-price').textContent = subtotal.toFixed(2).replace('.', ',');
+}
+
+function fillRow(row, item) {
+  const invId = row.querySelector('input[data-inventory-id]');
+  const code = row.querySelector('.code-search');
+  const desc = row.querySelector('.item-description');
+  const price = row.querySelector('.price');
+  if (code) code.value = item.code;
+  if (desc) desc.value = item.name;
+  if (price) price.value = item.unit_price;
+  if (invId) invId.value = item.id;
+  recalc();
+}
+
+document.addEventListener('input', function(e) {
+  if (!e.target || !e.target.classList.contains('code-search')) return;
+  const input = e.target;
+  const row = input.closest('.item-row');
+  const results = row.querySelector('.code-results');
+  const code = input.value.trim();
+  clearTimeout(input._searchT);
+  if (!code) { results.innerHTML = ''; results.style.display = 'none'; return; }
+  input._searchT = setTimeout(() => {
+    fetch('/inventory_items/search?q=' + encodeURIComponent(code) + '&format=json', { headers: { 'Accept': 'application/json' } })
+      .then(r => r.json())
+      .then(items => {
+        results.innerHTML = '';
+        if (items && items.length) {
+          items.forEach(item => {
+            const li = document.createElement('li');
+            li.dataset.code = item.code;
+            li.dataset.name = item.name;
+            li.dataset.price = item.unit_price;
+            li.dataset.id = item.id;
+            li.textContent = item.code + ' — ' + item.name + (item.unit_price ? ' (R ' + parseFloat(item.unit_price).toFixed(2) + ')' : '');
+            li.addEventListener('click', () => { fillRow(row, item); results.innerHTML = ''; results.style.display = 'none'; });
+            results.appendChild(li);
+          });
+          results.style.display = 'block';
+        } else {
+          results.style.display = 'none';
+        }
+      });
+  }, 250);
+});
+
+document.addEventListener('click', function(e) {
+  if (!e.target.classList.contains('code-search') && !e.target.closest('.code-results')) {
+    document.querySelectorAll('.code-results').forEach(r => { r.innerHTML = ''; r.style.display = 'none'; });
+  }
+});
+
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.classList.contains('remove-link')) {
+    e.preventDefault();
+    const row = e.target.closest('.item-row');
+    if (row) {
+      const destroyField = row.querySelector('.destroy-field');
+      if (destroyField) destroyField.value = '1';
+      row.style.display = 'none';
+    }
+    recalc();
+  }
+});
+
+function nextIndex() {
+  const tbody = document.getElementById('items');
+  const used = new Set();
+  tbody.querySelectorAll('.item-row input.code-search').forEach(inp => {
+    const m = (inp.name || '').match(/\[(\d+)\]/);
+    if (m) used.add(parseInt(m[1], 10));
+  });
+  let i = 0;
+  while (used.has(i)) i++;
+  return i;
+}
+
+document.getElementById('add-item').addEventListener('click', function(e) {
+  e.preventDefault();
+  const template = document.querySelector('.item-template');
+  if (!template) return;
+  const tbody = document.getElementById('items');
+  const clone = template.cloneNode(true);
+  clone.removeAttribute('data-template');
+  clone.classList.remove('item-template');
+  clone.querySelectorAll('input').forEach(i => { i.value = ''; });
+  clone.querySelectorAll('.code-results').forEach(r => { r.innerHTML = ''; r.style.display = 'none'; });
+  applyItemNames(clone, nextIndex());
+  tbody.appendChild(clone);
+  clone.querySelectorAll('.price').forEach(input => input.addEventListener('input', recalc));
+  recalc();
+});
+
+document.querySelectorAll('.price').forEach(input => input.addEventListener('input', recalc));
+recalc();
+</script>

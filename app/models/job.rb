@@ -5,6 +5,7 @@ class Job < ApplicationRecord
   has_many :purchase_orders, dependent: :destroy
   has_many :claims, dependent: :destroy
   has_many :digital_job_cards, dependent: :destroy
+  has_many :quotes, dependent: :destroy
 
   # invoiced is its own status rather than a flag on completed, so a job is
   # never both. Values are the stored integers; invoiced: 5 keeps cancelled: 4
@@ -54,6 +55,10 @@ class Job < ApplicationRecord
 
   def display_status
     status.humanize
+  end
+
+  def display_label
+    [ job_number, customer_name ].compact_blank.join(" - ")
   end
 
   def display_status_key

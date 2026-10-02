@@ -10,15 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_29_120001) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_01_212656) do
   create_table "addresses", force: :cascade do |t|
     t.text "address"
     t.integer "client_id", null: false
-    t.datetime "created_at", null: false
+    t.datetime "created_at", precision: nil, null: false
     t.boolean "is_default", default: false
-    t.string "label", default: "Other"
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_addresses_on_client_id"
+    t.string "label", limit: 255, default: "Other"
+    t.datetime "updated_at", precision: nil, null: false
   end
 
   create_table "claims", force: :cascade do |t|
@@ -106,6 +105,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_120001) do
     t.decimal "unit_price", precision: 10, scale: 2
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_inventory_items_on_code", unique: true
+    t.index ["is_active"], name: "index_inventory_items_on_is_active"
   end
 
   create_table "jobs", force: :cascade do |t|
@@ -138,6 +138,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_120001) do
     t.index ["client_id"], name: "index_jobs_on_client_id"
     t.index ["is_project"], name: "index_jobs_on_is_project"
     t.index ["user_id"], name: "index_jobs_on_user_id"
+  end
+
+  create_table "maintenance_subscriptions", force: :cascade do |t|
+    t.integer "client_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "created_by_id", null: false
+    t.date "end_date"
+    t.date "next_service_date"
+    t.text "notes"
+    t.string "plan", default: "quarterly"
+    t.decimal "price", precision: 10, scale: 2
+    t.date "start_date", null: false
+    t.string "status", default: "active"
+    t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_maintenance_subscriptions_on_client_id"
+    t.index ["created_by_id"], name: "index_maintenance_subscriptions_on_created_by_id"
+    t.index ["next_service_date"], name: "index_maintenance_subscriptions_on_next_service_date"
+    t.index ["plan"], name: "index_maintenance_subscriptions_on_plan"
+    t.index ["status"], name: "index_maintenance_subscriptions_on_status"
   end
 
   create_table "people", force: :cascade do |t|
@@ -206,6 +225,42 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_120001) do
     t.index ["created_by_id"], name: "index_purchase_orders_on_created_by_id"
     t.index ["job_id"], name: "index_purchase_orders_on_job_id"
     t.index ["supplier_id"], name: "index_purchase_orders_on_supplier_id"
+  end
+
+  create_table "quote_items", force: :cascade do |t|
+    t.string "code"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.integer "inventory_item_id"
+    t.decimal "quantity", precision: 12, scale: 4, default: "0.0", null: false
+    t.integer "quote_id", null: false
+    t.decimal "total_price", precision: 10, scale: 2, default: "0.0", null: false
+    t.decimal "unit_price", precision: 10, scale: 2, default: "0.0", null: false
+    t.datetime "updated_at", null: false
+    t.index ["inventory_item_id"], name: "index_quote_items_on_inventory_item_id"
+    t.index ["quote_id"], name: "index_quote_items_on_quote_id"
+  end
+
+  create_table "quotes", force: :cascade do |t|
+    t.string "attention"
+    t.string "company"
+    t.datetime "created_at", null: false
+    t.integer "created_by_id"
+    t.string "email_address"
+    t.integer "job_id"
+    t.text "notes"
+    t.string "property"
+    t.date "quote_date"
+    t.string "quote_number", null: false
+    t.integer "status", default: 0, null: false
+    t.string "subject"
+    t.text "terms"
+    t.datetime "updated_at", null: false
+    t.date "valid_until"
+    t.decimal "vat_rate", precision: 5, scale: 2, default: "15.0", null: false
+    t.index ["created_by_id"], name: "index_quotes_on_created_by_id"
+    t.index ["job_id"], name: "index_quotes_on_job_id"
+    t.index ["quote_number"], name: "index_quotes_on_quote_number", unique: true
   end
 
   create_table "reports", force: :cascade do |t|
@@ -279,6 +334,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_120001) do
   add_foreign_key "jobs", "clients"
   add_foreign_key "jobs", "users"
   add_foreign_key "jobs", "users", column: "assigned_to_id"
+  add_foreign_key "maintenance_subscriptions", "clients"
+  add_foreign_key "maintenance_subscriptions", "users", column: "created_by_id"
   add_foreign_key "planner_entries", "users", column: "assigned_to_id"
   add_foreign_key "planner_entries", "users", column: "created_by_id"
   add_foreign_key "purchase_order_items", "inventory_items"
@@ -286,6 +343,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_120001) do
   add_foreign_key "purchase_orders", "jobs"
   add_foreign_key "purchase_orders", "suppliers"
   add_foreign_key "purchase_orders", "users", column: "created_by_id"
+  add_foreign_key "quote_items", "inventory_items"
+  add_foreign_key "quote_items", "quotes"
+  add_foreign_key "quotes", "jobs"
+  add_foreign_key "quotes", "users", column: "created_by_id"
   add_foreign_key "reports", "users"
   add_foreign_key "users", "people"
 end
