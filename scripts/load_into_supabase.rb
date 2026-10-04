@@ -52,6 +52,31 @@ unless host.include?("supabase")
   abort "Set ALLOW_ANY_HOST=1 to proceed anyway." unless ENV["ALLOW_ANY_HOST"] == "1"
 end
 
+# Supabase direct hosts (db.<ref>.supabase.co) are IPv6-only on new projects.
+# Detect that up front: libpq reports it as an unhelpful name-resolution error.
+if host.start_with?("db.") && host.end_with?(".supabase.co")
+  require "resolv"
+  ipv4 = begin
+    Resolv::DNS.open { |dns| dns.getresources(host, Resolv::DNS::Resource::IN::A).map { |r| r.address.to_s } }
+  rescue StandardError
+    []
+  end
+  if ipv4.empty?
+    abort <<~MSG
+
+      #{host} is Supabase's *direct* connection host, which is IPv6-only.
+
+      Use the pooler host instead. In the Supabase dashboard go to
+      Project Settings -> Database -> Connection string and copy the
+      **Session pooler** URI (the one on port 5432), which looks like:
+
+        postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
+
+      Replace SUPABASE_DATABASE_URL in .env with that string and re-run.
+    MSG
+  end
+end
+
 files = Dir.glob(File.join(DIR, "*.sql"))
              .reject { |f| File.basename(f) == "all_in_one.sql" }
              .sort_by { |f| File.basename(f) }
@@ -78,8 +103,15 @@ if existing.positive? && ENV["FORCE"] != "1"
 end
 
 if ENV["DROP_TABLES"] == "1"
-  puts "dropping existing app tables..."
-  conn.exec("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
+  # Drop only our own tables. Deliberately not DROP SCHEMA public CASCADE: on
+  # Supabase that would take out the schema's grants and extensions and break
+  # the dashboard's table browser.
+  ours = File.read(File.join(DIR, "00_schema.sql"), encoding: "UTF-8")
+            .scan(/^CREATE TABLE "([^"]+)"/).flatten
+  ours += %w[schema_migrations ar_internal_metadata]
+  puts "dropping #{ours.size} tables: #{ours.join(', ')}"
+  conn.exec(ours.reverse.map { |t| %(DROP TABLE IF EXISTS "#{t}" CASCADE) }.join(";\n"))
+  puts "dropped."
 end
 
 conn.exec("SET statement_timeout = 0")

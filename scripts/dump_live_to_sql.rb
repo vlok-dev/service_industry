@@ -11,6 +11,16 @@ require "fileutils"
 
 Dotenv.load(".env")
 
+# Which live database to read. Defaults to Aiven, but RENDER_DATABASE_URL takes
+# precedence so a dump can be taken from whichever database production actually
+# used - those two can drift apart, and picking the wrong one silently loses rows.
+SOURCE_URL = ENV["RENDER_DATABASE_URL"].presence || ENV["AIVEN_DATABASE_URL"].presence
+abort "Set RENDER_DATABASE_URL or AIVEN_DATABASE_URL in .env" if SOURCE_URL.nil? || SOURCE_URL.empty?
+
+SOURCE_LABEL = ENV["RENDER_DATABASE_URL"].present? ? "Render Postgres" : "Aiven"
+
+puts "Reading from: #{SOURCE_LABEL}"
+
 OUT_DIR = File.join(__dir__, "..", "db", "supabase_dump")
 FILE_BUDGET = 1_200_000 # bytes per data file before rolling over to the next part
 ROWS_PER_STATEMENT = 200
@@ -53,7 +63,7 @@ def write_data_file(path, body, table, part)
   File.write(path, [head, "BEGIN;", "", body, "COMMIT;", ""].join("\n"), encoding: "UTF-8")
 end
 
-conn = PG.connect(ENV.fetch("AIVEN_DATABASE_URL"))
+conn = PG.connect(SOURCE_URL)
 
 def q(conn, sql)
   conn.exec(sql).to_a

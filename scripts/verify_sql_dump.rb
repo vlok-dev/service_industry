@@ -14,7 +14,7 @@ Dotenv.load(".env")
 DIR = File.join(__dir__, "..", "db", "supabase_dump")
 VERIFY_SCHEMA = "supabase_dump_verify"
 
-conn = PG.connect(ENV.fetch("AIVEN_DATABASE_URL"))
+conn = PG.connect(ENV["RENDER_DATABASE_URL"].presence || ENV.fetch("AIVEN_DATABASE_URL"))
 conn.exec(%(DROP SCHEMA IF EXISTS #{VERIFY_SCHEMA} CASCADE))
 
 conn.exec("BEGIN")
