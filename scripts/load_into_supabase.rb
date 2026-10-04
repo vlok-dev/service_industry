@@ -16,12 +16,45 @@ require "dotenv"
 Dotenv.load(".env")
 
 DIR = File.join(__dir__, "..", "db", "supabase_dump")
-EXPECTED = {
-  "clients" => 935, "inventory_items" => 2952, "people" => 20, "suppliers" => 52,
-  "users" => 21, "jobs" => 122, "digital_job_cards" => 4, "digital_job_card_materials" => 11,
-  "purchase_orders" => 27, "purchase_order_items" => 83, "settings" => 1,
-  "schema_migrations" => 57
-}
+
+def env_present(key)
+  v = ENV[key].to_s.strip
+  v.empty? ? nil : v
+end
+
+# Expected row counts are read from the source database at run time, never
+# hardcoded. Hardcoding them is what let a stale-source dump look correct.
+def source_url
+  env_present("RENDER_DATABASE_URL") || env_present("AIVEN_DATABASE_URL")
+end
+
+def expected_counts
+  url = source_url
+  return {} if url.nil? || url.empty?
+
+  conn = PG.connect(url.include?("?") ? url : "#{url}?sslmode=require")
+  tables = conn.exec(<<~SQL).to_a.map { |r| r["table_name"] }
+    SELECT table_name FROM information_schema.tables
+    WHERE table_schema='public'
+      AND table_name NOT IN ('schema_migrations','ar_internal_metadata')
+    ORDER BY table_name
+  SQL
+  counts = {}
+  tables.each do |t|
+    counts[t] = conn.exec(%(SELECT COUNT(*) AS n FROM "#{t}")).first["n"].to_i
+  end
+  %w[schema_migrations ar_internal_metadata].each do |t|
+    counts[t] = conn.exec(%(SELECT COUNT(*) AS n FROM "#{t}")).first["n"].to_i
+  end
+  conn.close
+  counts
+rescue PG::Error => e
+  warn "could not read expected counts from source: #{e.message.lines.first.to_s.strip}"
+  {}
+end
+
+SOURCE_LABEL = env_present("RENDER_DATABASE_URL") ? "Render Postgres" : "Aiven"
+EXPECTED = expected_counts
 
 url = ENV["SUPABASE_DATABASE_URL"].to_s.strip
 if url.empty?
@@ -83,6 +116,7 @@ files = Dir.glob(File.join(DIR, "*.sql"))
 abort "No .sql files found in #{DIR}. Run: bundle exec ruby scripts/dump_live_to_sql.rb" if files.empty?
 
 puts "Target host: #{host}"
+puts "Expected counts read from: #{SOURCE_LABEL} (#{EXPECTED.size} tables)"
 puts "Files to run: #{files.size}"
 puts
 

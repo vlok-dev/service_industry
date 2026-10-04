@@ -14,10 +14,15 @@ Dotenv.load(".env")
 # Which live database to read. Defaults to Aiven, but RENDER_DATABASE_URL takes
 # precedence so a dump can be taken from whichever database production actually
 # used - those two can drift apart, and picking the wrong one silently loses rows.
-SOURCE_URL = ENV["RENDER_DATABASE_URL"].presence || ENV["AIVEN_DATABASE_URL"].presence
-abort "Set RENDER_DATABASE_URL or AIVEN_DATABASE_URL in .env" if SOURCE_URL.nil? || SOURCE_URL.empty?
+def env_present(key)
+  v = ENV[key].to_s.strip
+  v.empty? ? nil : v
+end
 
-SOURCE_LABEL = ENV["RENDER_DATABASE_URL"].present? ? "Render Postgres" : "Aiven"
+SOURCE_URL = env_present("RENDER_DATABASE_URL") || env_present("AIVEN_DATABASE_URL")
+abort "Set RENDER_DATABASE_URL or AIVEN_DATABASE_URL in .env" if SOURCE_URL.nil?
+
+SOURCE_LABEL = env_present("RENDER_DATABASE_URL") ? "Render Postgres" : "Aiven"
 
 puts "Reading from: #{SOURCE_LABEL}"
 
