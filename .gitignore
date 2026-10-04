@@ -10,6 +10,9 @@
 # Ignore all environment files.
 /.env*
 
+# Supabase import bundle: holds a copy of production data, including password hashes.
+db/supabase_dump/
+
 # Ignore all logfiles and tempfiles.
 /log/*
 /tmp/*
