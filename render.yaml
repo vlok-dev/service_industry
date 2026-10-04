@@ -17,10 +17,12 @@ services:
         value: info
       - key: AIVEN_DATABASE_URL
         sync: false
+      # Manually managed on purpose. This used to be fromDatabase, which pinned
+      # it to Render's own Postgres - re-applying the blueprint would then have
+      # silently pointed the app back at that database instead of Supabase.
+      # Set it to the Supabase connection string in the dashboard.
       - key: DATABASE_URL
-        fromDatabase:
-          name: industro-plumbers-db
-          property: connectionString
+        sync: false
       - key: APP_HOST
         value: industro-plumbers.onrender.com
       - key: MAILER_SENDER
