@@ -24,6 +24,7 @@ class Job < ApplicationRecord
   before_validation :populate_from_client, if: -> { client_id_changed? && client_id.present? }
   before_validation :sync_status_with_invoice
   before_save :set_completed_at
+  before_save :clear_whatsapp_sent_at_if_rescheduled
   scope :search, ->(query) {
     return all if query.blank?
     sanitized = "%#{ActiveRecord::Base.sanitize_sql_like(query.to_s.strip)}%"
@@ -126,5 +127,13 @@ class Job < ApplicationRecord
     self.contact_number = (client.primary_contact_mobile.presence || client.phone_number) if contact_number.blank?
     self.address = (client.delivery_address.presence || client.address) if address.blank?
     self.postal_address = (client.postal_address.presence || client.delivery_address) if postal_address.blank?
+  end
+
+  private
+
+  def clear_whatsapp_sent_at_if_rescheduled
+    if scheduled_date_changed? || scheduled_time_changed? || assigned_to_id_changed?
+      self.whatsapp_sent_at = nil
+    end
   end
 end
