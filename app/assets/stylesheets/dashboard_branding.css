@@ -768,6 +768,31 @@ nav .brand {
   display: none;
 }
 
+.sidebar.collapsed .theme-toggle-btn {
+  padding: 0.625rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  width: 44px;
+}
+
+.sidebar.collapsed .theme-toggle-btn #themeToggleText {
+  display: none;
+}
+
+.sidebar.collapsed .theme-toggle-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.sidebar.collapsed .sidebar-theme-toggle {
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem auto;
+}
+
 .sidebar.collapsed .sidebar-logout:hover::after {
   content: "Logout";
   position: absolute;
