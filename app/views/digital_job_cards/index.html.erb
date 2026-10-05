@@ -28,6 +28,7 @@
         <table>
           <thead>
             <tr>
+              <th>Job Number</th>
               <th>Client Name</th>
               <th>Address</th>
               <th>Date</th>
@@ -44,6 +45,7 @@
           <tbody id="digital_job_cards_table_body">
             <% @digital_job_cards.each do |card| %>
               <tr>
+                <td><%= card.job&.job_number || "—" %></td>
                 <td><%= card.client_name %></td>
                 <td><%= card.address&.truncate(50) %></td>
                 <td><%= card.date&.strftime("%d %b %Y") %></td>

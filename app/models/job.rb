@@ -47,6 +47,7 @@ class Job < ApplicationRecord
   # the Completed filter so the two tabs can never disagree. Whether a job has
   # been costed is a per-job detail, exposed by costed?, not a different list.
   scope :outstanding, -> { where(status: :completed) }
+  scope :ordered_by_date, -> { order(scheduled_date: :desc, scheduled_time: :desc, created_at: :desc) }
 
   def self.next_job_number
     last_job = Job.order(:id).last
@@ -60,6 +61,13 @@ class Job < ApplicationRecord
 
   def display_label
     [ job_number, customer_name ].compact_blank.join(" - ")
+  end
+
+  def display_label_with_details
+    parts = [ job_number, customer_name ].compact_blank
+    parts << assigned_to&.name if assigned_to.present?
+    parts << scheduled_date&.strftime("%d %b %Y") if scheduled_date.present?
+    parts.join(" | ")
   end
 
   def display_status_key
