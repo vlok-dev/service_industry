@@ -1630,15 +1630,32 @@
         var sidebar = document.getElementById('sidebar');
         var toggle = document.getElementById('sidebarToggle');
         var topToggle = document.getElementById('topBarToggle');
-        
+
+        // Initialize sidebar state from user preference (persisted in DB)
+        var sidebarCollapsed = <%= user_signed_in? && current_user.sidebar_collapsed? ? 'true' : 'false' %>;
+        if (sidebarCollapsed && window.innerWidth > 768) {
+          sidebar.classList.add('collapsed');
+        }
+
         function toggleSidebar() {
           if (window.innerWidth <= 768) {
             sidebar.classList.toggle('mobile-open');
           } else {
-            sidebar.classList.toggle('collapsed');
+            var isCollapsed = sidebar.classList.toggle('collapsed');
+            // Persist sidebar state to server
+            var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            fetch('/sidebar', {
+              method: 'PATCH',
+              headers: {
+                'X-CSRF-Token': csrfToken,
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              body: 'collapsed=' + isCollapsed
+            }).catch(function(e) { console.error('Failed to save sidebar state:', e); });
           }
         }
-        
+
         if (toggle) {
           toggle.addEventListener('click', toggleSidebar);
         }

@@ -22,10 +22,8 @@ class DigitalJobCardPolicy < ApplicationPolicy
   class Scope < ApplicationPolicy::Scope
     def resolve
       case user&.role
-      when "super_admin", "admin", "accountant", "scheduler"
+      when "super_admin", "admin", "accountant", "scheduler", "reporter", "project_manager"
         scope.all
-      when "reporter", "project_manager"
-        scope.where(user_id: user.id)
       else
         scope.none
       end
