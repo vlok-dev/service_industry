@@ -2,7 +2,7 @@
 
 <h1>Import Inventory from CSV</h1>
 
-<div style="background: #f9fafb; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; border: 1px solid var(--border);">
+  <div style="background: var(--bg-subtle); padding: 1rem; margin-bottom: 1rem; border-radius: 4px; border: 1px solid var(--border);">
   <p><strong>CSV Format:</strong></p>
   <p><code>Code,Description,Stock Item Type,Total Stock Quantity,Cost Price,List Price,Replacement Percentage,Is Serializable,Is Quantity Tracked,Is Active,Created Date,Created By,Modified By,Modified Date</code></p>
   <ul>
@@ -17,7 +17,7 @@
     <li><strong>Created Date</strong> / <strong>Modified Date</strong> — Ignored on import (Rails tracks automatically).</li>
   </ul>
   <p>Example:</p>
-  <pre style="background: white; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); overflow-x: auto;">
+  <pre style="background: var(--surface); padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); overflow-x: auto;">
 Code,Description,Stock Item Type,Total Stock Quantity,Cost Price,List Price,Replacement Percentage,Is Serializable,Is Quantity Tracked,Is Active,Created Date,Created By,Modified By,Modified Date
 COP-15,15mm Copper Pipe,Consumable,100,45.00,65.00,100.00,No,Yes,Yes,2026-09-01,Admin,Admin,2026-09-07
 PVC-50,50mm PVC Pipe,Resale,200,12.50,18.75,50.00,No,Yes,Yes,2026-09-01,Admin,,
