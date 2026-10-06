@@ -4,6 +4,7 @@ class DigitalJobCardsController < ApplicationController
   before_action :set_digital_job_card, only: %i[ show edit update destroy print ]
   before_action :authorize_access!, only: %i[ show edit update destroy print ]
   before_action :set_inventory_items, only: %i[ new create edit update ]
+  before_action :set_jobs, only: %i[ new create edit update ]
 
   def index
     @digital_job_cards = policy_scope(DigitalJobCard).recent.includes(:materials)
@@ -82,7 +83,11 @@ class DigitalJobCardsController < ApplicationController
     @inventory_items = InventoryItem.active.order(:code)
   end
 
+  def set_jobs
+    @jobs = Job.ordered_by_date
+  end
+
   def digital_job_card_params
-    params.require(:digital_job_card).permit(:client_id, :client_name, :address, :date, :time_start, :time_finish, :description, materials_attributes: [:id, :inventory_item_id, :material_name, :quantity, :unit_price, :markup, :labor_rate, :hours_worked, :is_labor, :_destroy])
+    params.require(:digital_job_card).permit(:job_id, :client_id, :client_name, :address, :date, :time_start, :time_finish, :description, materials_attributes: [:id, :inventory_item_id, :material_name, :quantity, :unit_price, :markup, :labor_rate, :hours_worked, :is_labor, :_destroy])
   end
 end

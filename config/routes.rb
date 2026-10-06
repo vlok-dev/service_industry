@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   }
   get "/stop_stay_logged_in" => "users/sessions#stop_stay_logged_in", as: :stop_stay_logged_in
   resource :theme, only: [:update]
+  patch "/sidebar", to: "themes#update_sidebar"
 
   get "up" => "rails/health#show", as: :rails_health_check
 

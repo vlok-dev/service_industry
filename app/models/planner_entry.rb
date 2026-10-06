@@ -21,6 +21,7 @@ class PlannerEntry < ApplicationRecord
   validates :title, :entry_date, :created_by, :assigned_to, presence: true
 
   after_commit :schedule_whatsapp_reminder, on: [:create, :update], if: :should_schedule_whatsapp?
+  before_save :clear_whatsapp_sent_at_if_rescheduled
 
   scope :upcoming, -> { where("entry_date >= ?", Date.today).order(:entry_date, :entry_time) }
   scope :past, -> { where("entry_date < ?", Date.today).order(:entry_date, :entry_time) }
@@ -76,6 +77,12 @@ class PlannerEntry < ApplicationRecord
     # Only schedule if reminder time is in the future
     if reminder_time > Time.current
       PlannerEntryWhatsappReminderJob.set(wait_until: reminder_time).perform_later(id)
+    end
+  end
+
+  def clear_whatsapp_sent_at_if_rescheduled
+    if entry_date_changed? || entry_time_changed? || assigned_to_id_changed?
+      self.whatsapp_sent_at = nil
     end
   end
 end

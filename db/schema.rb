@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_01_212656) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_194000) do
   create_table "addresses", force: :cascade do |t|
     t.text "address"
     t.integer "client_id", null: false
@@ -315,6 +315,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_212656) do
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
     t.integer "role"
+    t.boolean "sidebar_collapsed", default: false
     t.string "theme_preference", default: "light"
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true

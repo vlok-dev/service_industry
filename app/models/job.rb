@@ -24,6 +24,7 @@ class Job < ApplicationRecord
   before_validation :populate_from_client, if: -> { client_id_changed? && client_id.present? }
   before_validation :sync_status_with_invoice
   before_save :set_completed_at
+  before_save :clear_whatsapp_sent_at_if_rescheduled
   scope :search, ->(query) {
     return all if query.blank?
     sanitized = "%#{ActiveRecord::Base.sanitize_sql_like(query.to_s.strip)}%"
@@ -46,6 +47,7 @@ class Job < ApplicationRecord
   # the Completed filter so the two tabs can never disagree. Whether a job has
   # been costed is a per-job detail, exposed by costed?, not a different list.
   scope :outstanding, -> { where(status: :completed) }
+  scope :ordered_by_date, -> { order(scheduled_date: :desc, scheduled_time: :desc, created_at: :desc) }
 
   def self.next_job_number
     last_job = Job.order(:id).last
@@ -59,6 +61,13 @@ class Job < ApplicationRecord
 
   def display_label
     [ job_number, customer_name ].compact_blank.join(" - ")
+  end
+
+  def display_label_with_details
+    parts = [ job_number, customer_name ].compact_blank
+    parts << assigned_to&.name if assigned_to.present?
+    parts << scheduled_date&.strftime("%d %b %Y") if scheduled_date.present?
+    parts.join(" | ")
   end
 
   def display_status_key
@@ -126,5 +135,13 @@ class Job < ApplicationRecord
     self.contact_number = (client.primary_contact_mobile.presence || client.phone_number) if contact_number.blank?
     self.address = (client.delivery_address.presence || client.address) if address.blank?
     self.postal_address = (client.postal_address.presence || client.delivery_address) if postal_address.blank?
+  end
+
+  private
+
+  def clear_whatsapp_sent_at_if_rescheduled
+    if scheduled_date_changed? || scheduled_time_changed? || assigned_to_id_changed?
+      self.whatsapp_sent_at = nil
+    end
   end
 end

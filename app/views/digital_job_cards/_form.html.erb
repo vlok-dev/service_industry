@@ -11,6 +11,11 @@
   <% end %>
 
   <div class="field">
+    <%= f.label :job_id, "Job Number (Optional)" %><br>
+    <%= f.collection_select :job_id, Job.ordered_by_date, :id, :display_label_with_details, { include_blank: "— Select Job —" }, class: "select-input" %>
+  </div>
+
+  <div class="field">
     <%= f.label :client_name, "Client Name" %>
     <div class="client-search-wrapper">
       <input type="hidden" name="digital_job_card[client_id]" id="digital_job_card_client_id" value="<%= digital_job_card.client_id %>">
@@ -69,7 +74,7 @@
 
   <div class="modal-footer" style="padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
     <button type="button" class="btn btn-secondary" id="cancelDigitalJobCardBtn">Cancel</button>
-    <%= f.submit "Create Digital Job Card", class: "btn btn-success" %>
+    <%= f.submit digital_job_card.persisted? ? "Update Extras" : "Create Digital Job Card", class: "btn btn-success" %>
   </div>
 <% end %>
 
