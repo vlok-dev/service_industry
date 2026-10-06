@@ -297,6 +297,8 @@ class JobsController < ApplicationController
       scoped = scope.scheduled
       scoped = scoped.on_date(@filter_date) if @filter_date
       scoped
+    when "past_scheduled"
+      scope.past_scheduled
     when "completed"
       scope.completed
     when "in_progress"

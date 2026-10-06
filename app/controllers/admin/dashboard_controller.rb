@@ -8,7 +8,8 @@ module Admin
       @jobs = Job.all
       @dashboard_counts = {
         pending: @jobs.pending.count,
-        scheduled: @jobs.scheduled.count,
+        scheduled: @jobs.upcoming_scheduled.count,
+        past_scheduled: @jobs.past_scheduled.count,
         in_progress: @jobs.in_progress.count,
         completed: @jobs.completed.count,
         invoiced: @jobs.invoiced.count

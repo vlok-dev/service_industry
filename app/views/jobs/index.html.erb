@@ -2,7 +2,8 @@
   pipeline_scope = current_user.super_admin? ? policy_scope(Job).where(user: current_user) : policy_scope(Job)
   counts = {
     pending:    pipeline_scope.where(status: :pending).count,
-    scheduled:  pipeline_scope.where(status: :scheduled).count,
+    scheduled:  pipeline_scope.upcoming_scheduled.count,
+    past_scheduled: pipeline_scope.past_scheduled.count,
     in_progress: pipeline_scope.where(status: :in_progress).count,
     completed:  pipeline_scope.where(status: :completed).count,
     cancelled:  pipeline_scope.where(status: :cancelled).count,
@@ -48,6 +49,11 @@
       <div class="value"><%= counts[:scheduled] %></div>
       <div class="sub">Booked in</div>
     </div>
+    <div class="kpi kpi-past-scheduled">
+      <div class="label">Past Scheduled</div>
+      <div class="value"><%= counts[:past_scheduled] %></div>
+      <div class="sub">Date passed</div>
+    </div>
     <div class="kpi kpi-progress">
       <div class="label">In Progress</div>
       <div class="value"><%= counts[:in_progress] %></div>
@@ -87,6 +93,10 @@
   <%= link_to jobs_context_path(filter: "scheduled", filter_date: nil), class: "chip #{current_filter == 'scheduled' ? 'active' : ''}" do %>
     Scheduled
     <span class="count"><%= counts[:scheduled] %></span>
+  <% end %>
+  <%= link_to jobs_context_path(filter: "past_scheduled"), class: "chip #{current_filter == 'past_scheduled' ? 'active' : ''}" do %>
+    Past Scheduled
+    <span class="count"><%= counts[:past_scheduled] %></span>
   <% end %>
   <%= link_to jobs_context_path(filter: "in_progress"), class: "chip #{current_filter == 'in_progress' ? 'active' : ''}" do %>
     In Progress

@@ -63,17 +63,20 @@
 .kpi.kpi-completed::before  { background: linear-gradient(180deg, #10b981, #34d399); }
 .kpi.kpi-invoiced::before   { background: linear-gradient(180deg, #0e7490, #22d3ee); }
 .kpi.kpi-cancelled::before  { background: linear-gradient(180deg, #ef4444, #f87171); }
+.kpi.kpi-past-scheduled::before  { background: linear-gradient(180deg, #64748b, #94a3b8); }
 .kpi.kpi-default::before    { background: linear-gradient(180deg, #2563eb, #6366f1); }
 
 /* Theme-aware background (no white patches) with per-status value tint */
 .kpi.kpi-pending    { background: var(--surface); }
 .kpi.kpi-scheduled  { background: var(--surface); }
+.kpi.kpi-past-scheduled  { background: var(--surface); }
 .kpi.kpi-progress   { background: var(--surface); }
 .kpi.kpi-completed  { background: var(--surface); }
 .kpi.kpi-invoiced   { background: var(--surface); }
 .kpi.kpi-cancelled  { background: var(--surface); }
 .kpi.kpi-pending .value   { color: #d97706; }
 .kpi.kpi-scheduled .value { color: #3b82f6; }
+.kpi.kpi-past-scheduled .value { color: #64748b; }
 .kpi.kpi-progress .value  { color: #8b5cf6; }
 .kpi.kpi-completed .value { color: #10b981; }
 .kpi.kpi-invoiced .value  { color: #06b6d4; }

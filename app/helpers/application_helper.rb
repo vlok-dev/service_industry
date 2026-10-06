@@ -20,6 +20,7 @@ module ApplicationHelper
     case filter
     when "pending" then "Pending"
     when "scheduled" then "Scheduled"
+    when "past_scheduled" then "Past Scheduled"
     when "in_progress" then "In Progress"
     when "completed" then "Completed"
     when "cancelled" then "Cancelled"

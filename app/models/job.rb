@@ -48,6 +48,12 @@ class Job < ApplicationRecord
   # the Completed filter so the two tabs can never disagree. Whether a job has
   # been costed is a per-job detail, exposed by costed?, not a different list.
   scope :outstanding, -> { where(status: :completed) }
+  scope :upcoming_scheduled, -> {
+    where(status: :scheduled).where("COALESCE(scheduled_end_date, scheduled_date) >= ?", Date.current)
+  }
+  scope :past_scheduled, -> {
+    where(status: :scheduled).where("COALESCE(scheduled_end_date, scheduled_date) < ?", Date.current)
+  }
   scope :ordered_by_date, -> { order(scheduled_date: :desc, scheduled_time: :desc, created_at: :desc) }
 
   def self.next_job_number

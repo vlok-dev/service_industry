@@ -14,6 +14,11 @@
     <div class="value"><%= @dashboard_counts[:scheduled] %></div>
     <div class="sub">Booked in</div>
   </div>
+  <div class="kpi kpi-past-scheduled">
+    <div class="label">Past Scheduled</div>
+    <div class="value"><%= @dashboard_counts[:past_scheduled] %></div>
+    <div class="sub">Date passed</div>
+  </div>
   <div class="kpi kpi-progress">
     <div class="label">In Progress</div>
     <div class="value"><%= @dashboard_counts[:in_progress] %></div>
