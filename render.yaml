@@ -40,5 +40,5 @@ services:
 
 databases:
   - name: industro-plumbers-db
-    plan: free
+    plan: 0.1c-256mb
     databaseName: industro_plumbers_production
