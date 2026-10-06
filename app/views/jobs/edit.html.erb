@@ -72,9 +72,10 @@
             <%= f.label :status %>
             <%= f.select :status, Job.statuses.keys.map { |s| [s.humanize, s] }, { include_blank: true }, { required: true } %>
           </div>
-          <div class="field">
-            <%= f.label :priority %>
-            <%= f.select :priority, Job.priorities.keys.map { |p| [p.humanize, p] }, { include_blank: true }, { required: true } %>
+          <div class="field" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <%= f.label :is_project, "Project?" %>
+<%= f.check_box :is_project, { style: "transform: scale(1.3);" } %>
+            <span style="font-size: 0.880rem; color: var(--text-muted);">Leave unchecked to mark it as a maintenance job.</span>
           </div>
           <div class="field">
             <%= f.label :assigned_to_id, "Assign Plumber" %>
@@ -134,19 +135,6 @@
       </div>
     </div>
   <% end %>
-
-  <div class="card" style="margin-bottom: 1.5rem;">
-    <div class="card-header">
-      <h2>Additional Settings</h2>
-    </div>
-    <div class="card-body">
-      <div class="field">
-        <%= f.label :is_project, "Project?" %>
-        <%= f.check_box :is_project %>
-        <span style="font-size: 0.875rem; color: var(--text-muted);">Mark as a project to run over multiple days and attach claims.</span>
-      </div>
-    </div>
-  </div>
 
   <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
     <%= link_to "Cancel", jobs_path, class: "btn btn-secondary" %>

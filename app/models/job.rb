@@ -23,6 +23,7 @@ class Job < ApplicationRecord
   before_validation :assign_job_number, on: :create
   before_validation :populate_from_client, if: -> { client_id_changed? && client_id.present? }
   before_validation :sync_status_with_invoice
+  before_validation :sync_priority_with_project, if: -> { priority.blank? || is_project_changed? }
   before_save :set_completed_at
   before_save :clear_whatsapp_sent_at_if_rescheduled
   scope :search, ->(query) {
@@ -124,6 +125,10 @@ class Job < ApplicationRecord
       # Invoice withdrawn - the work is still done, so it goes back to completed.
       self.status = :completed
     end
+  end
+
+  def sync_priority_with_project
+    self.priority = is_project? ? :project : :maintenance
   end
 
   def populate_from_client

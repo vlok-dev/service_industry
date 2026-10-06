@@ -63,7 +63,7 @@ class JobsController < ApplicationController
 
   def update
     if @job.update(job_params)
-      redirect_to @job, notice: "Job was successfully updated."
+      redirect_to jobs_path, notice: "Job was successfully updated."
     else
       render :edit, status: :unprocessable_entity
     end
