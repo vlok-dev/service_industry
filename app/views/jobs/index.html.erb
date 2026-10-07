@@ -11,7 +11,7 @@
     outstanding: pipeline_scope.outstanding.count
   }
   current_filter = params[:filter]
-  filter_date = params[:filter_date].present? ? Date.parse(params[:filter_date]) : nil
+  filter_date = @filter_date
 %>
 
 <div class="action-bar">
@@ -112,18 +112,18 @@
   <% end %>
 </div>
 
-<% if current_filter == "scheduled" %>
+<% if current_filter == "scheduled" || current_filter == "past_scheduled" %>
   <div class="scheduled-date-picker" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); box-shadow: var(--shadow);">
-    <label for="filter_date" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin: 0;">Show scheduled jobs for:</label>
-    <%= form_with url: jobs_context_path(filter: "scheduled", filter_date: nil), method: :get, local: true, style: "display: flex; align-items: center; gap: 0.5rem;" do |f| %>
-      <%= f.hidden_field :filter, value: "scheduled" %>
+    <label for="filter_date" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin: 0;">Show <%= current_filter == "past_scheduled" ? "past" : "upcoming" %> scheduled jobs for:</label>
+    <%= form_with url: jobs_context_path(filter: current_filter, filter_date: nil), method: :get, local: true, style: "display: flex; align-items: center; gap: 0.5rem;" do |f| %>
+      <%= f.hidden_field :filter, value: current_filter %>
       <%= hidden_field_tag :q, params[:q] if params[:q].present? %>
       <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
       <%= hidden_field_tag :direction, params[:direction] if params[:direction].present? %>
-      <%= f.date_field :filter_date, value: filter_date || Date.tomorrow, id: "filter_date", style: "padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem;", onchange: "this.form.requestSubmit();" %>
-      <%= link_to "View All", jobs_context_path(filter: "scheduled", filter_date: nil), class: "btn btn-sm btn-secondary" %>
-      <% if filter_date.present? %>
-        <%= link_to "Clear date", jobs_context_path(filter: "scheduled", filter_date: nil), class: "btn btn-sm btn-secondary" %>
+      <%= f.date_field :filter_date, value: filter_date || (current_filter == "scheduled" ? Date.current : nil), id: "filter_date", style: "padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem;", onchange: "this.form.requestSubmit();" %>
+      <%= link_to "View All", jobs_context_path(filter: current_filter, filter_date: nil), class: "btn btn-sm btn-secondary" %>
+      <% if @filter_date_explicit %>
+        <%= link_to "Clear date", jobs_context_path(filter: current_filter, filter_date: nil), class: "btn btn-sm btn-secondary" %>
       <% end %>
     <% end %>
   </div>

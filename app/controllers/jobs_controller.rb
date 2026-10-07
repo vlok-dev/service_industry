@@ -5,12 +5,9 @@ class JobsController < ApplicationController
   def index
     @jobs = policy_scope(Job).includes(:user, :assigned_to)
     
-    # Default to tomorrow's date for scheduled filter if no date provided
-    if params[:filter] == "scheduled" && params[:filter_date].blank?
-      @filter_date = Date.tomorrow
-    else
-      @filter_date = params[:filter_date].present? ? Date.parse(params[:filter_date]) : nil
-    end
+    # Parse filter_date only when explicitly provided by the user
+    @filter_date = params[:filter_date].present? ? Date.parse(params[:filter_date]) : nil
+    @filter_date_explicit = params[:filter_date].present?
 
     # Base scope for pipeline
     if current_user.super_admin?
@@ -26,8 +23,8 @@ class JobsController < ApplicationController
     @search_query = params[:q]
     @pipeline_scope = sort_job_list(@pipeline_scope)
 
-    # Default to newest-first by scheduled date for scheduler/super_admin/accountant/reporter
-    if (current_user.super_admin? || current_user.scheduler? || current_user.accountant? || current_user.reporter?) && params[:sort].blank?
+    # Default to newest-first by scheduled date for all roles that view the jobs list
+    if params[:sort].blank?
       @pipeline_scope = @pipeline_scope.order(scheduled_date: :desc, scheduled_time: :desc, created_at: :desc)
     end
 
@@ -295,10 +292,12 @@ class JobsController < ApplicationController
       scope.pending
     when "scheduled"
       scoped = scope.scheduled
-      scoped = scoped.on_date(@filter_date) if @filter_date
+      scoped = scoped.on_date(@filter_date || Date.current)
       scoped
     when "past_scheduled"
-      scope.past_scheduled
+      scoped = scope.past_scheduled
+      scoped = scoped.on_date(@filter_date) if @filter_date
+      scoped
     when "completed"
       scope.completed
     when "in_progress"

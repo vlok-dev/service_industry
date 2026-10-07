@@ -10,8 +10,8 @@ module ApplicationHelper
     preserved = request.query_parameters.slice(*JOBS_CONTEXT_PARAMS).except("page")
     merged = preserved.merge(overrides.stringify_keys).compact_blank
 
-    # filter_date only applies to the scheduled filter; drop it otherwise
-    merged = merged.except("filter_date") unless merged["filter"] == "scheduled"
+    # filter_date only applies to scheduled/past_scheduled filters; drop it otherwise
+    merged = merged.except("filter_date") unless %w[scheduled past_scheduled].include?(merged["filter"])
 
     jobs_path(merged)
   end
