@@ -14,7 +14,7 @@ class Quote < ApplicationRecord
   validates :vat_rate, numericality: { greater_than: 0 }, allow_blank: true
 
   def subtotal
-    self[:subtotal].presence || items.sum { |item| item.total_price.to_f }
+    self[:subtotal].to_f > 0 ? self[:subtotal] : items.sum { |item| item.total_price.to_f }
   end
 
   def vat_amount
