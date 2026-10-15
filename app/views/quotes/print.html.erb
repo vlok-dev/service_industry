@@ -26,6 +26,11 @@
     padding: 20px;
   }
 
+  @page {
+    margin: 2mm;
+    size: A4;
+  }
+
     .quote-print-container .page {
       border-radius: 8px;
       padding: 30px;
@@ -98,7 +103,6 @@
   }
 
   .subject-line {
-    font-weight: bold;
     margin: 20px 0 10px 0;
     position: relative;
     text-decoration: underline;
@@ -282,6 +286,36 @@
     margin: 0;
     line-height: 1.4;
   }
+
+  @media print {
+ .quote-print-container {
+    zoom: 1.2;
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .quote-print-container .page {
+    padding: 12mm;
+    border-radius: 0;
+    min-height: auto;
+  }
+
+  .logo { width: 200px; }
+  .title { font-size: 28px; margin: 24px 0 28px; }
+  .detail-row { margin-bottom: 12px; }
+  .detail-label { width: 160px; font-size: 14px; }
+  .subject-line { font-size: 24px; }
+  .line-item-header { font-size: 13px; }
+  .line-item-row, .line-item-row .desc-col, .line-item-row .total-col { font-size: 15px; padding-top: 8px; padding-bottom: 8px; }
+  .totals-table td { font-size: 15px; }
+  .terms-title { font-size: 14px; }
+  .terms-list li, .scope-text, .closing-block p, .closing-block .signature-line { font-size: 14px; }
+  .footer { font-size: 13px; }
+
+  .line-items-container, .terms-block, .closing-block, .totals-table {
+    page-break-inside: avoid;
+  }
+}
 </style>
 
 <div class="quote-print-container">
@@ -290,19 +324,23 @@
       <%= image_tag "IndustroTopRightLogo.png", alt: "Industro Plumbers Logo" %>
     </div>
 
+    <br>
+    <br>
+    <br>
+
     <h1 class="title">ESTIMATE</h1>
 
     <div class="details-block">
       <div class="detail-row">
         <span class="detail-label">QUOTE #</span>
         <span class="detail-colon" style="font-weight: bold;">:</span>
-        <span class="detail-value detail-value-bold" style="font-weight: bold;"><%= @quote.quote_number %></span>
+        <span class="detail-value"><%= @quote.quote_number %></span>
       </div>
 
       <div class="detail-row">
         <span class="detail-label">COMPANY</span>
         <span class="detail-colon" style="font-weight: bold;">:</span>
-        <span class="detail-value detail-value-bold"><%= company %></span>
+        <span class="detail-value"><%= company %></span>
       </div>
 
       <div class="detail-row">
@@ -326,7 +364,7 @@
       <div class="detail-row">
         <span class="detail-label">PROPERTY</span>
         <span class="detail-colon" style="font-weight: bold;">:</span>
-        <span class="detail-value detail-value-bold"><%= property %></span>
+        <span class="detail-value"><%= property %></span>
       </div>
     </div>
 
@@ -340,9 +378,10 @@
         <span class="total-col">LINE ITEM TOTAL (R)</span>
       </div>
       <% @quote.items.each do |item| %>
+        <% next if item.description.blank? && item.line_total.to_f <= 0 %>
         <div class="line-item-row">
           <span class="desc-col"><%= item.description.presence || "No description" %></span>
-          <span class="total-col"><%= number_to_currency(item.line_total, unit: "R", precision: 2) %></span>
+          <span class="total-col"><%= item.line_total.to_f > 0 ? number_to_currency(item.line_total, unit: "R", precision: 2) : "" %></span>
         </div>
       <% end %>
     </div>
@@ -350,7 +389,7 @@
     <table class="totals-table">
       <tfoot>
         <tr>
-          <td colspan="2" class="label">Total (excl. VAT):</td>
+          <td colspan="2" class="label">Labour + Materials (excl. VAT):</td>
           <td class="value">R <%= sprintf('%.2f', @quote.subtotal.to_f).gsub('.', ',') %></td>
         </tr>
       </tfoot>
@@ -360,14 +399,16 @@
       <div class="terms-title">TERMS AND CONDITIONS</div>
       <ul class="terms-list">
         <li>This estimate is valid for 30 days and excludes VAT.</li>
-        <li>Defective workmanship will be rectified free of charge if reported within 7 days after completion of work</li>
-        <li>We also reserve the right to re-quote and then recharge should additional work be required which was not in the original estimate</li>
-        <li>Ownership of goods does not pass on to the client until full payment has been received. Industro Services reserves the right to remove the goods no matter where the location, in lieu of payment. All cost to remove said goods and any subsequent legal costs, will be borne by the client</li>
+        <li>Defective workmanship will be rectified free of charge if reported within 7 days after completion of work.</li>
+        <li>We also reserve the right to re-quote and then recharge should additional work be required which was not in the original estimate.</li>
+        <li>Ownership of goods does not pass on to the client until full payment has been received. Industro Services reserves the right to remove the goods no matter where the location, in lieu of payment. All cost to remove said goods and any subsequent legal costs, will be borne by the client.</li>
       </ul>
     </div>
 
     <div class="closing-block">
       <p>Should you require any additional information, please contact me on 071 988 1196</p>
+      <br>
+      <br>
       <p class="signature-line">Kind Regards,</p>
       <p class="signature-line">Michael Bennett</p>
     </div>

@@ -93,7 +93,7 @@ class QuotesController < ApplicationController
   def quote_params
     params.require(:quote).permit(
       :job_id, :vat_rate, :notes, :terms, :valid_until, :quote_date,
-      :company, :attention, :email_address, :property, :subject,
+      :company, :attention, :email_address, :property, :subject, :subtotal,
       items_attributes: %i[id code description unit_price inventory_item_id _destroy]
     )
   end

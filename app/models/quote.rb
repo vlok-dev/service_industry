@@ -14,7 +14,7 @@ class Quote < ApplicationRecord
   validates :vat_rate, numericality: { greater_than: 0 }, allow_blank: true
 
   def subtotal
-    items.sum { |item| item.total_price.to_f }
+    self[:subtotal].presence || items.sum { |item| item.total_price.to_f }
   end
 
   def vat_amount
@@ -31,7 +31,7 @@ class Quote < ApplicationRecord
 
   def formatted_date
     dt = quote_date_value
-    "#{dt.day} #{dt.strftime('%B')} #{dt.year}".upcase
+    "#{dt.day} #{dt.strftime('%B')} #{dt.year}"
   end
 
   def company_name
@@ -72,8 +72,9 @@ class Quote < ApplicationRecord
 
   def persist_totals
     items.each do |item|
-      item.total_price = item.unit_price if item.unit_price.present?
+      item.total_price = item.unit_price.present? ? item.unit_price : nil
     end
+    self.subtotal = items.sum { |item| item.total_price.to_f }
   end
 
   def assign_quote_number

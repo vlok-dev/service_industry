@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_194000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_15_173621) do
   create_table "addresses", force: :cascade do |t|
     t.text "address"
     t.integer "client_id", null: false
@@ -18,6 +18,76 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_194000) do
     t.boolean "is_default", default: false
     t.string "label", limit: 255, default: "Other"
     t.datetime "updated_at", precision: nil, null: false
+  end
+
+  create_table "bill_of_quantities", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.integer "job_id", null: false
+    t.string "reference_number", null: false
+    t.integer "status", default: 0, null: false
+    t.decimal "total_amount", precision: 12, scale: 2, default: "0.0"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["job_id"], name: "index_bill_of_quantities_on_job_id"
+    t.index ["reference_number"], name: "index_bill_of_quantities_on_reference_number", unique: true
+    t.index ["user_id"], name: "index_bill_of_quantities_on_user_id"
+  end
+
+  create_table "bill_of_quantity_items", force: :cascade do |t|
+    t.integer "bill_of_quantity_id", null: false
+    t.integer "category", default: 0
+    t.datetime "created_at", null: false
+    t.string "description", null: false
+    t.string "item_number"
+    t.text "notes"
+    t.integer "position"
+    t.decimal "quantity", precision: 10, scale: 3, default: "0.0"
+    t.decimal "total_amount", precision: 12, scale: 2, default: "0.0"
+    t.string "unit", null: false
+    t.decimal "unit_rate", precision: 10, scale: 2, default: "0.0"
+    t.datetime "updated_at", null: false
+    t.index ["bill_of_quantity_id", "position"], name: "index_bill_of_quantity_items_on_bill_of_quantity_id_and_position"
+    t.index ["bill_of_quantity_id"], name: "index_bill_of_quantity_items_on_bill_of_quantity_id"
+  end
+
+  create_table "boq_items", force: :cascade do |t|
+    t.decimal "bill_qty", precision: 12, scale: 4, default: "0.0", null: false
+    t.integer "boq_id", null: false
+    t.decimal "claimed", precision: 12, scale: 2, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.integer "inventory_item_id"
+    t.string "item"
+    t.string "page"
+    t.decimal "rate", precision: 10, scale: 2, default: "0.0", null: false
+    t.decimal "total_price", precision: 10, scale: 2, default: "0.0", null: false
+    t.string "unit"
+    t.datetime "updated_at", null: false
+    t.index ["boq_id"], name: "index_boq_items_on_boq_id"
+    t.index ["inventory_item_id"], name: "index_boq_items_on_inventory_item_id"
+  end
+
+  create_table "boqs", force: :cascade do |t|
+    t.string "attention"
+    t.string "boq_number", null: false
+    t.string "company"
+    t.datetime "created_at", null: false
+    t.integer "created_by_id"
+    t.string "email_address"
+    t.integer "job_id"
+    t.text "notes"
+    t.string "property"
+    t.date "quote_date"
+    t.integer "status", default: 0, null: false
+    t.string "subject"
+    t.text "terms"
+    t.datetime "updated_at", null: false
+    t.date "valid_until"
+    t.decimal "vat_rate", precision: 5, scale: 2, default: "15.0", null: false
+    t.index ["boq_number"], name: "index_boqs_on_boq_number", unique: true
+    t.index ["created_by_id"], name: "index_boqs_on_created_by_id"
+    t.index ["job_id"], name: "index_boqs_on_job_id"
   end
 
   create_table "claims", force: :cascade do |t|
@@ -254,6 +324,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_194000) do
     t.string "quote_number", null: false
     t.integer "status", default: 0, null: false
     t.string "subject"
+    t.decimal "subtotal", precision: 12, scale: 2, default: "0.0"
     t.text "terms"
     t.datetime "updated_at", null: false
     t.date "valid_until"
@@ -326,6 +397,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_194000) do
   end
 
   add_foreign_key "addresses", "clients"
+  add_foreign_key "bill_of_quantities", "jobs"
+  add_foreign_key "bill_of_quantities", "users"
+  add_foreign_key "bill_of_quantity_items", "bill_of_quantities"
+  add_foreign_key "boq_items", "boqs"
+  add_foreign_key "boq_items", "inventory_items"
+  add_foreign_key "boqs", "jobs"
+  add_foreign_key "boqs", "users", column: "created_by_id"
   add_foreign_key "claims", "jobs"
   add_foreign_key "digital_job_card_materials", "digital_job_cards"
   add_foreign_key "digital_job_card_materials", "inventory_items"
