@@ -47,19 +47,19 @@ class Quote < ApplicationRecord
   end
 
   def customer_attention
-    attention.presence || job&.contact_person.presence || "Tiisetso Mohlohlo"
+    attention.presence || job&.contact_person.presence || ""
   end
 
   def customer_email
-    email_address.presence || job&.email.presence || "cca@clc.co.za"
+    email_address.presence || job&.email.presence || ""
   end
 
   def property_address
-    property.presence || job&.address.presence || "73B Omar Cassim Street, Overbaakens"
+    property.presence || job&.address.presence || ""
   end
 
   def job_subject
-    subject.presence || job&.description.presence || "REPLACE GEYSERWISE"
+    subject.presence || job&.description.presence || ""
   end
 
   def self.next_quote_number
