@@ -1580,6 +1580,15 @@
                       <span>Admin</span>
                     </a>
                   </li>
+                  <% if current_user.admin? && !current_user.super_admin? %>
+                  <li>
+
+                    <a href="<%= admin_notifications_path %>" class="<%= current_page?(admin_notifications_path) ? 'active' : '' %>" data-title="Notifications">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                      <span>Notifications</span>
+                    </a>
+                  </li>
+                <% end %>
                 <% end %>
             </ul>
           </nav>
@@ -1983,5 +1992,31 @@
         });
       })();
     </script>
+<!-- notifications disabled -->
+<% if user_signed_in? %>
+  <% dismissed = NotificationDismissal.where(user: current_user).pluck(:notification_id) %>
+  <% Notification.due.where.not(id: dismissed).each do |n| %>
+    <div class="notification-popup" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#ffffff,#f8fafc);border-radius:20px;padding:2.5rem;max-width:520px;width:92%;z-index:9999;box-shadow:0 25px 50px rgba(0,0,0,.3);color:#111;text-align:center;border:1px solid #e5e7eb;">
+      <% if n.image_url.present? %><img src="<%= n.image_url %>" style="max-width:100%;"/><% end %>
+      <div style="width:64px;height:64px;margin:0 auto 1rem;background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13v-2z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg></div><h4 style="margin:0 0 0.75rem;font-size:1.4rem;font-weight:700;"><%= n.title %></h4>
+      <p><%= n.description %></p>
+      <form method="post" action="/notifications/<%= n.id %>/dismiss">
+        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+        <label><input type="checkbox" name="do_not_show_again" value="1" onchange="this.form.submit()"> Do not show again</label>
+        
+      </form>
+    </div>
+  <% end %>
+<% end %>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+

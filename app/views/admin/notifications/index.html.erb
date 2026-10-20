@@ -1,0 +1,65 @@
+<style>
+.notification-page { max-width: 720px; margin: 2rem auto; }
+.notification-card { background: var(--surface); border: 1px solid var(--border-light); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 16px rgba(0,0,0,.08); margin-bottom: 2rem; }
+.notification-card h2 { margin: 0 0 1.5rem; font-size: 1.25rem; }
+.form-group { margin-bottom: 1.25rem; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+.form-control { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; background: var(--bg); color: var(--text); }
+[data-theme="dark"] .form-control { background: #1f2937; color: #f9fafb; border-color: #374151; }
+[data-theme="dark"] .form-control::placeholder { color: #9ca3af; }
+.form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.btn-primary { background: var(--primary); color: #fff; border: none; padding: 0.875rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; }
+.btn-primary:hover { opacity: 0.9; }
+.notification-list { list-style: none; padding: 0; margin: 0; }
+.notification-list li { padding: 0.75rem 0; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; }
+.notification-list li:last-child { border-bottom: none; }
+.meta { color: var(--text-muted); font-size: 0.85rem; }
+</style>
+<div class="notification-page">
+  <div class="notification-card">
+    <h2>Release Notification</h2>
+    <%= form_with model: @notification, url: admin_notifications_path do |f| %>
+      <div class="form-group">
+        <%= f.label :image_url, "Image URL" %>
+        <%= f.text_field :image_url, class: "form-control", placeholder: "https://..." %>
+      </div>
+      <div class="form-group">
+        <%= f.label :title, "Notification title" %>
+        <%= f.text_field :title, class: "form-control" %>
+      </div>
+      <div class="form-group">
+        <%= f.label :description, "Notification description" %>
+        <%= f.text_area :description, class: "form-control", rows: 4 %>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <%= f.label :release_date, "Release date" %>
+          <%= f.date_field :release_date, class: "form-control" %>
+        </div>
+        <div class="form-group">
+          <%= f.label :show_from, "Date to show" %>
+          <%= f.text_field :show_from, class: "form-control" %>
+        </div>
+      </div>
+      <%= f.submit "Release Notification", class: "btn btn-primary" %>
+    <% end %>
+  </div>
+
+  <div class="notification-card">
+    <h2>Released Notifications</h2>
+    <ul class="notification-list">
+      <% @notifications.each do |n| %>
+        <li>
+          <span><%= n.title %></span>
+          <span class="meta">show from <%= n.show_from %></span>
+          <%= button_to "Delete", admin_notification_path(n), method: :delete, class: "btn btn-danger", data: { confirm: "Delete?" } %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+
+
+

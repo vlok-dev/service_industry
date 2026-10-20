@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   resource :theme, only: [:update]
   patch "/sidebar", to: "themes#update_sidebar"
 
+  post "/notifications/:id/dismiss" => "notifications#dismiss", as: :dismiss_notification
   get "up" => "rails/health#show", as: :rails_health_check
 
   get "/migrate_to_aiven" => "data_migration#migrate_to_aiven", as: :migrate_to_aiven
@@ -102,5 +103,8 @@ Rails.application.routes.draw do
     resources :users
     resources :reports, only: [:index, :destroy]
     resource :settings, only: [:edit, :update]
+    resources :notifications, only: [:index, :create, :destroy]
   end
 end
+
+
