@@ -97,6 +97,11 @@ Rails.application.routes.draw do
       get :print
     end
   end
+  resources :boqs do
+    member do
+      get :download
+    end
+  end
 
   namespace :admin do
     root to: "dashboard#index"

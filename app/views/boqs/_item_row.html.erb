@@ -1,0 +1,14 @@
+<tr class="boq-item-row">
+  <td>
+    <%= f.hidden_field :id unless f.object.new_record? %>
+    <%= f.hidden_field :_destroy, value: 0, class: "destroy-field" %>
+    <%= f.select :row_type, BoqItem.row_types.keys.map { |type| [ type.humanize, type ] }, {}, class: "row-type-select" %>
+  </td>
+  <td><%= f.text_field :description, class: "item-description", placeholder: "Description..." %></td>
+  <td><%= f.text_field :unit, class: "item-unit", placeholder: "Unit" %></td>
+  <td><%= f.number_field :bill_qty, class: "item-bill-qty", step: "any", placeholder: "0" %></td>
+  <td><%= f.number_field :claimed_qty, class: "item-claimed-qty", step: "any", placeholder: "0" %></td>
+  <td><%= f.number_field :rate, class: "item-rate", step: "any", placeholder: "0.00" %></td>
+  <td style="text-align: center;"><%= f.check_box :total_formula, class: "item-total-formula" %></td>
+  <td><button type="button" class="btn-icon btn-icon-danger remove-row">Remove</button></td>
+</tr>

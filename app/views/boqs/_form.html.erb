@@ -1,0 +1,205 @@
+<%= form_with model: @boq, local: true do |f| %>
+  <% if @boq.errors.any? %>
+    <div class="alert" style="margin-bottom: 1rem;">
+      <h2><%= pluralize(@boq.errors.count, "error") %> prohibited this BoQ from being saved:</h2>
+      <ul>
+        <% @boq.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Project</h2>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <%= f.label :project_title, "Project title" %>
+        <%= f.text_field :project_title, id: "boq_project_title", placeholder: "House Avonmouth" %>
+        <p class="form-hint">Shown in capitals at the top of the sheet.</p>
+      </div>
+
+      <div class="field">
+        <%= f.label :sheet_name, "Sheet name" %>
+        <%= f.text_field :sheet_name, id: "boq_sheet_name", placeholder: "AVONMOUTH" %>
+        <p class="form-hint">Tab name of the worksheet, in capitals.</p>
+      </div>
+
+      <div class="field">
+        <%= f.label :job_id, "Linked job (optional)" %>
+        <%= f.collection_select :job_id, @jobs, :id, :display_label, { include_blank: "Not linked to a job" }, class: "select" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Claims</h2>
+    </div>
+    <div class="card-body">
+      <p class="form-hint" style="margin-top: 0;">The last claim is worked out as the balance of the total less the claims above it.</p>
+      <div class="field">
+        <%= f.label :claim_1_label, "1st claim label" %>
+        <%= f.text_field :claim_1_label %>
+      </div>
+      <div class="field">
+        <%= f.label :claim_1_amount, "1st claim amount" %>
+        <%= f.number_field :claim_1_amount, step: "0.01", min: "0" %>
+      </div>
+      <div class="field">
+        <%= f.label :claim_2_label, "2nd claim label" %>
+        <%= f.text_field :claim_2_label %>
+      </div>
+      <div class="field">
+        <%= f.label :claim_2_amount, "2nd claim amount" %>
+        <%= f.number_field :claim_2_amount, step: "0.01", min: "0" %>
+      </div>
+      <div class="field">
+        <%= f.label :claim_3_label, "3rd claim label" %>
+        <%= f.text_field :claim_3_label %>
+      </div>
+      <div class="field">
+        <%= f.label :claim_3_amount, "3rd claim amount" %>
+        <%= f.number_field :claim_3_amount, step: "0.01", min: "0" %>
+      </div>
+      <div class="field">
+        <%= f.label :claim_4_label, "4th claim label" %>
+        <%= f.text_field :claim_4_label %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Line items</h2>
+    </div>
+    <div class="card-body no-padding">
+      <div class="modern-table" style="border: none; box-shadow: none; border-radius: 0;">
+        <table id="boq-items">
+          <thead>
+            <tr>
+              <th style="width: 12%;">Row</th>
+              <th style="width: 38%;">Description</th>
+              <th style="width: 8%;">Unit</th>
+              <th style="width: 10%;">Bill Qty</th>
+              <th style="width: 10%;">Claimed</th>
+              <th style="width: 12%;">Rate</th>
+              <th style="width: 6%;">Total</th>
+              <th style="width: 4%;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= f.fields_for :items do |item_form| %>
+              <%= render "item_row", f: item_form %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; padding: 1rem;">
+        <button type="button" class="btn btn-secondary" data-add-row="item">Add item</button>
+        <button type="button" class="btn btn-secondary" data-add-row="heading">Add heading</button>
+        <button type="button" class="btn btn-secondary" data-add-row="spacer">Add blank row</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 0.75rem; margin-bottom: 2rem;">
+    <%= f.submit (@boq.persisted? ? "Update BoQ" : "Create BoQ"), class: "btn" %>
+    <%= link_to "Cancel", boqs_path, class: "btn btn-secondary" %>
+  </div>
+<% end %>
+
+<table style="display:none;"><tbody>
+  <tr class="boq-item-row" data-template="true">
+    <td>
+      <input type="hidden" class="destroy-field" value="0" />
+      <select class="row-type-select">
+        <option value="item">Item</option>
+        <option value="heading">Heading</option>
+        <option value="spacer">Blank row</option>
+      </select>
+    </td>
+    <td><input type="text" class="item-description" placeholder="Description..." /></td>
+    <td><input type="text" class="item-unit" placeholder="Unit" /></td>
+    <td><input type="number" step="any" class="item-bill-qty" placeholder="0" /></td>
+    <td><input type="number" step="any" class="item-claimed-qty" placeholder="0" /></td>
+    <td><input type="number" step="any" class="item-rate" placeholder="0.00" /></td>
+    <td style="text-align: center;"><input type="checkbox" class="item-total-formula" checked /></td>
+    <td><button type="button" class="btn-icon btn-icon-danger remove-row">Remove</button></td>
+  </tr>
+</tbody></table>
+
+<script>
+  (function() {
+    const prefix = "boq[items_attributes]";
+    const tbody = document.querySelector("#boq-items tbody");
+    const template = document.querySelector(".boq-item-row[data-template]");
+
+    function applyNames(row, index) {
+      row.querySelectorAll("input, select").forEach(function(input) {
+        let key = null;
+        if (input.classList.contains("row-type-select")) key = "row_type";
+        else if (input.classList.contains("item-description")) key = "description";
+        else if (input.classList.contains("item-unit")) key = "unit";
+        else if (input.classList.contains("item-bill-qty")) key = "bill_qty";
+        else if (input.classList.contains("item-claimed-qty")) key = "claimed_qty";
+        else if (input.classList.contains("item-rate")) key = "rate";
+        else if (input.classList.contains("item-total-formula")) key = "total_formula";
+        else if (input.classList.contains("destroy-field")) key = "_destroy";
+        if (key) input.name = `${prefix}[${index}][${key}]`;
+      });
+    }
+
+    function addRow(type) {
+      if (!template || !tbody) return;
+      const row = template.cloneNode(true);
+      row.removeAttribute("data-template");
+      row.querySelectorAll("input[type='text'], input[type='number']").forEach(function(input) { input.value = ""; });
+      const destroy = row.querySelector(".destroy-field");
+      if (destroy) destroy.value = "0";
+      const totalFormula = row.querySelector(".item-total-formula");
+      if (totalFormula) totalFormula.checked = true;
+      const select = row.querySelector(".row-type-select");
+      if (select) select.value = type;
+      tbody.appendChild(row);
+      applyNames(row, tbody.children.length - 1);
+    }
+
+    document.querySelectorAll("[data-add-row]").forEach(function(button) {
+      button.addEventListener("click", function(event) {
+        event.preventDefault();
+        addRow(button.dataset.addRow);
+      });
+    });
+
+    document.addEventListener("click", function(event) {
+      const button = event.target.closest(".remove-row");
+      if (!button) return;
+      event.preventDefault();
+      const row = button.closest("tr");
+      if (!row) return;
+      const destroy = row.querySelector(".destroy-field");
+      if (destroy) destroy.value = "1";
+      row.style.display = "none";
+    });
+
+    const titleField = document.getElementById("boq_project_title");
+    const sheetField = document.getElementById("boq_sheet_name");
+    let sheetEdited = sheetField && sheetField.value.trim() !== "";
+
+    if (sheetField) {
+      sheetField.addEventListener("input", function() { sheetEdited = true; });
+    }
+
+    if (titleField && sheetField) {
+      titleField.addEventListener("input", function() {
+        if (sheetEdited) return;
+        const parts = titleField.value.trim().split(/[\s\-_]+/).filter(Boolean);
+        sheetField.value = parts.length ? parts[parts.length - 1].toUpperCase() : "";
+      });
+    }
+  })();
+</script>

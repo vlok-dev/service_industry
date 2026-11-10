@@ -1,0 +1,80 @@
+<div class="action-bar">
+  <div>
+    <h1>BoQ's</h1>
+    <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem;">
+      <%= pluralize(@boqs.count, "bill of quantities") %>
+    </p>
+  </div>
+  <div class="actions">
+    <% if policy(:boq).create? %>
+      <%= link_to new_boq_path, class: "btn" do %>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        New Bill of Quantities
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem;">
+  <div class="card-header">
+    <h2>Bills of Quantities</h2>
+  </div>
+  <div class="card-body no-padding">
+    <% if @boqs.present? %>
+      <div class="modern-table" style="border: none; box-shadow: none; border-radius: 0;">
+        <table>
+          <thead>
+            <tr>
+              <th>BoQ #</th>
+              <th>Project</th>
+              <th>Sheet</th>
+              <th>Job</th>
+              <th>Rows</th>
+              <th>Total</th>
+              <th>Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @boqs.each do |boq| %>
+              <tr>
+                <td><%= boq.boq_number %></td>
+                <td><%= link_to boq.project_title, edit_boq_path(boq), class: "job-number", title: "Edit BoQ" %></td>
+                <td><%= boq.sheet_name %></td>
+                <td><%= boq.job_label %></td>
+                <td><%= boq.items.count %></td>
+                <td><%= number_to_currency(boq.total_value, unit: "R", precision: 2) %></td>
+                <td><%= boq.updated_at.strftime("%d %b %Y") %></td>
+                <td>
+                  <div class="row-actions">
+                    <%= link_to download_boq_path(boq), class: "btn-icon btn-icon-primary", title: "Download Excel" do %>
+                      Excel
+                    <% end %>
+                    <% if policy(:boq).update? %>
+                      <%= link_to edit_boq_path(boq), class: "btn-icon btn-icon-secondary", title: "Edit" do %>
+                        Edit
+                      <% end %>
+                    <% end %>
+                    <% if policy(:boq).destroy? %>
+                      <%= button_to boq_path(boq), method: :delete, class: "btn-icon btn-icon-danger", title: "Delete", data: { confirm: "Are you sure?" } do %>
+                        Delete
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem; opacity: 0.4;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="12" y2="17"></line></svg>
+        <p>No bills of quantities yet.</p>
+        <% if policy(:boq).create? %>
+          <p style="margin-top: 1rem;"><%= link_to "Create the first BoQ", new_boq_path, class: "btn" %></p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_20_140100) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_120000) do
   create_table "addresses", force: :cascade do |t|
     t.text "address"
     t.integer "client_id", null: false
@@ -29,21 +29,35 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_140100) do
     t.text "description"
     t.string "item_code"
     t.string "page"
+    t.integer "position"
     t.decimal "rate"
+    t.string "row_type", default: "item"
     t.decimal "total"
+    t.boolean "total_formula", default: true
     t.string "unit"
     t.datetime "updated_at", null: false
+    t.index ["boq_id", "position"], name: "index_boq_items_on_boq_id_and_position"
     t.index ["boq_id"], name: "index_boq_items_on_boq_id"
   end
 
   create_table "boqs", force: :cascade do |t|
     t.string "attention"
     t.string "boq_number"
+    t.decimal "claim_1_amount", precision: 12, scale: 2
+    t.string "claim_1_label"
+    t.decimal "claim_2_amount", precision: 12, scale: 2
+    t.string "claim_2_label"
+    t.decimal "claim_3_amount", precision: 12, scale: 2
+    t.string "claim_3_label"
+    t.string "claim_4_label"
     t.string "company"
     t.datetime "created_at", null: false
+    t.integer "created_by_id"
     t.string "email_address"
-    t.integer "job_id", null: false
+    t.integer "job_id"
+    t.string "project_title"
     t.string "property"
+    t.string "sheet_name"
     t.integer "status"
     t.string "subject"
     t.decimal "subtotal"
@@ -51,6 +65,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_140100) do
     t.datetime "updated_at", null: false
     t.decimal "vat_amount"
     t.decimal "vat_rate"
+    t.index ["created_by_id"], name: "index_boqs_on_created_by_id"
     t.index ["job_id"], name: "index_boqs_on_job_id"
   end
 
