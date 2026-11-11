@@ -79,7 +79,7 @@ class BoqsController < ApplicationController
       :claim_1_label, :claim_1_amount,
       :claim_2_label, :claim_2_amount,
       :claim_3_label, :claim_3_amount,
-      :claim_4_label,
+      :claim_4_label, :claim_4_amount,
       items_attributes: %i[id row_type description unit page item_code bill_qty claimed_qty rate total_formula position _destroy]
     )
   end

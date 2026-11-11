@@ -38,7 +38,7 @@ class Boq < ApplicationRecord
 
   def claim_entries
     labels = [ claim_1_label, claim_2_label, claim_3_label, claim_4_label ]
-    amounts = [ claim_1_amount, claim_2_amount, claim_3_amount, nil ]
+    amounts = [ claim_1_amount, claim_2_amount, claim_3_amount, claim_4_amount ]
 
     labels.each_with_index.map do |label, index|
       {

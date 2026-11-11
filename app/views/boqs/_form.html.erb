@@ -68,6 +68,10 @@
         <%= f.label :claim_4_label, "4th claim label" %>
         <%= f.text_field :claim_4_label %>
       </div>
+      <div class="field">
+        <%= f.label :claim_4_amount, "4th claim amount" %>
+        <%= f.number_field :claim_4_amount, step: "0.01", min: "0" %>
+      </div>
     </div>
   </div>
 

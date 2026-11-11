@@ -42,6 +42,8 @@ class BoqsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match "Project title", response.body
     assert_match "Bill Qty", response.body
+    assert_match "4th claim label", response.body
+    assert_match "4th claim amount", response.body
   end
 
   test "create stores the project, claims and line items" do
@@ -59,6 +61,7 @@ class BoqsControllerTest < ActionDispatch::IntegrationTest
             claim_3_label: "3rd claim",
             claim_3_amount: "3000",
             claim_4_label: "4th claim",
+            claim_4_amount: "4000",
             items_attributes: {
               "0" => { row_type: "heading", description: "KITCHEN" },
               "1" => { row_type: "spacer" },
@@ -74,6 +77,7 @@ class BoqsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "ROSEBANK", boq.sheet_name
     assert_equal 3, boq.items.count
     assert_equal 750.0, boq.total_value
+    assert_equal 4000.0, boq.claim_4_amount
   end
 
   test "create rejects a blank project title" do

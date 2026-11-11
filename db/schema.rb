@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_082141) do
   create_table "addresses", force: :cascade do |t|
     t.text "address"
     t.integer "client_id", null: false
@@ -49,6 +49,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_120000) do
     t.string "claim_2_label"
     t.decimal "claim_3_amount", precision: 12, scale: 2
     t.string "claim_3_label"
+    t.decimal "claim_4_amount", precision: 12, scale: 2
     t.string "claim_4_label"
     t.string "company"
     t.datetime "created_at", null: false

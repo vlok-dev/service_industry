@@ -13,6 +13,7 @@ class AddBoqWorkbookFields < ActiveRecord::Migration[8.1]
     add_column :boqs, :claim_3_label, :string unless column_exists?(:boqs, :claim_3_label)
     add_column :boqs, :claim_3_amount, :decimal, precision: 12, scale: 2 unless column_exists?(:boqs, :claim_3_amount)
     add_column :boqs, :claim_4_label, :string unless column_exists?(:boqs, :claim_4_label)
+    add_column :boqs, :claim_4_amount, :decimal, precision: 12, scale: 2 unless column_exists?(:boqs, :claim_4_amount)
 
     add_column :boq_items, :row_type, :string, default: "item" unless column_exists?(:boq_items, :row_type)
     add_column :boq_items, :total_formula, :boolean, default: true unless column_exists?(:boq_items, :total_formula)
@@ -34,6 +35,7 @@ class AddBoqWorkbookFields < ActiveRecord::Migration[8.1]
     remove_column :boqs, :claim_3_label if column_exists?(:boqs, :claim_3_label)
     remove_column :boqs, :claim_3_amount if column_exists?(:boqs, :claim_3_amount)
     remove_column :boqs, :claim_4_label if column_exists?(:boqs, :claim_4_label)
+    remove_column :boqs, :claim_4_amount if column_exists?(:boqs, :claim_4_amount)
     remove_column :boq_items, :row_type if column_exists?(:boq_items, :row_type)
     remove_column :boq_items, :total_formula if column_exists?(:boq_items, :total_formula)
     remove_column :boq_items, :position if column_exists?(:boq_items, :position)

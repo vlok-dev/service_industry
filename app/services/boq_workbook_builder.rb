@@ -161,7 +161,8 @@ class BoqWorkbookBuilder
     claim = claim.symbolize_keys if claim.respond_to?(:symbolize_keys)
     {
       label: claim[:label].to_s,
-      amount: claim[:amount]
+      amount: claim[:amount],
+      balance: claim[:amount].nil?
     }
   end
 
@@ -292,7 +293,7 @@ class BoqWorkbookBuilder
     @claims.each_with_index do |claim, index|
       row_number = total_row + 2 + (index * 2)
       formats = body_formats
-      formats = formats.merge("H" => last_claim_total_format) if index == @claims.length - 1
+      formats = formats.merge("H" => last_claim_total_format) if claim[:balance]
 
       write_blank_body_row(sheet, row_number - 1) if index.positive?
 
@@ -304,7 +305,7 @@ class BoqWorkbookBuilder
       sheet.write_blank(row_number - 1, 5, formats["F"])
       sheet.write_blank(row_number - 1, 6, formats["G"])
 
-      if index == @claims.length - 1
+      if claim[:balance]
         sheet.write_formula(row_number - 1, 7, balance_formula, formats["H"], balance_value)
       else
         sheet.write(row_number - 1, 7, claim[:amount].to_f, formats["H"])
@@ -314,12 +315,14 @@ class BoqWorkbookBuilder
   end
 
   def balance_formula
-    claimed_cells = @claims[0...-1].each_with_index.map { |_claim, index| "H#{total_row + 2 + (index * 2)}" }
+    claimed_cells = @claims.each_with_index
+                              .reject { |claim, _| claim[:balance] }
+                              .map { |_claim, index| "H#{total_row + 2 + (index * 2)}" }
     "=H#{total_row}#{claimed_cells.map { |cell| "-#{cell}" }.join}"
   end
 
   def balance_value
-    claimed = @claims[0...-1].sum { |claim| claim[:amount].to_f }
+    claimed = @claims.reject { |claim| claim[:balance] || claim[:amount].nil? }.sum { |claim| claim[:amount].to_f }
     (total_value.round(2) - claimed).round(2)
   end
 
