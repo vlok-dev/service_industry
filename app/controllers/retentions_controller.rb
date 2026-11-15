@@ -50,7 +50,7 @@ class RetentionsController < ApplicationController
   private
 
   def require_manager
-    return if current_user.admin? || current_user.super_admin?
+    return if current_user.admin? || current_user.super_admin? || current_user.scheduler? || current_user.reporter?
 
     redirect_back(fallback_location: root_path, alert: "You are not authorized to manage retentions.")
   end

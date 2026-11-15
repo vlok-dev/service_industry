@@ -1,6 +1,6 @@
 class BoqPolicy < ApplicationPolicy
   def index?
-    user.scheduler? || user.super_admin? || user.admin? || user.accountant? || user.project_manager?
+    user.scheduler? || user.super_admin? || user.admin? || user.accountant? || user.project_manager? || user.reporter?
   end
 
   def show?
@@ -8,7 +8,7 @@ class BoqPolicy < ApplicationPolicy
   end
 
   def create?
-    user.super_admin? || user.admin? || user.accountant? || user.scheduler?
+    user.super_admin? || user.admin? || user.accountant? || user.scheduler? || user.reporter?
   end
 
   def new?
@@ -24,7 +24,7 @@ class BoqPolicy < ApplicationPolicy
   end
 
   def destroy?
-    user.super_admin? || user.admin?
+    user.super_admin? || user.admin? || user.scheduler? || user.reporter?
   end
 
   def download?
@@ -34,7 +34,7 @@ class BoqPolicy < ApplicationPolicy
   class Scope < ApplicationPolicy::Scope
     def resolve
       case user&.role
-      when "super_admin", "admin", "accountant", "scheduler", "project_manager"
+      when "super_admin", "admin", "accountant", "scheduler", "project_manager", "reporter"
         scope.all
       else
         scope.none
