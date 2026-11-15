@@ -20,7 +20,7 @@
     </div>
     <div class="field">
       <label><strong>Date of Retention Held</strong></label>
-      <p><%= l @retention.date_held, format: :default %></p>
+      <p><%= @retention.date_held ? @retention.date_held.strftime("%d %B %Y") : "—" %></p>
     </div>
     <div class="field">
       <label><strong>Amount</strong></label>
@@ -32,7 +32,7 @@
     </div>
     <div class="field">
       <label><strong>Release Date</strong></label>
-      <p><%= l @retention.release_date, format: :default %></p>
+      <p><%= @retention.release_date ? @retention.release_date.strftime("%d %B %Y") : "—" %></p>
     </div>
   </div>
 </div>

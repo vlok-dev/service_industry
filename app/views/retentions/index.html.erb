@@ -28,10 +28,10 @@
         <tr>
           <td><strong><%= retention.client_display %></strong></td>
           <td><%= retention.project_name %></td>
-          <td><%= l retention.date_held, format: :default %></td>
+          <td><%= retention.date_held ? retention.date_held.strftime("%d %B %Y") : "—" %></td>
           <td><%= number_to_currency(retention.amount, unit: "R", precision: 2) %></td>
           <td><%= retention.invoice_number || "—" %></td>
-          <td><%= l retention.release_date, format: :default %></td>
+          <td><%= retention.release_date ? retention.release_date.strftime("%d %B %Y") : "—" %></td>
           <td>
             <%= link_to "View", retention, class: "btn btn-sm" %>
             <%= link_to "Edit", edit_retention_path(retention), class: "btn btn-sm" %>
