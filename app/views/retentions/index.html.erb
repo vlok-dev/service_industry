@@ -1,0 +1,46 @@
+<p><%= link_to "New Retention", new_retention_path, class: "btn btn-success" %></p>
+
+<h1>Retentions</h1>
+
+<%= form_with url: retentions_path, method: :get, local: true, style: "margin-bottom: 1rem;" do |f| %>
+  <%= f.text_field :q, value: params[:q], placeholder: "Search retentions...", class: "search-input" %>
+  <%= f.submit "Search", class: "btn" %>
+  <% if params[:q].present? %>
+    <%= link_to "Clear", retentions_path, class: "btn" %>
+  <% end %>
+<% end %>
+
+<% if @retentions.present? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Client</th>
+        <th>Project</th>
+        <th>Date Held</th>
+        <th>Amount</th>
+        <th>Invoice Number</th>
+        <th>Release Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @retentions.each do |retention| %>
+        <tr>
+          <td><strong><%= retention.client_display %></strong></td>
+          <td><%= retention.project_name %></td>
+          <td><%= l retention.date_held, format: :default %></td>
+          <td><%= number_to_currency(retention.amount, unit: "R", precision: 2) %></td>
+          <td><%= retention.invoice_number || "—" %></td>
+          <td><%= l retention.release_date, format: :default %></td>
+          <td>
+            <%= link_to "View", retention, class: "btn btn-sm" %>
+            <%= link_to "Edit", edit_retention_path(retention), class: "btn btn-sm" %>
+            <%= button_to "Delete", retention, method: :delete, data: { confirm: "Delete this retention?" }, class: "btn btn-danger btn-sm", style: "display: inline; padding: 0.25rem 0.5rem; font-size: 0.8rem;" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No retentions found.</p>
+<% end %>

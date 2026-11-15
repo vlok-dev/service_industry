@@ -73,6 +73,7 @@ Rails.application.routes.draw do
       delete :delete_all
     end
   end
+  resources :retentions
   resources :inventory_items do
     collection do
       get :search

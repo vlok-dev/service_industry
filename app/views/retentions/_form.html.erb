@@ -1,0 +1,223 @@
+<%= form_with model: @retention, local: true do |f| %>
+  <% if @retention.errors.any? %>
+    <div class="alert">
+      <h2><%= pluralize(@retention.errors.count, "error") %> prohibited this retention from being saved:</h2>
+      <ul>
+        <% @retention.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :client_id, "Client" %>
+    <div class="client-search-wrapper">
+      <%= f.hidden_field :client_id, id: "retention_client_id" %>
+      <%= f.text_field :client_name, id: "client_search", class: "client-search-input", placeholder: "Search clients to auto-fill...", value: @retention.client_display, autocomplete: "off" %>
+      <div id="client_dropdown" class="client-dropdown"></div>
+    </div>
+    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem;">Select an existing client, or type a new client name.</p>
+  </div>
+
+  <div class="field">
+    <%= f.label :project_name, "Project Name" %>
+    <%= f.text_field :project_name, placeholder: "e.g. Addo", required: true %>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+    <div class="field">
+      <%= f.label :date_held, "Date of Retention Held" %>
+      <%= f.date_field :date_held, required: true %>
+    </div>
+    <div class="field">
+      <%= f.label :release_date, "Date Retention Needs to be Released" %>
+      <%= f.date_field :release_date, required: true %>
+      <p class="form-hint">When the retention needs to be paid out.</p>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+    <div class="field">
+      <%= f.label :amount, "Amount" %>
+      <%= f.number_field :amount, placeholder: "e.g. 1000.00", required: true, step: "0.01", min: "0" %>
+    </div>
+    <div class="field">
+      <%= f.label :invoice_number, "Invoice Number" %>
+      <div class="client-search-wrapper">
+        <%= f.text_field :invoice_number, id: "invoice_search", class: "client-search-input", placeholder: "Select or type an invoice number...", value: @retention.invoice_number, autocomplete: "off" %>
+        <div id="invoice_dropdown" class="client-dropdown"></div>
+      </div>
+      <p class="form-hint">Choose an existing invoice number, or type a new one.</p>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+    <%= link_to "Cancel", retentions_path, class: "btn btn-secondary" %>
+    <%= f.submit class: "btn" %>
+  </div>
+<% end %>
+
+<script>
+  var clientsData = <%= raw Client.ordered.map { |c| [ c.id, c.name ] }.to_h.to_json %>;
+  var invoiceNumbers = <%= raw Job.where.not(invoice_number: [nil, ""]).distinct.pluck(:invoice_number).to_json %>;
+
+  function initClientSearch() {
+    var searchInput = document.getElementById('client_search');
+    var dropdown = document.getElementById('client_dropdown');
+    var hiddenInput = document.getElementById('retention_client_id');
+    if (!searchInput || !dropdown || !hiddenInput) return;
+
+    function renderClients(filterText) {
+      var term = (filterText || '').toLowerCase();
+      var html = '';
+      var count = 0;
+      Object.keys(clientsData).forEach(function(id) {
+        var name = clientsData[id];
+        if (term && name.toLowerCase().indexOf(term) === -1) return;
+        count++;
+        var selectedClass = (String(id) === String(hiddenInput.value)) ? ' active' : '';
+        html += '<div class="client-option' + selectedClass + '" data-id="' + id + '"><span class="client-name">' + name.replace(/</g, '&lt;') + '</span></div>';
+      });
+      if (!count) {
+        html = '';
+      }
+      dropdown.innerHTML = html;
+      dropdown.classList.add('open');
+
+      dropdown.querySelectorAll('.client-option').forEach(function(el) {
+        el.addEventListener('mousedown', function(e) {
+          e.preventDefault();
+          var id = el.getAttribute('data-id');
+          hiddenInput.value = id;
+          searchInput.value = el.querySelector('.client-name').textContent;
+          dropdown.classList.remove('open');
+        });
+      });
+    }
+
+    searchInput.addEventListener('input', function() {
+      renderClients(searchInput.value);
+    });
+
+    searchInput.addEventListener('focus', function() {
+      renderClients(searchInput.value);
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('open');
+      }
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+      var active = dropdown.querySelector('.client-option.active');
+      var options = Array.prototype.slice.call(dropdown.querySelectorAll('.client-option'));
+      var index = options.indexOf(active);
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        var next = options[index + 1];
+        if (next) {
+          options.forEach(function(o) { o.classList.remove('active'); });
+          next.classList.add('active');
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        var prev = options[index - 1];
+        if (prev) {
+          options.forEach(function(o) { o.classList.remove('active'); });
+          prev.classList.add('active');
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (active) {
+          var id = active.getAttribute('data-id');
+          hiddenInput.value = id;
+          searchInput.value = active.querySelector('.client-name').textContent;
+          dropdown.classList.remove('open');
+        }
+      } else if (e.key === 'Escape') {
+        dropdown.classList.remove('open');
+      }
+    });
+  }
+
+  function initInvoiceSearch() {
+    var searchInput = document.getElementById('invoice_search');
+    var dropdown = document.getElementById('invoice_dropdown');
+    if (!searchInput || !dropdown) return;
+
+    function renderInvoices(filterText) {
+      var term = (filterText || '').toLowerCase();
+      var html = '';
+      var count = 0;
+      invoiceNumbers.forEach(function(num) {
+        if (term && num.toLowerCase().indexOf(term) === -1) return;
+        count++;
+        var selectedClass = (num === searchInput.value) ? ' active' : '';
+        html += '<div class="client-option' + selectedClass + '" data-id="' + num.replace(/"/g, '&quot;') + '"><span class="client-name">' + num.replace(/</g, '&lt;') + '</span></div>';
+      });
+      if (!count) {
+        html = '';
+      }
+      dropdown.innerHTML = html;
+      dropdown.classList.add('open');
+
+      dropdown.querySelectorAll('.client-option').forEach(function(el) {
+        el.addEventListener('mousedown', function(e) {
+          e.preventDefault();
+          var val = el.getAttribute('data-id');
+          searchInput.value = val;
+          dropdown.classList.remove('open');
+        });
+      });
+    }
+
+    searchInput.addEventListener('input', function() {
+      renderInvoices(searchInput.value);
+    });
+
+    searchInput.addEventListener('focus', function() {
+      renderInvoices(searchInput.value);
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('open');
+      }
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+      var active = dropdown.querySelector('.client-option.active');
+      var options = Array.prototype.slice.call(dropdown.querySelectorAll('.client-option'));
+      var index = options.indexOf(active);
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        var next = options[index + 1];
+        if (next) {
+          options.forEach(function(o) { o.classList.remove('active'); });
+          next.classList.add('active');
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        var prev = options[index - 1];
+        if (prev) {
+          options.forEach(function(o) { o.classList.remove('active'); });
+          prev.classList.add('active');
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (active) {
+          var val = active.getAttribute('data-id');
+          searchInput.value = val;
+          dropdown.classList.remove('open');
+        }
+      } else if (e.key === 'Escape') {
+        dropdown.classList.remove('open');
+      }
+    });
+  }
+
+  initClientSearch();
+  initInvoiceSearch();
+</script>

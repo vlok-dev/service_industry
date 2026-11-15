@@ -1,0 +1,42 @@
+<div class="action-bar">
+  <div>
+    <h1>Retention</h1>
+    <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem;">Client retention details.</p>
+  </div>
+  <div class="actions">
+    <%= link_to "Back to Retentions", retentions_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="field">
+      <label><strong>Client</strong></label>
+      <p><%= @retention.client_display %></p>
+    </div>
+    <div class="field">
+      <label><strong>Project Name</strong></label>
+      <p><%= @retention.project_name %></p>
+    </div>
+    <div class="field">
+      <label><strong>Date of Retention Held</strong></label>
+      <p><%= l @retention.date_held, format: :default %></p>
+    </div>
+    <div class="field">
+      <label><strong>Amount</strong></label>
+      <p><%= number_to_currency(@retention.amount, unit: "R", precision: 2) %></p>
+    </div>
+    <div class="field">
+      <label><strong>Invoice Number</strong></label>
+      <p><%= @retention.invoice_number || "—" %></p>
+    </div>
+    <div class="field">
+      <label><strong>Release Date</strong></label>
+      <p><%= l @retention.release_date, format: :default %></p>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 1rem;">
+  <%= link_to "Edit", edit_retention_path(@retention), class: "btn btn-secondary" %>
+</div>
