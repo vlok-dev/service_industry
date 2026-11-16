@@ -23,11 +23,11 @@
     font-size: 13px;
     color: var(--text);
     line-height: 1.5;
-    padding: 20px;
+    padding: 32px;
   }
 
   @page {
-    margin: 2mm;
+    margin: 10mm;
     size: A4;
   }
 
@@ -57,7 +57,7 @@
     text-align: center;
     font-weight: bold;
     text-transform: uppercase;
-    font-size: 18px;
+    font-size: 14px;
     letter-spacing: 0.15em;
     margin: 30px 0 30px 0;
     position: relative;
@@ -295,13 +295,13 @@
   }
 
   .quote-print-container .page {
-    padding: 12mm;
+    padding: 16mm;
     border-radius: 0;
     min-height: auto;
   }
 
   .logo { width: 200px; }
-  .title { font-size: 28px; margin: 24px 0 28px; }
+  .title { font-size: 14px; margin: 24px 0 28px; }
   .detail-row { margin-bottom: 12px; }
   .detail-label { width: 160px; font-size: 14px; }
   .subject-line { font-size: 24px; }
@@ -327,8 +327,9 @@
     <br>
     <br>
     <br>
+    <br>
 
-    <h1 class="title">ESTIMATE</h1>
+    <h3 class="title" style="font-size: 14px !important;">ESTIMATE</h3>
 
     <div class="details-block">
       <div class="detail-row">
@@ -369,7 +370,7 @@
     </div>
 
     <div class="subject-line">
-      RE: <span style="font-weight: normal; text-decoration: none; margin-left: 0.5rem;"><%= subject %></span>
+      <span class="detail-label"> RE: <%= subject %> </span>
     </div>
 
     <div class="line-items-container">
@@ -394,6 +395,8 @@
         </tr>
       </tfoot>
     </table>
+
+    <br/>
 
     <div class="terms-block">
       <div class="terms-title">TERMS AND CONDITIONS</div>
