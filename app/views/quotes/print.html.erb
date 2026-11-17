@@ -381,7 +381,7 @@
       <% @quote.items.each do |item| %>
         <% next if item.description.blank? && item.line_total.to_f <= 0 %>
         <div class="line-item-row">
-          <span class="desc-col"><%= item.description.presence || "No description" %></span>
+          <span class="desc-col" style="font-weight: 600 !important;"><%= item.description.presence || "No description" %></span>
           <span class="total-col"><%= item.line_total.to_f > 0 ? number_to_currency(item.line_total, unit: "R", precision: 2) : "" %></span>
         </div>
       <% end %>
@@ -391,7 +391,7 @@
       <tfoot>
         <tr>
           <td colspan="2" class="label">Labour + Materials (excl. VAT):</td>
-          <td class="value">R <%= sprintf('%.2f', @quote.subtotal.to_f).gsub('.', ',') %></td>
+          <td class="value"><%= number_to_currency(@quote.subtotal.to_f, unit: "R", precision: 2) %></td>
         </tr>
       </tfoot>
     </table>
