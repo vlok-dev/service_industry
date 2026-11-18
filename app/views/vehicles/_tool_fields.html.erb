@@ -1,0 +1,25 @@
+﻿<tr class="vehicle-tool-row">
+  <td style="padding:0.5rem; border-bottom:1px solid var(--border-light); vertical-align: top;">
+    <%= f.hidden_field :id %>
+    <%= f.hidden_field :_destroy, value: "0", class: "destroy-field" %>
+    <%= f.text_field :name, placeholder: "e.g. Drain rods", style: "width:100%;" %>
+  </td>
+  <td style="padding:0.5rem; border-bottom:1px solid var(--border-light); vertical-align: top;">
+    <%= f.text_field :quantity, placeholder: "1", style: "width:100%;" %>
+  </td>
+  <td style="padding:0.5rem; border-bottom:1px solid var(--border-light); vertical-align: top; text-align:center;">
+    <%= f.check_box :signed_off %>
+  </td>
+  <td style="padding:0.5rem; border-bottom:1px solid var(--border-light); vertical-align: top;">
+    <%= f.text_field :signed_by, placeholder: "Plumber name/signature", style: "width:100%;" %>
+  </td>
+  <td style="padding:0.5rem; border-bottom:1px solid var(--border-light); vertical-align: top;">
+    <%= f.date_field :signed_on, style: "width:100%;" %>
+  </td>
+  <td style="padding:0.5rem; border-bottom:1px solid var(--border-light); vertical-align: top;">
+    <%= f.text_field :notes, placeholder: "Condition/notes", style: "width:100%;" %>
+  </td>
+  <td style="padding:0.5rem; border-bottom:1px solid var(--border-light); vertical-align: top;">
+    <button type="button" class="btn btn-danger btn-sm remove-vehicle-tool" title="Remove">Remove</button>
+  </td>
+</tr>

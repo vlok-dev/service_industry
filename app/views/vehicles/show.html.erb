@@ -1,0 +1,69 @@
+﻿<div class="action-bar">
+  <div>
+    <h1><%= @vehicle.name %></h1>
+    <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem;">Vehicle details, service tracking and tools register.</p>
+  </div>
+  <div class="actions">
+    <%= link_to "Edit", edit_vehicle_path(@vehicle), class: "btn" %>
+    <%= link_to "Back to Fleet", vehicles_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<div class="info-grid">
+  <div class="info-tile"><div class="label">Registration Number</div><div class="value"><%= @vehicle.registration_number.presence || "—" %></div></div>
+  <div class="info-tile"><div class="label">Plumber</div><div class="value"><%= @vehicle.plumber_name.presence || "—" %></div></div>
+  <div class="info-tile"><div class="label">Assistant</div><div class="value"><%= @vehicle.assistant_name.presence || "—" %></div></div>
+  <div class="info-tile"><div class="label">Current Mileage</div><div class="value"><%= @vehicle.current_mileage.present? ? number_with_delimiter(@vehicle.current_mileage) + " km" : "—" %></div></div>
+  <div class="info-tile"><div class="label">Last Service Date</div><div class="value"><%= @vehicle.last_service_date&.strftime("%d %B %Y") || "—" %></div></div>
+  <div class="info-tile"><div class="label">Next Service Due</div><div class="value"><%= @vehicle.next_service_due_date&.strftime("%d %B %Y") || "—" %> <span class="badge <%= @vehicle.service_status == "Overdue" ? "badge-cancelled" : (@vehicle.service_status == "Due soon" ? "badge-pending" : "badge-completed") %>"><%= @vehicle.service_status %></span></div></div>
+  <div class="info-tile"><div class="label">License / Registration Expiry</div><div class="value"><%= @vehicle.registration_expiry&.strftime("%d %B %Y") || "—" %> <span class="badge <%= @vehicle.registration_status == "Expired" ? "badge-cancelled" : (@vehicle.registration_status == "Due soon" ? "badge-pending" : "badge-completed") %>"><%= @vehicle.registration_status %></span></div></div>
+</div>
+
+<div class="card" style="margin-bottom: 1rem;">
+  <div class="card-header"><h2>Last Service Notes</h2></div>
+  <div class="card-body">
+    <%= simple_format(@vehicle.last_service_notes.presence || "No service notes recorded.") %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><h2>Vehicle Tools & Sign-off</h2></div>
+  <div class="card-body no-padding">
+    <% if @vehicle.vehicle_tools.any? %>
+      <div class="modern-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Quantity</th>
+              <th>Signed Off</th>
+              <th>Signed By</th>
+              <th>Signed On</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @vehicle.vehicle_tools.each do |tool| %>
+              <tr>
+                <td><%= tool.name %></td>
+                <td><%= tool.quantity.presence || "—" %></td>
+                <td>
+                  <% if tool.signed_off? %>
+                    <span class="badge badge-completed">Signed</span>
+                  <% else %>
+                    <span class="badge badge-pending">Not signed</span>
+                  <% end %>
+                </td>
+                <td><%= tool.signed_by.presence || "—" %></td>
+                <td><%= tool.signed_on&.strftime("%d %b %Y") || "—" %></td>
+                <td><%= tool.notes.presence || "—" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <p style="padding:1rem;">No tools recorded for this vehicle.</p>
+    <% end %>
+  </div>
+</div>

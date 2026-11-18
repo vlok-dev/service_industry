@@ -1,0 +1,97 @@
+﻿<div class="action-bar">
+  <div>
+    <h1>Fleet Vehicles</h1>
+    <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem;">Track vehicle services, mileage, licenses and tool sign-offs.</p>
+  </div>
+  <div class="actions">
+    <%= link_to "New Vehicle", new_vehicle_path, class: "btn btn-success" %>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom: 1rem;">
+  <div class="card-body">
+    <%= form_with url: vehicles_path, method: :get, local: true, style: "display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;" do |f| %>
+      <%= f.text_field :q, value: @q, placeholder: "Search vehicle, registration, plumber or assistant...", style: "flex:1; min-width:260px;" %>
+      <%= f.submit "Search", class: "btn" %>
+      <% if @q.present? %>
+        <%= link_to "Clear", vehicles_path, class: "btn btn-secondary" %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<div class="kpi-strip" style="margin-bottom: 1rem;">
+  <div class="kpi kpi-default"><div class="label">Vehicles</div><div class="value"><%= @vehicles.size %></div><div class="sub">Fleet total</div></div>
+  <div class="kpi kpi-scheduled"><div class="label">Service Due Soon</div><div class="value"><%= @vehicles.count { |v| v.service_status == "Due soon" } %></div><div class="sub">Within 14 days</div></div>
+  <div class="kpi kpi-pending"><div class="label">Service Overdue</div><div class="value"><%= @vehicles.count { |v| v.service_status == "Overdue" } %></div><div class="sub">Needs attention</div></div>
+  <div class="kpi kpi-cancelled"><div class="label">License Expiring/Expired</div><div class="value"><%= @vehicles.count { |v| ["Expired", "Due soon"].include?(v.registration_status) } %></div><div class="sub">Registration</div></div>
+</div>
+
+<% if @vehicles.any? %>
+  <div class="card">
+    <div class="card-body no-padding">
+      <div class="modern-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Vehicle</th>
+              <th>Registration</th>
+              <th>Plumber / Assistant</th>
+              <th>Mileage</th>
+              <th>Last Service</th>
+              <th>Next Service Due</th>
+              <th>License Expiry</th>
+              <th>Tools</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @vehicles.each do |vehicle| %>
+              <tr>
+                <td>
+                  <strong><%= vehicle.name %></strong>
+                  <% if vehicle.last_service_notes.present? %>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;"><%= truncate(vehicle.last_service_notes, length: 60) %></div>
+                  <% end %>
+                </td>
+                <td>
+                  <%= vehicle.registration_number.presence || "—" %>
+                  <div style="margin-top:0.25rem;">
+                    <span class="badge <%= vehicle.registration_status == "Expired" ? "badge-cancelled" : (vehicle.registration_status == "Due soon" ? "badge-pending" : "badge-completed") %>"><%= vehicle.registration_status %></span>
+                  </div>
+                </td>
+                <td>
+                  <div><strong>P:</strong> <%= vehicle.plumber_name.presence || "—" %></div>
+                  <div><strong>A:</strong> <%= vehicle.assistant_name.presence || "—" %></div>
+                </td>
+                <td><%= vehicle.current_mileage.present? ? number_with_delimiter(vehicle.current_mileage) + " km" : "—" %></td>
+                <td><%= vehicle.last_service_date&.strftime("%d %b %Y") || "—" %></td>
+                <td>
+                  <%= vehicle.next_service_due_date&.strftime("%d %b %Y") || "—" %>
+                  <div style="margin-top:0.25rem;">
+                    <span class="badge <%= vehicle.service_status == "Overdue" ? "badge-cancelled" : (vehicle.service_status == "Due soon" ? "badge-pending" : "badge-completed") %>"><%= vehicle.service_status %></span>
+                  </div>
+                </td>
+                <td><%= vehicle.registration_expiry&.strftime("%d %b %Y") || "—" %></td>
+                <td>
+                  <%= vehicle.vehicle_tools.size %> item(s)
+                  <% signed = vehicle.vehicle_tools.count(&:signed_off?) %>
+                  <div style="font-size:0.8rem; color:var(--text-muted);"><%= signed %> signed</div>
+                </td>
+                <td>
+                  <div class="actions-icon">
+                    <%= link_to "View", vehicle_path(vehicle), class: "btn btn-sm" %>
+                    <%= link_to "Edit", edit_vehicle_path(vehicle), class: "btn btn-sm btn-secondary" %>
+                    <%= button_to "Delete", vehicle_path(vehicle), method: :delete, data: { confirm: "Delete this vehicle and its tool records?" }, class: "btn btn-sm btn-danger" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<% else %>
+  <div class="card"><div class="card-body"><p>No vehicles found.</p></div></div>
+<% end %>

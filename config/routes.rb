@@ -1,4 +1,4 @@
-Rails.application.routes.draw do
+﻿Rails.application.routes.draw do
   devise_for :users, controllers: {
     sessions: "users/sessions"
   }
@@ -74,6 +74,7 @@ Rails.application.routes.draw do
     end
   end
   resources :retentions
+  resources :vehicles
   resources :inventory_items do
     collection do
       get :search
@@ -112,5 +113,6 @@ Rails.application.routes.draw do
     resources :notifications, only: [:index, :create, :destroy]
   end
 end
+
 
 

@@ -10,71 +10,39 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_15_183400) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_18_133000) do
   create_table "addresses", force: :cascade do |t|
     t.text "address"
     t.integer "client_id", null: false
-    t.datetime "created_at", precision: nil, null: false
+    t.datetime "created_at", null: false
     t.boolean "is_default", default: false
-    t.string "label", limit: 255, default: "Other"
-    t.datetime "updated_at", precision: nil, null: false
-  end
-
-  create_table "bill_of_quantities", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.text "description"
-    t.integer "job_id", null: false
-    t.string "reference_number", null: false
-    t.integer "status", default: 0, null: false
-    t.decimal "total_amount", precision: 12, scale: 2, default: "0.0"
+    t.string "label", default: "Other"
     t.datetime "updated_at", null: false
-    t.integer "user_id", null: false
-    t.index ["job_id"], name: "index_bill_of_quantities_on_job_id"
-    t.index ["reference_number"], name: "index_bill_of_quantities_on_reference_number", unique: true
-    t.index ["user_id"], name: "index_bill_of_quantities_on_user_id"
-  end
-
-  create_table "bill_of_quantity_items", force: :cascade do |t|
-    t.integer "bill_of_quantity_id", null: false
-    t.integer "category", default: 0
-    t.datetime "created_at", null: false
-    t.string "description", null: false
-    t.string "item_number"
-    t.text "notes"
-    t.integer "position"
-    t.decimal "quantity", precision: 10, scale: 3, default: "0.0"
-    t.decimal "total_amount", precision: 12, scale: 2, default: "0.0"
-    t.string "unit", null: false
-    t.decimal "unit_rate", precision: 10, scale: 2, default: "0.0"
-    t.datetime "updated_at", null: false
-    t.index ["bill_of_quantity_id", "position"], name: "index_bill_of_quantity_items_on_bill_of_quantity_id_and_position"
-    t.index ["bill_of_quantity_id"], name: "index_bill_of_quantity_items_on_bill_of_quantity_id"
+    t.index ["client_id"], name: "index_addresses_on_client_id"
   end
 
   create_table "boq_items", force: :cascade do |t|
-    t.decimal "bill_qty", precision: 12, scale: 4, default: "0.0", null: false
+    t.decimal "bill_qty"
     t.integer "boq_id", null: false
-    t.decimal "claimed", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "claimed_qty"
     t.datetime "created_at", null: false
     t.text "description"
-    t.integer "inventory_item_id"
-    t.string "item"
+    t.string "item_code"
     t.string "page"
     t.integer "position"
-    t.decimal "rate", precision: 10, scale: 2, default: "0.0", null: false
+    t.decimal "rate"
     t.string "row_type", default: "item"
+    t.decimal "total"
     t.boolean "total_formula", default: true
-    t.decimal "total_price", precision: 10, scale: 2, default: "0.0", null: false
     t.string "unit"
     t.datetime "updated_at", null: false
     t.index ["boq_id", "position"], name: "index_boq_items_on_boq_id_and_position"
     t.index ["boq_id"], name: "index_boq_items_on_boq_id"
-    t.index ["inventory_item_id"], name: "index_boq_items_on_inventory_item_id"
   end
 
   create_table "boqs", force: :cascade do |t|
     t.string "attention"
-    t.string "boq_number", null: false
+    t.string "boq_number"
     t.decimal "claim_1_amount", precision: 12, scale: 2
     t.string "claim_1_label"
     t.decimal "claim_2_amount", precision: 12, scale: 2
@@ -88,20 +56,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_15_183400) do
     t.integer "created_by_id"
     t.string "email_address"
     t.integer "job_id"
-    t.text "notes"
     t.string "project_title"
     t.string "property"
-    t.date "quote_date"
     t.string "sheet_name"
-    t.integer "status", default: 0, null: false
+    t.integer "status"
     t.string "subject"
-    t.text "terms"
+    t.decimal "subtotal"
+    t.decimal "total_including_vat"
     t.datetime "updated_at", null: false
-    t.date "valid_until"
-    t.decimal "vat_rate", precision: 5, scale: 2, default: "15.0", null: false
-    t.index ["boq_number"], name: "index_boqs_on_boq_number", unique: true
+    t.decimal "vat_amount"
+    t.decimal "vat_rate"
     t.index ["created_by_id"], name: "index_boqs_on_created_by_id"
     t.index ["job_id"], name: "index_boqs_on_job_id"
+  end
+
+  create_table "chat_messages", force: :cascade do |t|
+    t.text "content", null: false
+    t.string "conversation_id"
+    t.datetime "created_at", null: false
+    t.string "model"
+    t.string "role", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id", "conversation_id"], name: "index_chat_messages_on_user_id_and_conversation_id"
+    t.index ["user_id", "created_at"], name: "index_chat_messages_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_chat_messages_on_user_id"
   end
 
   create_table "claims", force: :cascade do |t|
@@ -222,25 +201,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_15_183400) do
     t.index ["client_id"], name: "index_jobs_on_client_id"
     t.index ["is_project"], name: "index_jobs_on_is_project"
     t.index ["user_id"], name: "index_jobs_on_user_id"
-  end
-
-  create_table "maintenance_subscriptions", force: :cascade do |t|
-    t.integer "client_id", null: false
-    t.datetime "created_at", null: false
-    t.integer "created_by_id", null: false
-    t.date "end_date"
-    t.date "next_service_date"
-    t.text "notes"
-    t.string "plan", default: "quarterly"
-    t.decimal "price", precision: 10, scale: 2
-    t.date "start_date", null: false
-    t.string "status", default: "active"
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_maintenance_subscriptions_on_client_id"
-    t.index ["created_by_id"], name: "index_maintenance_subscriptions_on_created_by_id"
-    t.index ["next_service_date"], name: "index_maintenance_subscriptions_on_next_service_date"
-    t.index ["plan"], name: "index_maintenance_subscriptions_on_plan"
-    t.index ["status"], name: "index_maintenance_subscriptions_on_status"
   end
 
   create_table "notification_dismissals", force: :cascade do |t|
@@ -402,6 +362,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_15_183400) do
     t.datetime "created_at", null: false
     t.string "default_job_priority"
     t.string "notification_email"
+    t.string "openrouter_api_key"
     t.datetime "updated_at", null: false
     t.string "whatsapp_api_key"
     t.string "whatsapp_phone_id"
@@ -444,14 +405,37 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_15_183400) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "vehicle_tools", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.text "notes"
+    t.string "quantity"
+    t.string "signed_by"
+    t.boolean "signed_off", default: false, null: false
+    t.date "signed_on"
+    t.datetime "updated_at", null: false
+    t.integer "vehicle_id", null: false
+    t.index ["vehicle_id"], name: "index_vehicle_tools_on_vehicle_id"
+  end
+
+  create_table "vehicles", force: :cascade do |t|
+    t.string "assistant_name"
+    t.datetime "created_at", null: false
+    t.integer "current_mileage"
+    t.date "last_service_date"
+    t.text "last_service_notes"
+    t.string "name", null: false
+    t.date "next_service_due_date"
+    t.string "plumber_name"
+    t.date "registration_expiry"
+    t.string "registration_number"
+    t.datetime "updated_at", null: false
+  end
+
   add_foreign_key "addresses", "clients"
-  add_foreign_key "bill_of_quantities", "jobs"
-  add_foreign_key "bill_of_quantities", "users"
-  add_foreign_key "bill_of_quantity_items", "bill_of_quantities"
   add_foreign_key "boq_items", "boqs"
-  add_foreign_key "boq_items", "inventory_items"
   add_foreign_key "boqs", "jobs"
-  add_foreign_key "boqs", "users", column: "created_by_id"
+  add_foreign_key "chat_messages", "users"
   add_foreign_key "claims", "jobs"
   add_foreign_key "digital_job_card_materials", "digital_job_cards"
   add_foreign_key "digital_job_card_materials", "inventory_items"
@@ -461,8 +445,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_15_183400) do
   add_foreign_key "jobs", "clients"
   add_foreign_key "jobs", "users"
   add_foreign_key "jobs", "users", column: "assigned_to_id"
-  add_foreign_key "maintenance_subscriptions", "clients"
-  add_foreign_key "maintenance_subscriptions", "users", column: "created_by_id"
   add_foreign_key "notification_dismissals", "notifications"
   add_foreign_key "notification_dismissals", "users"
   add_foreign_key "planner_entries", "users", column: "assigned_to_id"
@@ -479,4 +461,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_15_183400) do
   add_foreign_key "reports", "users"
   add_foreign_key "retentions", "clients"
   add_foreign_key "users", "people"
+  add_foreign_key "vehicle_tools", "vehicles"
 end

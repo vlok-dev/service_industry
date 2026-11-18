@@ -1,0 +1,144 @@
+﻿<%= form_with model: vehicle, local: true do |f| %>
+  <% if vehicle.errors.any? %>
+    <div class="alert" style="margin-bottom: 1rem;">
+      <h2><%= pluralize(vehicle.errors.count, "error") %> prevented this vehicle from being saved:</h2>
+      <ul>
+        <% vehicle.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="card" style="margin-bottom: 1rem;">
+    <div class="card-header"><h2>Vehicle Details</h2></div>
+    <div class="card-body">
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+        <div class="field">
+          <%= f.label :name, "Vehicle Name" %>
+          <%= f.text_field :name, required: true, placeholder: "e.g. Vehicle 1 / Toyota Hilux" %>
+        </div>
+        <div class="field">
+          <%= f.label :registration_number, "Registration Number" %>
+          <%= f.text_field :registration_number, placeholder: "e.g. CA 123-456" %>
+        </div>
+        <div class="field">
+          <%= f.label :current_mileage, "Current Mileage (km)" %>
+          <%= f.number_field :current_mileage, min: 0, step: 1, placeholder: "e.g. 125000" %>
+        </div>
+        <div class="field">
+          <%= f.label :registration_expiry, "License / Registration Expiry" %>
+          <%= f.date_field :registration_expiry %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 1rem;">
+    <div class="card-header"><h2>Assigned Team</h2></div>
+    <div class="card-body">
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+        <div class="field">
+          <%= f.label :plumber_name, "Plumber (Responsible)" %>
+          <%= f.text_field :plumber_name, placeholder: "Plumber name" %>
+        </div>
+        <div class="field">
+          <%= f.label :assistant_name, "Assistant" %>
+          <%= f.text_field :assistant_name, placeholder: "Assistant name" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 1rem;">
+    <div class="card-header"><h2>Service Tracking</h2></div>
+    <div class="card-body">
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+        <div class="field">
+          <%= f.label :last_service_date, "Last Service Date" %>
+          <%= f.date_field :last_service_date %>
+        </div>
+        <div class="field">
+          <%= f.label :next_service_due_date, "Next Service Due (Must Go In)" %>
+          <%= f.date_field :next_service_due_date %>
+        </div>
+      </div>
+      <div class="field" style="margin-top: 0.5rem;">
+        <%= f.label :last_service_notes, "Service Notes / What Was Done" %>
+        <%= f.text_area :last_service_notes, rows: 3, placeholder: "Details of last service, work done, parts replaced..." %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 1rem;">
+    <div class="card-header">
+      <h2>Vehicle Tools (Plumber Sign-off)</h2>
+    </div>
+    <div class="card-body">
+      <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0;">Record tools assigned to this vehicle. The responsible plumber must sign for each tool (e.g. drain rods).</p>
+      <table style="width:100%; border-collapse: collapse; margin-bottom: 0.75rem;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding:0.5rem; border-bottom:1px solid var(--border);">Tool</th>
+            <th style="text-align:left; padding:0.5rem; border-bottom:1px solid var(--border); width:90px;">Qty</th>
+            <th style="text-align:left; padding:0.5rem; border-bottom:1px solid var(--border); width:90px;">Signed</th>
+            <th style="text-align:left; padding:0.5rem; border-bottom:1px solid var(--border);">Signed By (Plumber)</th>
+            <th style="text-align:left; padding:0.5rem; border-bottom:1px solid var(--border); width:150px;">Signed On</th>
+            <th style="text-align:left; padding:0.5rem; border-bottom:1px solid var(--border);">Notes</th>
+            <th style="width:70px; border-bottom:1px solid var(--border);"></th>
+          </tr>
+        </thead>
+        <tbody id="vehicle-tools-body">
+          <%= f.fields_for :vehicle_tools do |tf| %>
+            <%= render "tool_fields", f: tf %>
+          <% end %>
+        </tbody>
+      </table>
+
+      <button type="button" class="btn btn-secondary btn-sm" id="add-vehicle-tool">Add Tool</button>
+
+      <table style="display:none;">
+        <tbody id="vehicle-tool-template">
+          <%= f.fields_for :vehicle_tools, VehicleTool.new, child_index: "NEW_RECORD" do |tf| %>
+            <%= render "tool_fields", f: tf %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+    <%= link_to "Cancel", vehicles_path, class: "btn btn-secondary" %>
+    <%= f.submit class: "btn btn-success" %>
+  </div>
+<% end %>
+
+<script>
+  (function() {
+    var addBtn = document.getElementById('add-vehicle-tool');
+    var body = document.getElementById('vehicle-tools-body');
+    var template = document.getElementById('vehicle-tool-template');
+    if (!addBtn || !body || !template) return;
+
+    addBtn.addEventListener('click', function() {
+      var content = template.innerHTML.replace(/NEW_RECORD/g, new Date().getTime());
+      body.insertAdjacentHTML('beforeend', content);
+    });
+
+    body.addEventListener('click', function(e) {
+      var btn = e.target.closest('.remove-vehicle-tool');
+      if (!btn) return;
+      e.preventDefault();
+      var row = btn.closest('tr.vehicle-tool-row');
+      if (!row) return;
+      var destroy = row.querySelector('input[name*="[_destroy]"]');
+      var idInput = row.querySelector('input[name*="[id]"]');
+      if (destroy && idInput && idInput.value) {
+        destroy.value = '1';
+        row.style.display = 'none';
+      } else {
+        row.remove();
+      }
+    });
+  })();
+</script>

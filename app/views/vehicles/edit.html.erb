@@ -1,0 +1,12 @@
+﻿<div class="action-bar">
+  <div>
+    <h1>Edit Vehicle</h1>
+    <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem;">Update vehicle service details, license dates and plumber tool responsibility.</p>
+  </div>
+  <div class="actions">
+    <%= link_to "View", vehicle_path(@vehicle), class: "btn btn-secondary" %>
+    <%= link_to "Back to Fleet", vehicles_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<%= render "form", vehicle: @vehicle %>
