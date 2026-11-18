@@ -87,6 +87,10 @@ class User < ApplicationRecord
     User.role_default_theme(role)
   end
 
+  def can_manage_fleet_vehicles?
+    reporter?
+  end
+
   private
 
   def normalize_email

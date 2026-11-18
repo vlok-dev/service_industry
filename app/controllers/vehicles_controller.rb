@@ -51,7 +51,7 @@
   private
 
   def require_fleet_access!
-    return if current_user.reporter? && current_user.email.to_s.casecmp("leeanne@industroplumbers.co.za").zero?
+    return if current_user.can_manage_fleet_vehicles?
 
     redirect_to root_path, alert: "You are not authorized to access this page."
   end
