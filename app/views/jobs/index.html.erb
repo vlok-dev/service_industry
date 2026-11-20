@@ -53,6 +53,7 @@
       <div class="label">Past Scheduled</div>
       <div class="value"><%= counts[:past_scheduled] %></div>
       <div class="sub">Date passed</div>
+      <% if counts[:past_scheduled].to_i > 10 %><div style="margin-top:0.35rem;padding:0.35rem 0.5rem;border:1px solid #f59e0b;background:#fffbeb;color:#92400e;border-radius:6px;font-size:0.75rem;font-weight:600;">⚠️ Please attend to the high amount of Past Scheduled jobs.</div><% end %>
     </div>
     <div class="kpi kpi-progress">
       <div class="label">In Progress</div>
@@ -77,10 +78,9 @@
       </div>
     <% end %>
   </div>
-<% end %>
+  <% end %>
 
-
-<div class="chip-row">
+  <div class="chip-row">
   <%= link_to "All", jobs_context_path(filter: nil), class: "chip #{current_filter.blank? ? 'active' : ''}" %>
   <%= link_to jobs_context_path(filter: "outstanding"), class: "chip #{current_filter == 'outstanding' ? 'active' : ''}" do %>
     Outstanding
